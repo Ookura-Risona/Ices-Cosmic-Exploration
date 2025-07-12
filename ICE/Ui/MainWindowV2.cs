@@ -54,17 +54,17 @@ namespace ICE.Ui
         // Matching up to the sheet `ClassJob` vs `ClassJobCategory` for future use (idk why that sheet even exist...)
         public static List<(string Name, uint Id)> jobOptions = new()
         {
-            ("CRP", 8),
-            ("BSM", 9),
-            ("ARM", 10),
-            ("GSM", 11),
-            ("LTW", 12),
-            ("WVR", 13),
-            ("ALC", 14),
-            ("CUL", 15),
-            ("MIN", 16),
-            ("BTN", 17),
-            ("FSH", 18),
+            ("刻木匠", 8), // CRP
+            ("锻铁匠", 9), // BSM
+            ("铸甲匠", 10), // ARM
+            ("雕金匠", 11), // GSM
+            ("制革匠", 12), // LTW
+            ("裁衣匠", 13), // WVR
+            ("炼金术士", 14), // ALC
+            ("烹调师", 15), // CUL
+            ("采矿工", 16), // MIN
+            ("园艺工", 17), // BTN
+            ("捕鱼人", 18), // FSH
         };
 
         // Available mission ranks and their identifiers.
@@ -111,24 +111,24 @@ namespace ICE.Ui
         private bool increaseMiddleColumn = C.IncreaseMiddleColumn;
 
         private bool showTableSetting = false;
-        private string[] modes = ["Gold", "Silver", "Bronze", "Manual"];
+        private string[] modes = ["金星", "银星", "铜星", "手动"]; // ["Gold", "Silver", "Bronze", "Manual"];
         private bool[] selectedModes = [false, false, false, false];
 
-        private string[] missionOptions = ["Current Class", "All Missions", "Currently Enabled"];
-        private string selectedOption = "Current Class";
+        private string[] missionOptions = ["当前职业任务", "所有任务", "当前已启用任务"]; // ["Current Class", "All Missions", "Currently Enabled"];
+        private string selectedOption = "当前职业任务"; // Current Class 此处的class指代职业
 
         private List<(uint Id, string SortOptionName, Func<IEnumerable<KeyValuePair<uint, MissionListInfo>>, IEnumerable<KeyValuePair<uint, MissionListInfo>>> SortFunc)> sortOptions = new()
         {
             (0, "", missions => missions),
-            (1, "Name", missions => missions.OrderBy(x => x.Value.Name)),
-            (2, "Mission ID", missions => missions),
-            (3, "Cosmocredits", missions => missions.OrderByDescending(x => x.Value.CosmoCredit)),
-            (4, "Lunar Credits", missions => missions.OrderByDescending(x => x.Value.LunarCredit)),
-            (5, "Research I", missions => missions.OrderByDescending(x => x.Value.ExperienceRewards.Where(exp => CosmicHelper.ExpDictionary[exp.Type] == "I").FirstOrDefault().Amount)),
-            (6, "Research II", missions => missions.OrderByDescending(x => x.Value.ExperienceRewards.Where(exp => CosmicHelper.ExpDictionary[exp.Type] == "II").FirstOrDefault().Amount)),
-            (7, "Research III", missions => missions.OrderByDescending(x => x.Value.ExperienceRewards.Where(exp => CosmicHelper.ExpDictionary[exp.Type] == "III").FirstOrDefault().Amount)),
-            (8, "Research IV", missions => missions.OrderByDescending(x => x.Value.ExperienceRewards.Where(exp => CosmicHelper.ExpDictionary[exp.Type] == "IV").FirstOrDefault().Amount)),
-            (9, "Map Marker", missions => missions.OrderByDescending(x => x.Value.MarkerId)),
+            (1, "名称", missions => missions.OrderBy(x => x.Value.Name)), // Name
+            (2, "任务 ID", missions => missions), // Mission ID
+            (3, "宇宙信用点", missions => missions.OrderByDescending(x => x.Value.CosmoCredit)), // Cosmocredits
+            (4, "月球信用点", missions => missions.OrderByDescending(x => x.Value.LunarCredit)), // Lunar Credits
+            (5, "研究 I", missions => missions.OrderByDescending(x => x.Value.ExperienceRewards.Where(exp => CosmicHelper.ExpDictionary[exp.Type] == "I").FirstOrDefault().Amount)),
+            (6, "研究 II", missions => missions.OrderByDescending(x => x.Value.ExperienceRewards.Where(exp => CosmicHelper.ExpDictionary[exp.Type] == "II").FirstOrDefault().Amount)),
+            (7, "研究 III", missions => missions.OrderByDescending(x => x.Value.ExperienceRewards.Where(exp => CosmicHelper.ExpDictionary[exp.Type] == "III").FirstOrDefault().Amount)),
+            (8, "研究 IV", missions => missions.OrderByDescending(x => x.Value.ExperienceRewards.Where(exp => CosmicHelper.ExpDictionary[exp.Type] == "IV").FirstOrDefault().Amount)),
+            (9, "地图旗帜标记", missions => missions.OrderByDescending(x => x.Value.MarkerId)), // Map Marker
         };
 
         // Right Column stuff
@@ -164,7 +164,7 @@ namespace ICE.Ui
 
                 using (ImRaii.Disabled(SchedulerMain.State != IceState.Idle || !usingSupportedJob))
                 {
-                    if (ImGui.Button("Start", new Vector2(ImGui.GetContentRegionAvail().X, textLineHeight * 1.5f)))
+                    if (ImGui.Button("开始", new Vector2(ImGui.GetContentRegionAvail().X, textLineHeight * 1.5f))) // Start
                     {
                         SchedulerMain.EnablePlugin();
                     }
@@ -172,17 +172,17 @@ namespace ICE.Ui
 
                 using (ImRaii.Disabled(SchedulerMain.State == IceState.Idle))
                 {
-                    if (ImGui.Button("Stop", new Vector2(ImGui.GetContentRegionAvail().X, textLineHeight * 1.5f)))
+                    if (ImGui.Button("停止", new Vector2(ImGui.GetContentRegionAvail().X, textLineHeight * 1.5f))) // Stop
                     {
                         SchedulerMain.DisablePlugin();
                     }
                 }
-                if (ImGui.Button("Settings", new Vector2(ImGui.GetContentRegionAvail().X, textLineHeight * 1.5f)))
+                if (ImGui.Button("设置", new Vector2(ImGui.GetContentRegionAvail().X, textLineHeight * 1.5f))) // Settings
                 {
                     P.settingWindow.IsOpen = !P.settingWindow.IsOpen;
                 }
 
-                if (ImGui.Checkbox($"Only grab mission", ref onlyGrabMission))
+                if (ImGui.Checkbox($"仅刷取并开始任务", ref onlyGrabMission)) // Only grab mission 具体指通过重复接取放弃任务刷想要的任务，然后开始任务
                 {
                     C.OnlyGrabMission = onlyGrabMission;
                     C.Save();
@@ -196,8 +196,8 @@ namespace ICE.Ui
 
                 ImGui.Spacing();
 
-                ImGui.Checkbox("Stop after current mission", ref SchedulerMain.StopBeforeGrab);
-                if (ImGui.Checkbox($"Stop at Cosmic Credits", ref stopCosmic))
+                ImGui.Checkbox("当前任务结束后停止", ref SchedulerMain.StopBeforeGrab); // Stop after current mission
+                if (ImGui.Checkbox($"宇宙信用点达到阈值后停止", ref stopCosmic)) // Stop at Cosmic Credits
                 {
                     C.StopOnceHitCosmoCredits = stopCosmic;
                     C.Save();
@@ -214,7 +214,7 @@ namespace ICE.Ui
                     ImGui.Unindent(15);
                 }
 
-                if (ImGui.Checkbox($"Stop at Lunar Credits", ref stopLunar))
+                if (ImGui.Checkbox($"月球信用点达到阈值后停止", ref stopLunar)) // Stop at Lunar Credits
                 {
                     C.StopOnceHitLunarCredits = stopLunar;
                     C.Save();
@@ -231,7 +231,7 @@ namespace ICE.Ui
                     ImGui.Unindent(15);
                 }
 
-                if (ImGui.Checkbox($"Stop at Cosmic Score", ref stopScore))
+                if (ImGui.Checkbox($"技巧点达到阈值后停止", ref stopScore)) // Stop at Cosmic Score
                 {
                     C.StopOnceHitCosmicScore = stopScore;
                     C.Save();
@@ -248,7 +248,7 @@ namespace ICE.Ui
                     ImGui.Unindent(15);
                 }
 
-                if (ImGui.Checkbox($"Stop at Level", ref stopWhenLevel))
+                if (ImGui.Checkbox($"等级达到阈值后停止", ref stopWhenLevel)) // Stop at Level
                 {
                     C.StopWhenLevel = stopWhenLevel;
                     C.Save();
@@ -270,7 +270,7 @@ namespace ICE.Ui
                 ImGui.Separator();
 
                 ImGui.Dummy(new(0, 10));
-                if (ImGui.Checkbox("Auto Pick Current Job", ref autoPickCurrentJob))
+                if (ImGui.Checkbox("自动挑选当前职业", ref autoPickCurrentJob)) // Auto Pick Current Job
                 {
                     C.AutoPickCurrentJob = autoPickCurrentJob;
                     C.Save();
@@ -295,32 +295,32 @@ namespace ICE.Ui
                 ImGui.SetCursorPosX(startX);
 
                 // Row 1: CRP, BSM, ARM, GSM
-                DrawJobSelection(8, "CRP");
+                DrawJobSelection(8, "刻木匠");
                 ImGui.SameLine(0, iconSpacing);
-                DrawJobSelection(9, "BSM");
+                DrawJobSelection(9, "锻铁匠");
                 ImGui.SameLine(0, iconSpacing);
-                DrawJobSelection(10, "ARM");
+                DrawJobSelection(10, "铸甲匠");
                 ImGui.SameLine(0, iconSpacing);
-                DrawJobSelection(11, "GSM");
+                DrawJobSelection(11, "雕金匠");
 
                 // Row 2: LTW, WVR, ALC, CUL
                 ImGui.SetCursorPosX(startX);
 
-                DrawJobSelection(12, "LWT");
+                DrawJobSelection(12, "制革匠");
                 ImGui.SameLine(0, iconSpacing);
-                DrawJobSelection(13, "WVR");
+                DrawJobSelection(13, "裁衣匠");
                 ImGui.SameLine(0, iconSpacing);
-                DrawJobSelection(14, "ALC");
+                DrawJobSelection(14, "炼金术士");
                 ImGui.SameLine(0, iconSpacing);
-                DrawJobSelection(15, "CUL");
+                DrawJobSelection(15, "烹调师");
 
                 // Row 3: MIN, BTN, FSH
                 ImGui.SetCursorPosX(startX);
-                DrawJobSelection(16, "MIN");
+                DrawJobSelection(16, "采矿工");
                 ImGui.SameLine(0, iconSpacing);
-                DrawJobSelection(17, "BTN");
+                DrawJobSelection(17, "园艺工");
                 ImGui.SameLine(0, iconSpacing);
-                DrawJobSelection(18, "FSH");
+                DrawJobSelection(18, "捕鱼人");
 
                 ImGui.Dummy(new Vector2(0, 5));
 
@@ -328,7 +328,7 @@ namespace ICE.Ui
 
                 ImGui.Dummy(new Vector2(0, 5));
 
-                ImGui.Text("Quick Mission Apply");
+                ImGui.Text("快捷任务应用"); // Quick Mission Apply
 
                 ImGui.Dummy(new Vector2(0, 5));
                 UpdateMissions();
@@ -370,7 +370,7 @@ namespace ICE.Ui
             if (ImGui.BeginChild("###MissionList", new Vector2(0, childHeight), true))
             {
 
-                if (ImGui.Checkbox("Hide Unsupported Missions", ref hideUnsupported))
+                if (ImGui.Checkbox("隐藏不支持的任务", ref hideUnsupported)) // Hide Unsupported Missions
                 {
                     C.HideUnsupportedMissions = hideUnsupported;
                     C.Save();
@@ -378,32 +378,32 @@ namespace ICE.Ui
 
                 ImGui.SameLine();
 
-                if (ImGui.Button("Open Table Settings"))
+                if (ImGui.Button("打开表格设置")) // Open Table Settings
                 {
                     ImGui.OpenPopup("Open Table Settings");
                 }
 
                 if (ImGui.BeginPopup("Open Table Settings"))
                 {
-                    ImGui.Text("Toggle Configs");
+                    ImGui.Text("切换配置"); // Toggle Configs
                     ImGui.Separator();
 
-                    if (ImGui.Checkbox("Show Credit Column", ref showCredits))
+                    if (ImGui.Checkbox("显示信用点表格列", ref showCredits)) // Show Credit Column
                     {
                         C.ShowCreditsColumn = showCredits;
                         C.Save();
                     }
-                    if (ImGui.Checkbox("Show XP Amounts", ref showExp))
+                    if (ImGui.Checkbox("显示经验值", ref showExp)) // Show XP Amounts
                     {
                         C.ShowExpColums = showExp;
                         C.Save();
                     }
-                    if (ImGui.Checkbox("Show Notes", ref showNotes))
+                    if (ImGui.Checkbox("显示备注", ref showNotes)) // Show Notes
                     {
                         C.ShowNotes = showNotes;
                         C.Save();
                     }
-                    if (ImGui.Checkbox("Increase Middle Column Size", ref increaseMiddleColumn))
+                    if (ImGui.Checkbox("增加中间列的尺寸", ref increaseMiddleColumn)) // Increase Middle Column Size
                     {
                         C.IncreaseMiddleColumn = increaseMiddleColumn;
                         C.Save();
@@ -415,7 +415,7 @@ namespace ICE.Ui
                 ImGui.SameLine();
 
                 ImGui.SetNextItemWidth(150);
-                if (ImGui.BeginCombo("Sort By", sortOptions[SortOption].SortOptionName))
+                if (ImGui.BeginCombo("排序方式", sortOptions[SortOption].SortOptionName)) // Sort By
                 {
                     for (int i = 0; i < sortOptions.Count; i++)
                     {
@@ -479,7 +479,7 @@ namespace ICE.Ui
 
                 if (showCritical)
                 {
-                    DrawCollapsibleHeader($"Critical Missions", $"Critical Missions - {criticalMissions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} Enabled");
+                    DrawCollapsibleHeader($"Critical Missions", $"紧急探索任务 - {criticalMissions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} 个 已启用"); // Critical Missions
                     if (headerStates.TryGetValue("Critical Missions", out var isOpen) && isOpen)
                     {
                         MissionInfo("Critical Missions", criticalMissions, criticalGather);
@@ -488,7 +488,7 @@ namespace ICE.Ui
 
                 if (showSequential)
                 {
-                    DrawCollapsibleHeader($"Sequential Missions", $"Sequential Missions - {sequentialMissions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} Enabled");
+                    DrawCollapsibleHeader($"Sequential Missions", $"连续任务 - {sequentialMissions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} 个 已启用"); // Sequential Missions
                     if (headerStates.TryGetValue("Sequential Missions", out var isOpen) && isOpen)
                     {
                         MissionInfo("Sequential Missions", sequentialMissions, sequentialGather);
@@ -497,7 +497,7 @@ namespace ICE.Ui
 
                 if (showWeather)
                 {
-                    DrawCollapsibleHeader($"Weather Missions", $"Weather Missions - {weatherRestrictedMissions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} Enabled");
+                    DrawCollapsibleHeader($"Weather Missions", $"天气限定任务 - {weatherRestrictedMissions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} 个 已启用"); // Weather Missions
                     if (headerStates.TryGetValue("Weather Missions", out var isOpen) && isOpen)
                     {
                         MissionInfo("Weather Missions", weatherRestrictedMissions, weatherGather);
@@ -506,10 +506,10 @@ namespace ICE.Ui
 
                 if (showTimeRestricted)
                 {
-                    DrawCollapsibleHeader($"Time-Restricted Missions", $"Time-Restricted Missions - {timeRestrictedMissions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} Enabled");
+                    DrawCollapsibleHeader($"Time-Restricted Missions", $"时间限定任务 - {timeRestrictedMissions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} 个 已启用"); // Time-Restricted Missions
                     if (headerStates.TryGetValue("Time-Restricted Missions", out var isOpen) && isOpen)
                     {
-                        MissionInfo("Sequential Missions", timeRestrictedMissions, timeGather);
+                        MissionInfo("Time-Restricted Missions", timeRestrictedMissions, timeGather); // 写错了？原先是: Sequential Missions
                     }
                 }
 
@@ -526,7 +526,7 @@ namespace ICE.Ui
                     missions = sortOptions.FirstOrDefault(s => s.Id == SortOption).SortFunc(missions);
 
                     bool missionGather = missions.Any(g => GatheringJobList.Contains((int)g.Value.JobId) || GatheringJobList.Contains((int)g.Value.JobId2));
-                    DrawCollapsibleHeader($"Class {rank.RankName}", $"Class {rank.RankName} - {missions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} enabled");
+                    DrawCollapsibleHeader($"Class {rank.RankName}", $"{rank.RankName} 类任务 - {missions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} 个 已启用");
                     if (headerStates.TryGetValue($"Class {rank.RankName}", out var isOpen) && isOpen)
                     {
                         MissionInfo($"Class {rank.RankName} Missions", missions, missionGather);
@@ -550,7 +550,7 @@ namespace ICE.Ui
 
                 if (selectedMission != 0)
                 {
-                    ImGui.Text($"Mission Info (More Detailed)");
+                    ImGui.Text($"任务信息(详细)"); // Mission Info (More Detailed)
                     ImGui.Separator();
 
                     var mission = MissionInfoDict[selectedMission];
@@ -558,11 +558,11 @@ namespace ICE.Ui
                     var MissionInfo = new List<(string Label, string Value)>
                     {
                         ("ID:", $"{selectedMission}"),
-                        ("Mission Name:", mission.Name),
-                        ("Cosmocredits:", mission.CosmoCredit.ToString()),
-                        ("Lunar Credits", mission.LunarCredit.ToString()),
-                        ("Silver Requirements:", mission.SilverRequirement.ToString()),
-                        ("Gold Requirements:", mission.GoldRequirement.ToString())
+                        ("任务名称:", mission.Name), // Mission Name:
+                        ("宇宙信用点:", mission.CosmoCredit.ToString()), // Cosmocredits:
+                        ("月球信用点:", mission.LunarCredit.ToString()), // Lunar Credits 少个,
+                        ("银星需求:", mission.SilverRequirement.ToString()), // Silver Requirements:
+                        ("金星需求:", mission.GoldRequirement.ToString()) // Gold Requirements:
                     };
 
                     float infoSize1 = MissionInfo.Max(row => ImGui.CalcTextSize(row.Label).X) + 10;
@@ -589,7 +589,7 @@ namespace ICE.Ui
 
                         ImGui.TableNextRow();
                         ImGui.TableSetColumnIndex(0);
-                        ImGui.Text($"Tool XP Reward");
+                        ImGui.Text($"宇宙研究数据"); // Tool XP Reward
 
                         for (int i = mission.ExperienceRewards.Count - 1; i >= 0; i--)
                         {
@@ -631,9 +631,9 @@ namespace ICE.Ui
 
                         var entry = C.Missions.Where(e => e.Id == selectedMission);
 
-                        ImGui.Text($"Notes:");
+                        ImGui.Text($"备注:"); // Notes:
                         bool hasPreviousNotes = false;
-                        if (mission.Weather != CosmicWeather.FairSkies)
+                        if (mission.Weather != CosmicWeather.晴朗)
                         {
                             hasPreviousNotes = true;
 
@@ -681,28 +681,28 @@ namespace ICE.Ui
                             string MissionType = "";
                             if (craftMission)
                             {
-                                MissionType = "Dual Class Mission";
+                                MissionType = "双职业任务"; // Dual Class Mission
                             }
                             else if (LimitedQuant)
                             {
-                                MissionType = "Limited Quantity/Nodes";
+                                MissionType = "限制数量/采集点"; // Limited Quantity/Nodes
                             }
                             else if (TimedMission)
-                                MissionType = "Timed Scoring/Time Attack";
+                                MissionType = "限时冲分/时间竞速"; // Timed Scoring/Time Attack
                             else if (ChainedMission && !BoonMission)
-                                MissionType = "Chained Gather Scoring";
+                                MissionType = "连锁采集冲分"; // Chained Gather Scoring
                             else if (BoonMission && !ChainedMission)
-                                MissionType = "Gatherer's Boon Scoring";
+                                MissionType = "采集者的恩惠冲分"; // Gatherer's Boon Scoring
                             else if (BoonMission && ChainedMission)
-                                MissionType = "Chained + Gatherer's Boon Scoring";
+                                MissionType = "连锁 + 采集者的恩惠冲分"; // Chained + Gatherer's Boon Scoring
                             else if (collectableMission && !stellerReductionMission)
-                                MissionType = "Collectable Scoring";
+                                MissionType = "收藏品冲分"; // Collectable Scoring
                             else if (stellerReductionMission)
-                                MissionType = "Steller Reduction/Collectables";
+                                MissionType = "宇宙精选/收藏品"; // Steller Reduction/Collectables
                             else if (GatherX)
-                                MissionType = "Gather X Amount of Items";
+                                MissionType = "采集 X 个物品"; // Gather X Amount of Items
 
-                            ImGui.Text("Mission Type: " + MissionType);
+                            ImGui.Text("任务类型: " + MissionType); // Mission Type:
                         }
 #if DEBUG
                         ImGui.Dummy(new(0, 10));
@@ -867,10 +867,10 @@ namespace ICE.Ui
 
                 float col3Width = maxMissionNameWidth + 20f; // 20f buffer for spacing
 
-                float col1Width = ImGui.CalcTextSize("Enabled").X + 10f;  // Add buffer
+                float col1Width = ImGui.CalcTextSize("启用").X + 10f;  // Add buffer | Enabled
                 float col2Width = ImGui.CalcTextSize("ID").X + 10f;       // Add buffer
-                float col4Width = ImGui.CalcTextSize("Cosmo").X + 5f;
-                float col5Width = ImGui.CalcTextSize("Lunar").X + 5f;
+                float col4Width = ImGui.CalcTextSize("宇宙信用点").X + 5f; // Cosmo
+                float col5Width = ImGui.CalcTextSize("月球信用点").X + 5f; // Lunar
                 float colXPWidth = ImGui.CalcTextSize("III").X + 5f;
 
                 // Updating the column lengths based on the text size
@@ -882,7 +882,7 @@ namespace ICE.Ui
 
                 ImGui.TableSetupColumn("###EnableCheckbox", ImGuiTableColumnFlags.WidthFixed, col1Width);
                 ImGui.TableSetupColumn("###MissionIDs", ImGuiTableColumnFlags.WidthFixed, col2Width);
-                ImGui.TableSetupColumn("Mission Name", ImGuiTableColumnFlags.WidthFixed, maxMissionNameWidth);
+                ImGui.TableSetupColumn("任务名称", ImGuiTableColumnFlags.WidthFixed, maxMissionNameWidth); // Mission Name
                 if (showCredits)
                 {
                     ImGui.TableSetupColumn("###Cosmo", ImGuiTableColumnFlags.WidthFixed, col4Width);
@@ -897,17 +897,17 @@ namespace ICE.Ui
                     }
                 }
                 // Settings column
-                ImGui.TableSetupColumn("Turn In", ImGuiTableColumnFlags.WidthFixed, 100);
+                ImGui.TableSetupColumn("汇报", ImGuiTableColumnFlags.WidthFixed, 100); // Turn In 国服文本是这么翻译的，即使感觉不太合适
 
                 if (showGatherConfig)
                 {
-                    float columnWidth = ImGui.CalcTextSize("Gather Config").X + 5;
-                    ImGui.TableSetupColumn("Gather Config", ImGuiTableColumnFlags.WidthFixed, columnWidth);
+                    float columnWidth = ImGui.CalcTextSize("采集配置").X + 20; // Gather Config
+                    ImGui.TableSetupColumn("采集配置", ImGuiTableColumnFlags.WidthFixed, columnWidth); // Gather Config
                 }
 
                 if (showNotes)
                 {
-                    ImGui.TableSetupColumn("Mission Notes", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupColumn("任务备注", ImGuiTableColumnFlags.WidthStretch); // Mission Notes 这列中放置了需求职业等信息
                 }
 
                 // Render the header row (static headers get drawn here)
@@ -915,7 +915,7 @@ namespace ICE.Ui
 
                 // Setup to make sure the labels are centered
                 ImGui.TableSetColumnIndex(0);
-                CenterText("Enabled");
+                CenterText("启用"); // Enabled
 
                 ImGui.TableNextColumn();
                 CenterText("ID");
@@ -924,10 +924,10 @@ namespace ICE.Ui
                 if (showCredits)
                 {
                     ImGui.TableNextColumn();
-                    CenterText("Cosmo");
+                    CenterText("宇宙信用点"); // Cosmo
 
                     ImGui.TableNextColumn();
-                    CenterText("Lunar");
+                    CenterText("月球信用点"); // Lunar
                 }
                 if (showExp)
                 {
@@ -1028,7 +1028,7 @@ namespace ICE.Ui
                         ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), MissionName);
                         if (ImGui.IsItemHovered())
                         {
-                            ImGui.SetTooltip("Currently can only be done in manual mode");
+                            ImGui.SetTooltip("当前仅可在手动模式下执行"); // Currently can only be done in manual mode
                         }
                     }
                     else
@@ -1081,17 +1081,17 @@ namespace ICE.Ui
                     bool[] selectedModes;
                     if (unsupported)
                     {
-                        modes = ["Manual"];
+                        modes = ["手动"]; // Manual
                         selectedModes = [mission.ManualMode];
                     }
                     else if (entry.Value.Attributes.HasFlag(MissionAttributes.ScoreTimeRemaining) || entry.Value.Attributes.HasFlag(MissionAttributes.Critical))
                     {
-                        modes = ["ASAP", "Manual"];
+                        modes = ["尽快汇报", "手动"]; // ASAP Manual
                         selectedModes = [mission.TurnInASAP, mission.ManualMode];
                     }
                     else
                     {
-                        modes = ["Gold", "Silver", "Bronze", "Manual"];
+                        modes = ["金星", "银星", "尽快汇报", "手动"]; // "Gold", "Silver", "Bronze", "Manual" ???
                         selectedModes =
                         [
                             mission.TurnInGold,
@@ -1119,7 +1119,7 @@ namespace ICE.Ui
                     if (ImGui.IsItemHovered())
                     {
                         ImGui.BeginTooltip();
-                        ImGui.Text("Turnin's Enabled:");
+                        ImGui.Text("汇报启用:"); // Turnin's Enabled:
                         for (int i = 0; i < selectedModes.Length; i++)
                         {
                             if (selectedModes[i] == true)
@@ -1179,7 +1179,7 @@ namespace ICE.Ui
                         ImGui.TableNextColumn();
                         bool hasPreviousNotes = false;
                         string notes = "";
-                        if (entry.Value.Weather != CosmicWeather.FairSkies)
+                        if (entry.Value.Weather != CosmicWeather.晴朗)
                         {
                             hasPreviousNotes = true;
                             notes = entry.Value.Weather.ToString();
@@ -1213,17 +1213,17 @@ namespace ICE.Ui
         private void UpdateMissions()
         {
             ImGui.SetNextItemWidth(100);
-            if (ImGui.Button("Select Modes"))
+            if (ImGui.Button("选择模式")) // Select Modes
             {
                 ImGui.OpenPopup("Select Mission Profiles");
             }
 
             if (ImGui.BeginPopup("Select Mission Profiles"))
             {
-                ImGui.Checkbox($"Gold", ref selectedModes[0]);
-                ImGui.Checkbox($"Silver", ref selectedModes[1]);
-                ImGui.Checkbox($"Bronze/ASAP", ref selectedModes[2]);
-                ImGui.Checkbox($"Manual", ref selectedModes[3]);
+                ImGui.Checkbox($"金星", ref selectedModes[0]); // Gold
+                ImGui.Checkbox($"银星", ref selectedModes[1]); // Silver
+                ImGui.Checkbox($"铜星/尽快汇报", ref selectedModes[2]); // Bronze/ASAP
+                ImGui.Checkbox($"手动", ref selectedModes[3]); // Manual
 
                 ImGui.EndPopup();
             }
@@ -1241,7 +1241,7 @@ namespace ICE.Ui
                 ImGui.EndCombo();
             }
 
-            if (ImGui.Button("Apply to selected profiles"))
+            if (ImGui.Button("应用到所选配置")) // Apply to selected profiles
             {
                 var currentJob = PlayerHelper.GetClassJobId();
 
@@ -1259,6 +1259,7 @@ namespace ICE.Ui
                     bool collectableMission = missionDict.Attributes.HasFlag(MissionAttributes.Collectables);
                     bool stellerReductionMission = missionDict.Attributes.HasFlag(MissionAttributes.ReducedItems);
                     bool TimedMission = missionDict.Attributes.HasFlag(MissionAttributes.ScoreTimeRemaining);
+                    bool CriticalMission = missionDict.Attributes.HasFlag(MissionAttributes.Critical); // 紧急任务
 
                     bool dualclass = craftMission && (gatherMission || fishMission);
 
@@ -1270,7 +1271,15 @@ namespace ICE.Ui
                     // "Current Class", "All Missions", "Currently Enabled"
                     void UpdateMissions()
                     {
-                        if (TimedMission)
+                        if (CriticalMission) // 如果是紧急任务
+                        {
+                            // 忽略 TurnInGold 和 TurnInSilver，只处理 TurnInASAP 和 ManualMode
+                            mission.TurnInGold = false;
+                            mission.TurnInSilver = false;
+                            mission.TurnInASAP = selectedModes[2];
+                            mission.ManualMode = selectedModes[3];
+                        }
+                        else if (TimedMission)
                         {
                             if (!selectedModes[2] && !selectedModes[3])
                             {
@@ -1380,7 +1389,7 @@ namespace ICE.Ui
                 }
             }
 
-            ImGui.Text($"Stage: {stage}");
+            ImGui.Text($"阶段: {stage}"); // Stage:
 
             if (stage != 9)
             {
@@ -1405,7 +1414,7 @@ namespace ICE.Ui
                     else
                         xpType = "???";
 
-                    DrawXPBar($"Type: {xpType}", current, needed, size, max);
+                    DrawXPBar($"类型: {xpType}", current, needed, size, max); // Type:
                 }
             }
             else
@@ -1415,7 +1424,7 @@ namespace ICE.Ui
 
                 var (classScore, cappedClassScore, totalScores, classId) = MissionHandler.GetCosmicClassScores();
 
-                DrawXPBar("Score", (uint)classScore, 0, size, 500_000);
+                DrawXPBar("技巧点", (uint)classScore, 0, size, 500_000); // Score
             }
         }
 
