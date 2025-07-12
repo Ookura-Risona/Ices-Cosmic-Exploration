@@ -89,6 +89,7 @@ namespace ICE
 
         // Misc settings
         public bool EnableAutoSprint { get; set; } = true;
+        public bool AutoAntiAFK { get; set; } = true; // 新增: 自动切换离开状态 默认启用
 
         public void Save()
         {
@@ -170,7 +171,7 @@ namespace ICE
 
     public enum GambaType
     {
-        Mount = 0,
+        /*Mount = 0,
         Emote = 1,
         Minion = 2,
         Outfit = 3,
@@ -179,6 +180,18 @@ namespace ICE
         Housing = 6,
         Dye = 7,
         Other = 8,
-        Materia = 9,
+        Materia = 9,*/
+
+        坐骑 = 0,
+        情感动作 = 1,
+        宠物 = 2,
+        套装 = 3,
+        时尚配饰 = 4,
+        管弦乐琴乐谱 = 5,
+        房屋用品 = 6,
+        染剂 = 7,
+        其他 = 8,
+        魔晶石 = 9,
+
     }
 }

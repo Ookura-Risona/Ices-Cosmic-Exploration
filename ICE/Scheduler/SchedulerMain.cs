@@ -153,6 +153,7 @@ namespace ICE.Scheduler
         public static void EnqueueResumeCheck()
         {
             State = Idle;
+            PlayerHandlers.AutoAntiAFK();
             if (CosmicHelper.CurrentLunarMission != 0)
             {
                 if (!AddonHelper.IsAddonActive("WKSMissionInfomation"))
