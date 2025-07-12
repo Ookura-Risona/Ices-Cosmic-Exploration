@@ -37,9 +37,10 @@ public class PathManager
     public PathManager()
     {
         // Save to: %AppData%/XIVLauncher/pluginConfigs/ICE/Paths
+        // 改为 XIVLauncherCN 路径
         var configDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "XIVLauncher",
+            "XIVLauncherCN",
             "pluginConfigs",
             "ICE",
             "Paths"

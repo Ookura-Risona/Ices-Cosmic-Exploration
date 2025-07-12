@@ -52,7 +52,7 @@ namespace ICE.Scheduler.Tasks
                 {
                     if (hud.CosmoCredit >= C.CosmoCreditsCap)
                     {
-                        DuoLog.Information($"Stopping the plugin as you have {hud.CosmoCredit} Cosmocredits.");
+                        DuoLog.Information($"宇宙信用点已达到阈值: {hud.CosmoCredit}，插件停止运行"); // topping the plugin as you have {hud.CosmoCredit} Cosmocredits.
                         SchedulerMain.DisablePlugin();
                         return;
                     }
@@ -65,7 +65,7 @@ namespace ICE.Scheduler.Tasks
                 {
                     if (hud.LunarCredit >= C.LunarCreditsCap)
                     {
-                        DuoLog.Information($"Stopping the plugin as you have {hud.LunarCredit} Lunar Credits");
+                        DuoLog.Information($"月球信用点已达到阈值: {hud.LunarCredit}，插件停止运行"); // Stopping the plugin as you have {hud.LunarCredit} Lunar Credits
                         SchedulerMain.DisablePlugin();
                         return;
                     }
@@ -77,7 +77,7 @@ namespace ICE.Scheduler.Tasks
                 var (classScore, _, _, _) = MissionHandler.GetCosmicClassScores();
                 if (classScore >= C.CosmicScoreCap)
                 {
-                    DuoLog.Information($"Stopping the plugin as you have {classScore} Cosmic Score");
+                    DuoLog.Information($"已达到目标技巧点: {classScore}，插件停止运行"); // Stopping the plugin as you have {classScore} Cosmic Score
                     SchedulerMain.DisablePlugin();
                     return;
                 }
@@ -85,7 +85,7 @@ namespace ICE.Scheduler.Tasks
 
             if (Player.Level >= C.TargetLevel && C.StopWhenLevel)
             {
-                DuoLog.Information($"Stopping the plugin as you have reached level {C.TargetLevel}");
+                DuoLog.Information($"已达到目标等级: {C.TargetLevel}，插件停止运行"); // Stopping the plugin as you have reached level {C.TargetLevel}
                 SchedulerMain.DisablePlugin();
             }
             if (SchedulerMain.StopBeforeGrab)
@@ -99,11 +99,13 @@ namespace ICE.Scheduler.Tasks
 
             if (!(HasCritical || HasWeather || HasTimed || HasSequence || HasStandard))
             {
-                DuoLog.Error($"No missions enabled for {Svc.ClientState.LocalPlayer?.ClassJob.Value.Name}. Did you forget to set me up?");
+                DuoLog.Error($"该职业没有启用任何任务: {Svc.ClientState.LocalPlayer?.ClassJob.Value.Name}。您忘记设置了吗？"); // No missions enabled for {Svc.ClientState.LocalPlayer?.ClassJob.Value.Name}. Did you forget to set me up?
                 SchedulerMain.DisablePlugin();
                 return;
             }
 
+            //P.TaskManager.Enqueue(TaskSpendingCredit.炫酷抽奖任务, "Checking for Spending LunarCredits"); //占位 消费月球票抽奖
+            //P.TaskManager.Enqueue(TaskSpendingCredit.炫酷购买任务, "Checking for Spending CosmoCredits"); //占位 消费宇宙票购物
             P.TaskManager.Enqueue(TaskRepair.GatherCheck, "Checking for repairs");
             P.TaskManager.Enqueue(TaskSpiritbond.TryExtractMateria, "Checking for materia");
 
@@ -480,6 +482,15 @@ namespace ICE.Scheduler.Tasks
             if (EzThrottler.Throttle("GrabMission", 250))
             {
                 IceLogging.Debug($"[Grabbing Mission] Mission Name: {SchedulerMain.MissionName} | MissionId {MissionId}");
+                if (MissionId == 0) // 如果没有任务则发送通知
+                {
+                    IceLogging.Debug("[Grabbing Mission] No mission was grabbed");
+                    if (EzThrottler.Throttle("NoGrabbedMission", 20000)) // 节流，如果持续触发，每20秒通知一次
+                    {
+                       DuoLog.Information($"当前未找到可用的任务。");
+                    }
+                    return true;
+                }
                 CosmicHelper.MissionListInfo mission = CosmicHelper.MissionInfoDict[MissionId];
                 float distance = mission.MarkerId != 0 ? Vector2.Distance(new Vector2(Player.Position.X, Player.Position.Z), new Vector2(mission.X, mission.Y)) : 0;
                 if (SchedulerMain.Abandon == false && mission.Attributes.HasFlag(MissionAttributes.Gather) && !mission.Attributes.HasFlag(MissionAttributes.Critical) && distance > mission.Radius)
@@ -496,7 +507,7 @@ namespace ICE.Scheduler.Tasks
                 }
                 else if (TryGetAddonMaster<SelectYesno>("SelectYesno", out var select) && select.IsAddonReady)
                 {
-                    string[] commenceStrings = ["選択したミッションを開始します。よろしいですか？", "Commence selected mission?", "Ausgewählte Mission wird gestartet.Fortfahren?", "Commencer la mission sélectionnée ?"];
+                    string[] commenceStrings = ["選択したミッションを開始します。よろしいですか？", "Commence selected mission?", "Ausgewählte Mission wird gestartet.Fortfahren?", "Commencer la mission sélectionnée ?", "确定要开始此任务吗？"]; //来自godbert解包
                     if (commenceStrings.Any(select.Text.Contains) || !C.RejectUnknownYesno)
                     {
                         IceLogging.Debug($"Expected Commence window: {select.Text}");
@@ -545,7 +556,7 @@ namespace ICE.Scheduler.Tasks
             {
                 if (TryGetAddonMaster<SelectYesno>("SelectYesno", out var select) && select.IsAddonReady)
                 {
-                    string[] abandonStrings = ["受注中のミッションを破棄します。", "Abandon mission?", "Aktuelle Mission abbrechen?", "Êtes-vous sûre de vouloir abandonner la mission en cours ?"];
+                    string[] abandonStrings = ["受注中のミッションを破棄します。", "Abandon mission?", "Aktuelle Mission abbrechen?", "Êtes-vous sûre de vouloir abandonner la mission en cours ?", "确定要放弃已领取的任务吗？"]; //来自godbert解包
                     if (abandonStrings.Any(select.Text.Contains) || !C.RejectUnknownYesno)
                     {
                         IceLogging.Debug($"[Abandoning Mission] Expected Abandon window: {select.Text}");
@@ -593,7 +604,7 @@ namespace ICE.Scheduler.Tasks
             if ((isUmbralWind || isMoonDust) && HasWeather)
             {
                 bool hasCorrectWeather = WeatherMissions
-                    .Any(x => (CosmicHelper.MissionInfoDict[x.Id].Weather == CosmicWeather.UmbralWind && isUmbralWind) || (CosmicHelper.MissionInfoDict[x.Id].Weather == CosmicWeather.MoonDust && isMoonDust));
+                    .Any(x => (CosmicHelper.MissionInfoDict[x.Id].Weather == CosmicWeather.灵风 && isUmbralWind) || (CosmicHelper.MissionInfoDict[x.Id].Weather == CosmicWeather.月尘 && isMoonDust));
                 if (hasCorrectWeather)
                     SchedulerMain.State &= ~IceState.Waiting;
             }

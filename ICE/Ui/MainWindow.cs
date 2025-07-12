@@ -54,17 +54,17 @@ namespace ICE.Ui
         // Available jobs and their IDs.
         public static List<(string Name, uint Id)> jobOptions = new()
         {
-            ("CRP", 9),
-            ("BSM", 10),
-            ("ARM", 11),
-            ("GSM", 12),
-            ("LTW", 13),
-            ("WVR", 14),
-            ("ALC", 15),
-            ("CUL", 16),
-            ("MIN", 17),
-            ("BTN", 18),
-            ("FSH", 19),
+            ("刻木匠", 9), // CRP
+            ("锻铁匠", 10), // BSM
+            ("铸甲匠", 11), // ARM
+            ("雕金匠", 12), // GSM
+            ("制革匠", 13), // LTW
+            ("裁衣匠", 14), // WVR
+            ("炼金术士", 15), // ALC
+            ("烹调师", 16), // CUL
+            ("采矿工", 17), // MIN
+            ("园艺工", 18), // BTN
+            ("捕鱼人", 19), // FSH
         };
 
         // Available mission ranks and their identifiers.
@@ -79,14 +79,14 @@ namespace ICE.Ui
         private static List<(uint Id, string SortOptionName, Func<IEnumerable<KeyValuePair<uint, MissionListInfo>>, IEnumerable<KeyValuePair<uint, MissionListInfo>>> SortFunc)> sortOptions = new()
         {
             (0, "", missions => missions),
-            (1, "Name", missions => missions.OrderBy(x => x.Value.Name)),
-            (2, "Mission ID", missions => missions),
-            (3, "Cosmocredits", missions => missions.OrderByDescending(x => x.Value.CosmoCredit)),
-            (4, "Lunar Credits", missions => missions.OrderByDescending(x => x.Value.LunarCredit)),
-            (5, "Research I", missions => missions.OrderByDescending(x => x.Value.ExperienceRewards.Where(exp => CosmicHelper.ExpDictionary[exp.Type] == "I").FirstOrDefault().Amount)),
-            (6, "Research II", missions => missions.OrderByDescending(x => x.Value.ExperienceRewards.Where(exp => CosmicHelper.ExpDictionary[exp.Type] == "II").FirstOrDefault().Amount)),
-            (7, "Research III", missions => missions.OrderByDescending(x => x.Value.ExperienceRewards.Where(exp => CosmicHelper.ExpDictionary[exp.Type] == "III").FirstOrDefault().Amount)),
-            (8, "Research IV", missions => missions.OrderByDescending(x => x.Value.ExperienceRewards.Where(exp => CosmicHelper.ExpDictionary[exp.Type] == "IV").FirstOrDefault().Amount))
+            (1, "名称", missions => missions.OrderBy(x => x.Value.Name)), // Name
+            (2, "任务 ID", missions => missions), // Mission ID
+            (3, "宇宙信用点", missions => missions.OrderByDescending(x => x.Value.CosmoCredit)),
+            (4, "月球信用点", missions => missions.OrderByDescending(x => x.Value.LunarCredit)),
+            (5, "研究 I", missions => missions.OrderByDescending(x => x.Value.ExperienceRewards.Where(exp => CosmicHelper.ExpDictionary[exp.Type] == "I").FirstOrDefault().Amount)),
+            (6, "研究 II", missions => missions.OrderByDescending(x => x.Value.ExperienceRewards.Where(exp => CosmicHelper.ExpDictionary[exp.Type] == "II").FirstOrDefault().Amount)),
+            (7, "研究 III", missions => missions.OrderByDescending(x => x.Value.ExperienceRewards.Where(exp => CosmicHelper.ExpDictionary[exp.Type] == "III").FirstOrDefault().Amount)),
+            (8, "研究 IV", missions => missions.OrderByDescending(x => x.Value.ExperienceRewards.Where(exp => CosmicHelper.ExpDictionary[exp.Type] == "IV").FirstOrDefault().Amount))
         };
 
         // Index of the currently selected job in jobOptions.
@@ -123,6 +123,7 @@ namespace ICE.Ui
         private static int targetLevel = C.TargetLevel;
         private static bool ShowSeconds = C.ShowSeconds;
         private static bool EnableAutoSprint = C.EnableAutoSprint;
+        private static bool EnableAutoAntiAFK = C.AutoAntiAFK; // Add
         private static bool autoPickCurrentJob = C.AutoPickCurrentJob;
         private static int SortOption = C.TableSortOption;
         private static bool showExp = C.ShowExpColums;
@@ -155,16 +156,16 @@ namespace ICE.Ui
                 return;
 
             // Title text for the run controls.
-            ImGui.Text("Run");
+            ImGui.Text("运行");
             // Help marker explaining how missions are selected and run.
             ImGuiEx.HelpMarker(
-                "Please note: this will try and run based off of every rank that it can.\n" +
-                "So if you have both C & D checkmarks, it will check C first -> Check D for potential Missions.\n" +
-                "It will cycle through missions until it finds one that you have selected.\n" +
-                "Unsupported missions will be disabled and shown in red; check 'Hide unsupported missions' to filter them out."
+                "请注意: 系统将尝试根据所有可选等级依次运行。\n" + // Please note: this will try and run based off of every rank that it can.\n
+                "若您同时勾选了C级和D级任务, 系统会优先检查C级 -> 再检查D级的潜在任务。\n" + // So if you have both C & D checkmarks, it will check C first -> Check D for potential Missions.
+                "程序会循环遍历任务列表, 直至找到您已选定的任务。\n" + // It will cycle through missions until it finds one that you have selected.
+                "不支持的任务将显示为红色并禁用; 勾选\"隐藏不支持的任务\"即可将其过滤掉。" // Unsupported missions will be disabled and shown in red; check 'Hide unsupported missions' to filter them out.
             );
 
-            ImGui.Text($"Current state: " + SchedulerMain.State.ToString());
+            ImGui.Text($"当前状态: " + SchedulerMain.State.ToString());
 
 
             ImGui.Spacing();
@@ -172,7 +173,7 @@ namespace ICE.Ui
             // Start button (disabled while already ticking).
             using (ImRaii.Disabled(SchedulerMain.State != IceState.Idle || !usingSupportedJob))
             {
-                if (ImGui.Button("Start"))
+                if (ImGui.Button("开始"))
                 {
                     SchedulerMain.EnablePlugin();
                 }
@@ -183,14 +184,14 @@ namespace ICE.Ui
             // Stop button (disabled while not ticking).
             using (ImRaii.Disabled(SchedulerMain.State == IceState.Idle))
             {
-                if (ImGui.Button("Stop"))
+                if (ImGui.Button("停止"))
                 {
                     SchedulerMain.DisablePlugin();
                 }
             }
 
             ImGui.SameLine();
-            ImGui.Checkbox("Stop after current mission", ref SchedulerMain.StopBeforeGrab);
+            ImGui.Checkbox("当前任务结束后停止", ref SchedulerMain.StopBeforeGrab);
 
             ImGui.SameLine();
             ImGui.NewLine();
@@ -200,7 +201,7 @@ namespace ICE.Ui
                 selectedJobIndex = jobOptions.IndexOf(job => job.Id == currentJobId + 1);
                 selectedJobId = jobOptions[selectedJobIndex].Id;
 
-                ImGui.Text($"Job: " + jobOptions[selectedJobIndex].Name);
+                ImGui.Text($"职业: " + jobOptions[selectedJobIndex].Name);
             }
             else
             {
@@ -228,7 +229,7 @@ namespace ICE.Ui
             ImGui.Spacing();
 
             ImGui.SetNextItemWidth(150);
-            if (ImGui.BeginCombo("Sort By", sortOptions[SortOption].SortOptionName))
+            if (ImGui.BeginCombo("排序方式", sortOptions[SortOption].SortOptionName))
             {
                 for (int i = 0; i < sortOptions.Count; i++)
                 {
@@ -258,7 +259,7 @@ namespace ICE.Ui
             .Where(m => m.Value.Attributes.HasFlag(MissionAttributes.Critical));
             criticalMissions = sortOptions.FirstOrDefault(s => s.Id == SortOption).SortFunc(criticalMissions);
             bool criticalGather = criticalMissions.Any(g => GatheringJobList.Contains((int)g.Value.JobId) || GatheringJobList.Contains((int)g.Value.JobId2));
-            DrawMissionsDropDown($"Critical Missions - {criticalMissions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} enabled", criticalMissions, criticalGather);
+            DrawMissionsDropDown($"紧急探索任务 - {criticalMissions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} 个 已启用", criticalMissions, criticalGather);
 
             IEnumerable<KeyValuePair<uint, MissionListInfo>> weatherRestrictedMissions =
                     MissionInfoDict
@@ -282,9 +283,9 @@ namespace ICE.Ui
             bool sequentialGather = sequentialMissions.Any(g => GatheringJobList.Contains((int)g.Value.JobId) || GatheringJobList.Contains((int)g.Value.JobId2));
             sequentialMissions = sortOptions.FirstOrDefault(s => s.Id == SortOption).SortFunc(sequentialMissions);
 
-            void DrawWeatherMissions() => DrawMissionsDropDown($"Weather-restricted Missions - {weatherRestrictedMissions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} enabled", weatherRestrictedMissions, weatherGather);
-            void DrawTimedMissions() => DrawMissionsDropDown($"Time-restricted Missions - {timeRestrictedMissions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} enabled", timeRestrictedMissions, timeGather);
-            void DrawSequentialMissions() => DrawMissionsDropDown($"Sequential Missions - {sequentialMissions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} enabled", sequentialMissions, sequentialGather);
+            void DrawWeatherMissions() => DrawMissionsDropDown($"天气限定任务 - {weatherRestrictedMissions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} 个 已启用", weatherRestrictedMissions, weatherGather);
+            void DrawTimedMissions() => DrawMissionsDropDown($"时间限定任务 - {timeRestrictedMissions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} 个 已启用", timeRestrictedMissions, timeGather);
+            void DrawSequentialMissions() => DrawMissionsDropDown($"连续任务 - {sequentialMissions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} 个 已启用", sequentialMissions, sequentialGather);
 
             var missionList = new List<(int prio, Action action)>
                 {
@@ -310,7 +311,7 @@ namespace ICE.Ui
                 missions = sortOptions.FirstOrDefault(s => s.Id == SortOption).SortFunc(missions);
 
                 bool missionGather = missions.Any(g => GatheringJobList.Contains((int)g.Value.JobId) || GatheringJobList.Contains((int)g.Value.JobId2));
-                DrawMissionsDropDown($"Class {rank.RankName} Missions - {missions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} enabled", missions, missionGather);
+                DrawMissionsDropDown($"{rank.RankName} 类任务 - {missions.Count(x => C.Missions.Any(y => y.Id == x.Key && y.Enabled))} 个 已启用", missions, missionGather);
             }
 
             ImGui.EndTabItem();
@@ -343,7 +344,7 @@ namespace ICE.Ui
                     int columnIndex = 0;
 
                     // First column: checkbox (empty header)
-                    ImGui.TableSetupColumn("Enable##Enable", ImGuiTableColumnFlags.WidthFixed, 50);
+                    ImGui.TableSetupColumn("启用##Enable", ImGuiTableColumnFlags.WidthFixed, 50);
                     columnIndex++;
 
                     // Second column: ID
@@ -351,16 +352,16 @@ namespace ICE.Ui
                     columnIndex++;
 
                     // Third column: dynamic header showing selected rank missions
-                    ImGui.TableSetupColumn("Mission Name", ImGuiTableColumnFlags.WidthFixed, col2Width);
+                    ImGui.TableSetupColumn("任务名称", ImGuiTableColumnFlags.WidthFixed, col2Width);
                     columnIndex++;
 
                     if (showCredits)
                     {
                         // Fourth column: Rewards
-                        ImGui.TableSetupColumn("Cosmocredits");
+                        ImGui.TableSetupColumn("宇宙信用点");
                         columnIndex++;
 
-                        ImGui.TableSetupColumn("Lunar Credits");
+                        ImGui.TableSetupColumn("月球信用点");
                         columnIndex++;
                     }
 
@@ -377,16 +378,16 @@ namespace ICE.Ui
                     }
 
                     // Settings column
-                    ImGui.TableSetupColumn("Turn In", ImGuiTableColumnFlags.WidthFixed, 100);
+                    ImGui.TableSetupColumn("汇报", ImGuiTableColumnFlags.WidthFixed, 100);
 
                     if (showGatherConfig)
                     {
-                        float columnWidth = ImGui.CalcTextSize("Gather Config").X + 5;
-                        ImGui.TableSetupColumn("Gather Config", ImGuiTableColumnFlags.WidthFixed, columnWidth);
+                        float columnWidth = ImGui.CalcTextSize("采集配置").X + 5; // Gather Config
+                        ImGui.TableSetupColumn("采集配置", ImGuiTableColumnFlags.WidthFixed, columnWidth);
                     }
 
                     // Final column: Notes
-                    ImGui.TableSetupColumn("Notes", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.TableSetupColumn("备注", ImGuiTableColumnFlags.WidthStretch); // Notes
 
                     // Render the header row (static headers get drawn here)
                     ImGui.TableHeadersRow();
@@ -481,7 +482,7 @@ namespace ICE.Ui
                             ImGui.TextColored(new Vector4(1f, 0f, 0f, 1f), MissionName);
                             if (ImGui.IsItemHovered())
                             {
-                                ImGui.SetTooltip("Currently can only be done in manual mode");
+                                ImGui.SetTooltip("当前仅可在手动模式下执行");
                             }
                         }
                         else
@@ -531,12 +532,12 @@ namespace ICE.Ui
                         bool[] selectedModes;
                         if (unsupported)
                         {
-                            modes = ["Manual"];
+                            modes = ["手动"];
                             selectedModes = [mission.ManualMode];
                         }
                         else
                         {
-                            modes = ["Gold", "Silver", "Bronze", "Manual"];
+                            modes = ["金星", "银星", "尽快汇报", "手动"];
                             selectedModes =
                             [
                                 mission.TurnInGold,
@@ -607,7 +608,7 @@ namespace ICE.Ui
                         // debug
                         ImGui.TableNextColumn();
                         bool hasPreviousNotes = false;
-                        if (entry.Value.Weather != CosmicWeather.FairSkies)
+                        if (entry.Value.Weather != CosmicWeather.晴朗)
                         {
                             hasPreviousNotes = true;
 
@@ -647,46 +648,46 @@ namespace ICE.Ui
             if (!tab)
                 return;
 
-            DrawLink("Say no to global warming, support Ice today: ", "https://ko-fi.com/ice643269", "https://ko-fi.com/ice643269");
+            DrawLink("拒绝全球变暖, 立即支持 Ice: ", "https://ko-fi.com/ice643269", "https://ko-fi.com/ice643269");
 
-            if (ImGui.CollapsingHeader("Safety Settings"))
+            if (ImGui.CollapsingHeader("安全设置"))
             {
-                if (ImGui.Checkbox("[Experimental] Animation Lock Unstuck", ref animationLockAbandon))
+                if (ImGui.Checkbox("[实验性] 解除动画锁", ref animationLockAbandon))
                 {
                     C.AnimationLockAbandon = animationLockAbandon;
                     C.Save();
                 }
-                ImGui.Checkbox("[Experimental] Animation Lock Manual Unstuck", ref SchedulerMain.AnimationLockAbandonState);
+                ImGui.Checkbox("[实验性] 手动解除动画锁", ref SchedulerMain.AnimationLockAbandonState);
 
-                if (ImGui.Checkbox("Stop on Errors", ref stopOnAbort))
+                if (ImGui.Checkbox("发生错误时停止", ref stopOnAbort))
                 {
                     C.StopOnAbort = stopOnAbort;
                     C.Save();
                 }
                 ImGuiEx.HelpMarker(
-                    "Warning! This is a safety feature to stop if something goes wrong!\n" +
-                    "You have been warned. Disable at your own risk."
+                    "警告！此安全功能将在出现异常时强制停止运行！\n" + // Warning! This is a safety feature to stop if something goes wrong!
+                    "您已获知风险，禁用后果自负。" // You have been warned. Disable at your own risk.
                 );
 
-                if (ImGui.Checkbox("Ignore non-Cosmic prompts", ref rejectUnknownYesNo))
+                if (ImGui.Checkbox("忽略非宇宙探索相关提示", ref rejectUnknownYesNo))
                 {
                     C.RejectUnknownYesno = rejectUnknownYesNo;
                     C.Save();
                 }
                 ImGuiEx.HelpMarker(
-                    "Warning! This is a safety feature to avoid joining random parties!\n" +
-                    "If you you uncheck this, YOU WILL JOIN random party invites.\n" +
-                    "You have been warned. Disable at your own risk."
+                    "警告！此安全功能用于防止误入随机小队！\n" + // Warning! This is a safety feature to avoid joining random parties!
+                    "若取消勾选，您将自动接受随机小队的邀请。\n" + // If you you uncheck this, YOU WILL JOIN random party invites.
+                    "您已获知风险，禁用后果自负。" // You have been warned. Disable at your own risk.
                 );
-                if (ImGui.Checkbox("Add delay to mission menu", ref delayGrabMission))
+                if (ImGui.Checkbox("任务菜单添加延迟", ref delayGrabMission))
                 {
                     C.DelayGrabMission = delayGrabMission;
                     C.Save();
                 }
                 ImGuiEx.HelpMarker(
-                    "This is here for safety! If you want to decrease the delay between missions be my guest.\n" +
-                    "Safety is around... 250? If you're having animation locks you can absolutely increase it higher\n" +
-                    "Or if you're feeling daredevil. Lower it. I'm not your dad (will tell dad jokes though.");
+                    "此为安全保护机制！若想缩短任务间隔时间，请随意调整。\n" + // This is here for safety! If you want to decrease the delay between missions be my guest.
+                    "安全值大概在... 250? 若遇到动画锁卡顿，完全可以调得更高。\n" + // Safety is around... 250? If you're having animation locks you can absolutely increase it higher
+                    "当然，想追求刺激的话...调低也行。反正我不是你老爸（不过老爸笑话管够）。"); // Or if you're feeling daredevil. Lower it. I'm not your dad (will tell dad jokes though.
                 if (delayGrabMission)
                 {
                     ImGui.SetNextItemWidth(150);
@@ -700,15 +701,15 @@ namespace ICE.Ui
                         }
                     }
                 }
-                if (ImGui.Checkbox("Add delay to crafting menu", ref delayCraft))
+                if (ImGui.Checkbox("制作菜单添加延迟", ref delayCraft))
                 {
                     C.DelayCraft = delayCraft;
                     C.Save();
                 }
                 ImGuiEx.HelpMarker(
-                    "This is here for safety! If you want to decrease the delay before turnin be my guest.\n" +
-                    "Safety is around... 2500? If you're having animation locks you can absolutely increase it higher\n" +
-                    "Or if you're feeling daredevil. Lower it. I'm not your dad (will tell dad jokes though.");
+                    "此为安全保护机制！若想缩短汇报延迟时间，请随意调整。\n" + // This is here for safety! If you want to decrease the delay before turnin be my guest.
+                    "安全值大概在... 2500？若遇到动画锁卡顿，完全可以调得更高。\n" + // Safety is around... 2500? If you're having animation locks you can absolutely increase it higher
+                    "当然，想追求刺激的话...调低也行。反正我不是你老爸（不过老爸笑话管够）。"); // Or if you're feeling daredevil. Lower it. I'm not your dad (will tell dad jokes though.
                 if (delayCraft)
                 {
                     ImGui.SetNextItemWidth(150);
@@ -724,14 +725,14 @@ namespace ICE.Ui
                 }
             }
 
-            if (ImGui.CollapsingHeader("Mission Settings"))
+            if (ImGui.CollapsingHeader("任务设置"))
             {
-                if (ImGui.Checkbox("Only Grab Mission", ref onlyGrabMission))
+                if (ImGui.Checkbox("仅刷取并开始任务", ref onlyGrabMission))
                 {
                     C.OnlyGrabMission = onlyGrabMission;
                     C.Save();
                 }
-                if (ImGui.Checkbox("Stop @ Cosmocredits", ref stopOnceHitCosmoCredits))
+                if (ImGui.Checkbox("宇宙信用点达到@后停止", ref stopOnceHitCosmoCredits)) // Stop @ Cosmocredits
                 {
                     C.StopOnceHitCosmoCredits = stopOnceHitCosmoCredits;
                     C.Save();
@@ -749,7 +750,7 @@ namespace ICE.Ui
                         }
                     }
                 }
-                if (ImGui.Checkbox("Stop @ Lunar Credits", ref stopOnceHitLunarCredits))
+                if (ImGui.Checkbox("月球信用点达到@后停止", ref stopOnceHitLunarCredits)) // Stop @ Lunar Credits
                 {
                     C.StopOnceHitLunarCredits = stopOnceHitLunarCredits;
                     C.Save();
@@ -767,7 +768,7 @@ namespace ICE.Ui
                         }
                     }
                 }
-                if (ImGui.Checkbox("Stop after @ level", ref stopWhenLevel))
+                if (ImGui.Checkbox("等级达到@后停止", ref stopWhenLevel)) // Stop after @ level
                 {
                     C.StopWhenLevel = stopWhenLevel;
                     C.Save();
@@ -776,7 +777,7 @@ namespace ICE.Ui
                 {
                     ImGui.SetNextItemWidth(100f);
                     ImGui.SameLine();
-                    if (ImGui.InputInt("Level", ref targetLevel))
+                    if (ImGui.InputInt("等级", ref targetLevel)) // Level
                     {
                         if (targetLevel < MinimumLevel)
                             targetLevel = MinimumLevel;
@@ -806,7 +807,7 @@ namespace ICE.Ui
                     {
                         int minGp = currentMinGp;
                         ImGui.AlignTextToFramePadding();
-                        ImGui.Text("Minimum GP");
+                        ImGui.Text("最低 GP"); // Minimum GP
                         ImGui.SameLine();
                         ImGui.SetNextItemWidth(200);
                         if (ImGui.SliderInt($"###Slider{uniqueId}{entryName}", ref minGp, minGpLimit, maxGpLimit))
@@ -828,12 +829,12 @@ namespace ICE.Ui
             ImGui.PushStyleColor(ImGuiCol.HeaderHovered, headerColor * 1.2f);
             ImGui.PushStyleColor(ImGuiCol.HeaderActive, headerColor * 1.5f);
 
-            if (ImGui.CollapsingHeader("Gathering Settings"))
+            if (ImGui.CollapsingHeader("采集设置")) // Gathering Settings
             {
                 ImGui.PopStyleColor(3);
                 int maxGp = 1200;
 
-                if (ImGui.Checkbox("Self Repair on Gather", ref SelfRepairGather))
+                if (ImGui.Checkbox("采集时自动修理", ref SelfRepairGather)) // Self Repair on Gather
                 {
                     if (C.SelfRepairGather != SelfRepairGather)
                     {
@@ -843,7 +844,7 @@ namespace ICE.Ui
                 }
                 if (SelfRepairGather)
                 {
-                    ImGui.Text("Repair at");
+                    ImGui.Text("修理阈值");
                     ImGui.SameLine();
                     ImGui.SetNextItemWidth(150);
                     if (ImGui.SliderFloat("###Repair %", ref SelfRepairPercent, 0f, 99f, "%.0f%%"))
@@ -858,8 +859,8 @@ namespace ICE.Ui
 
                 ImGui.Dummy(new(0, 5));
 
-                ImGui.InputText("New Profile Name", ref newProfileName, 64);
-                if (ImGui.Button("Add Profile") && !string.IsNullOrWhiteSpace(newProfileName))
+                ImGui.InputText("新配置名称", ref newProfileName, 64); // New Profile Name
+                if (ImGui.Button("添加配置") && !string.IsNullOrWhiteSpace(newProfileName)) // Add Profile
                 {
                     if (!C.GatherSettings.Any(x => x.Name == newProfileName))
                     {
@@ -870,7 +871,7 @@ namespace ICE.Ui
                     }
                 }
 
-                ImGui.Text("Gather Profiles");
+                ImGui.Text("采集配置"); // Gather Profiles
 
                 bool canDelete = C.GatherSettings.Count > 1 && C.SelectedGatherIndex != 0;
                 using (ImRaii.Disabled(!canDelete))
@@ -921,14 +922,14 @@ namespace ICE.Ui
 
                     // Boon Increase 2 (+30% Increase)
                     DrawBuffSetting(
-                        label: "Pioneer's / Mountaineer's Gift II",
+                        label: "沃土 / 富矿的馈赠 II",
                         uniqueId: $"Boon2Inc{entry.Id}",
                         currentEnabled: entry.Buffs.BoonIncrease2,
                         currentMinGp: entry.Buffs.BoonIncrease2Gp,
                         minGpLimit: 100,
                         maxGpLimit: maxGp,
                         entryName: entry.Name,
-                        ActionInfo: "Apply a 30% buff to your boon chance.",
+                        ActionInfo: "额外采集奖励发生率提升30%",
                         onEnabledChange: newVal =>
                         {
                             entry.Buffs.BoonIncrease2 = newVal;
@@ -943,14 +944,14 @@ namespace ICE.Ui
 
                     // Boon Increase 1 (+10% Increase)
                     DrawBuffSetting(
-                        label: "Pioneer's / Mountaineer's Gift I",
+                        label: "沃土 / 富矿的馈赠 I",
                         uniqueId: $"Boon1Inc{entry.Id}",
                         currentEnabled: entry.Buffs.BoonIncrease1,
                         currentMinGp: entry.Buffs.BoonIncrease1Gp,
                         minGpLimit: 50,
                         maxGpLimit: maxGp,
                         entryName: entry.Name,
-                        ActionInfo: "Apply a 10% buff to your boon chance.",
+                        ActionInfo: "额外采集奖励发生率提升10%",
                         onEnabledChange: newVal =>
                         {
                             entry.Buffs.BoonIncrease1 = newVal;
@@ -965,14 +966,14 @@ namespace ICE.Ui
 
                     // Tidings (+2 to boon instead of +1)
                     DrawBuffSetting(
-                        label: "Nophica's / Nald'thal's Tidings Buff",
+                        label: "诺菲卡 / 纳尔札尔 福音",
                         uniqueId: $"TidingsBuff{entry.Id}",
                         currentEnabled: entry.Buffs.TidingsBool,
                         currentMinGp: entry.Buffs.TidingsGp,
                         minGpLimit: 200,
                         maxGpLimit: maxGp,
                         entryName: entry.Name,
-                        ActionInfo: "Increases item yield from Gatherer's Boon by 1",
+                        ActionInfo: "额外采集奖励发生时的获得数增加1个",
                         onEnabledChange: newVal =>
                         {
                             entry.Buffs.TidingsBool = newVal;
@@ -987,14 +988,14 @@ namespace ICE.Ui
 
                     // Yield II (+2 to all items on node)
                     DrawBuffSetting(
-                        label: "Blessed / Kings Yield II",
+                        label: "天赐收成 / 莫非王土 II",
                         uniqueId: $"Blessed/KingsYieldIIBuff{entry.Id}",
                         currentEnabled: entry.Buffs.YieldII,
                         currentMinGp: entry.Buffs.YieldIIGp,
                         minGpLimit: 500,
                         maxGpLimit: maxGp,
                         entryName: entry.Name,
-                        ActionInfo: "Increases the number of items obtained when gathering by 2",
+                        ActionInfo: "令获得数增加2个",
                         onEnabledChange: newVal =>
                         {
                             entry.Buffs.YieldII = newVal;
@@ -1009,14 +1010,14 @@ namespace ICE.Ui
 
                     // Yield I (+1 to all items on node)
                     DrawBuffSetting(
-                        label: "Blessed / Kings Yield I",
+                        label: "天赐收成 / 莫非王土 I",
                         uniqueId: $"Blessed/KingsYieldIBuff{entry.Id}",
                         currentEnabled: entry.Buffs.YieldI,
                         currentMinGp: entry.Buffs.YieldIGp,
                         minGpLimit: 400,
                         maxGpLimit: maxGp,
                         entryName: entry.Name,
-                        ActionInfo: "Increases the number of items obtained when gathering by 1",
+                        ActionInfo: "令获得数增加1个",
                         onEnabledChange: newVal =>
                         {
                             entry.Buffs.YieldI = newVal;
@@ -1031,15 +1032,15 @@ namespace ICE.Ui
 
                     // Bonus Integrity (+1 integrity)
                     DrawBuffSetting(
-                        label: "Ageless Words / Solid Reason",
+                        label: "农夫之智 / 石工之理",
                         uniqueId: $"Incrase Intregity{entry.Id}",
                         currentEnabled: entry.Buffs.BonusIntegrity,
                         currentMinGp: entry.Buffs.BonusIntegrityGp,
                         minGpLimit: 300,
                         maxGpLimit: maxGp,
                         entryName: entry.Name,
-                        ActionInfo: "Increase the Integrity by 1\n" +
-                                    "50% chance to grant Eureka Moment",
+                        ActionInfo: "恢复1次采集次数\n" +
+                                    "50%几率附加理智同兴预备状态",
                         onEnabledChange: newVal =>
                         {
                             entry.Buffs.BonusIntegrity = newVal;
@@ -1054,15 +1055,15 @@ namespace ICE.Ui
 
                     // Bountiful Yield/Harvest II (+Amount based on gathering)
                     DrawBuffSetting(
-                        label: "Bountiful Yield II / Bountiful Harvest II",
+                        label: "高产 II / 丰收 II",
                         uniqueId: $"Bountiful Yield II {entry.Id}",
                         currentEnabled: entry.Buffs.BountifulYieldII,
                         currentMinGp: entry.Buffs.BountifulYieldIIGp,
                         minGpLimit: 100,
                         maxGpLimit: maxGp,
                         entryName: entry.Name,
-                        ActionInfo: "Increase item's gained on next gathering attempt by 1, 2, or 3 \n" +
-                                    "This is based on your gathering rating",
+                        ActionInfo: "令下一次采集的获得数增加\n" +
+                                    "获得力影响获得数的增加量（最小1～最大3）",
                         onEnabledChange: newVal =>
                         {
                             entry.Buffs.BountifulYieldII = newVal;
@@ -1087,9 +1088,9 @@ namespace ICE.Ui
 
 #if DEBUG
             TaskGamba.EnsureGambaWeightsInitialized();
-            if (ImGui.CollapsingHeader("Gamba Settings"))
+            if (ImGui.CollapsingHeader("宇宙好运道设置"))
             {
-                if (ImGui.Checkbox("Enable Gamba", ref gambaEnabled))
+                if (ImGui.Checkbox("启用 宇宙好运道", ref gambaEnabled))
                 {
                     C.GambaEnabled = gambaEnabled;
                     C.Save();
@@ -1098,27 +1099,27 @@ namespace ICE.Ui
                 {
                     ImGui.SameLine();
                     ImGui.SetNextItemWidth(150);
-                    if (ImGui.SliderInt("Gamba Delay", ref gambaDelay, 50, 2000))
+                    if (ImGui.SliderInt("宇宙好运道 延迟", ref gambaDelay, 50, 2000))
                     {
                         C.GambaDelay = gambaDelay;
                         C.Save();
                     }
                     ImGui.SameLine();
                     ImGui.SetNextItemWidth(150);
-                    if (ImGui.SliderInt("Mininum credits to keep", ref gambaCreditsMinimum, 0, 10000))
+                    if (ImGui.SliderInt("保留最低信用点数量", ref gambaCreditsMinimum, 0, 10000))
                     {
                         C.GambaCreditsMinimum = gambaCreditsMinimum;
                         C.Save();
                     }
                 }
-                if (ImGui.Checkbox("Prefer smaller wheel", ref gambaPreferSmallerWheel))
+                if (ImGui.Checkbox("优先更小的转盘", ref gambaPreferSmallerWheel))
                 {
                     C.GambaPreferSmallerWheel = gambaPreferSmallerWheel;
                     C.Save();
                 }
-                ImGuiEx.HelpMarker("This will make the Gamba prefer wheels with less items.");
+                ImGuiEx.HelpMarker("此选项将优先选择物品数量更少的转盘");
                 ImGui.Separator();
-                ImGui.TextUnformatted("Configure the weights for each item in the Gamba. Higher weight = more desirable.");
+                ImGui.TextUnformatted("配置宇宙好运道每个物品的权重，物品权重越高 = 越优先获取该物品");
                 ImGui.Spacing();
                 foreach (GambaType type in Enum.GetValues(typeof(GambaType)))
                 {
@@ -1142,63 +1143,68 @@ namespace ICE.Ui
                         ImGui.TreePop();
                     }
                 }
-                if (ImGui.Button("Reset Weights"))
+                if (ImGui.Button("重置权重"))
                 {
                     TaskGamba.EnsureGambaWeightsInitialized(true);
                 }
             }
 #endif
-            if (ImGui.CollapsingHeader("Overlay Settings"))
+            if (ImGui.CollapsingHeader("悬浮窗设置"))
             {
-                if (ImGui.Checkbox("Show Overlay", ref showOverlay))
+                if (ImGui.Checkbox("显示 悬浮窗", ref showOverlay))
                 {
                     C.ShowOverlay = showOverlay;
                     C.Save();
                 }
 
-                if (ImGui.Checkbox("Show Seconds", ref ShowSeconds))
+                if (ImGui.Checkbox("显示 秒数", ref ShowSeconds))
                 {
                     C.ShowSeconds = ShowSeconds;
                     C.Save();
                 }
             }
 
-            if (ImGui.CollapsingHeader("Table Settings"))
+            if (ImGui.CollapsingHeader("表格设置"))
             {
                 // Checkbox: Hide unsupported missions.
-                if (ImGui.Checkbox("Hide unsupported missions", ref hideUnsupported))
+                if (ImGui.Checkbox("隐藏不支持的任务", ref hideUnsupported))
                 {
                     C.HideUnsupportedMissions = hideUnsupported;
                     C.Save();
                 }
-                if (ImGui.Checkbox("Auto Pick Current Job", ref autoPickCurrentJob))
+                if (ImGui.Checkbox("自动挑选当前职业", ref autoPickCurrentJob))
                 {
                     C.AutoPickCurrentJob = autoPickCurrentJob;
                     C.Save();
                 }
-                if (ImGui.Checkbox($"Show EXP on Columns", ref showExp))
+                if (ImGui.Checkbox($"在表格列显示经验值", ref showExp))
                 {
                     C.ShowExpColums = showExp;
                     C.Save();
                 }
-                if (ImGui.Checkbox($"Show Cosmocredits", ref showCredits))
+                if (ImGui.Checkbox($"显示宇宙信用点", ref showCredits)) // Show Cosmocredits
                 {
                     C.ShowCreditsColumn = showCredits;
                     C.Save();
                 }
             }
 
-            if (ImGui.CollapsingHeader("Misc Settings"))
+            if (ImGui.CollapsingHeader("杂项设置"))
             {
-                if (ImGui.Checkbox("Enable Auto Sprint", ref EnableAutoSprint))
+                if (ImGui.Checkbox("启用 自动冲刺", ref EnableAutoSprint))
                 {
                     C.EnableAutoSprint = EnableAutoSprint;
+                    C.Save();
+                }
+                if (ImGui.Checkbox("启用 自动离开设置为不切换", ref EnableAutoAntiAFK))
+                {
+                    C.AutoAntiAFK = EnableAutoAntiAFK;
                     C.Save();
                 }
             }
 
 #if DEBUG
-            if (ImGui.CollapsingHeader("Debug Settings"))
+            if (ImGui.CollapsingHeader("Debug 设置"))
             {
                 ImGui.Checkbox("Force OOM Main", ref SchedulerMain.DebugOOMMain);
                 ImGui.Checkbox("Force OOM Sub", ref SchedulerMain.DebugOOMSub);

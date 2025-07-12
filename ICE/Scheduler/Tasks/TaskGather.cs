@@ -102,7 +102,7 @@ namespace ICE.Scheduler.Tasks
                         Utils.TryGetObjectByDataId(nodeId, out gameObject);
                         if (gameObject != null)
                         {
-                            // Game object has been found. Now time to check stuff on it.
+                            // Game object has been found. Now time to check stuff on it. 偶尔发生角色因地形高低差在空中与采集点交互，交互失败后卡死
                             if (gameObject.IsTargetable)
                             {
                                 P.TaskManager.Enqueue(() => Utils.TargetgameObject(gameObject), "Targeting gameObject");

@@ -62,14 +62,14 @@ public sealed partial class ICE : IDalamudPlugin
         debugWindow = new();
 
         EzCmd.Add("/icecosmic", OnCommand, """
-            Open plugin interface
-            /ice clear - Removes all missions
-            /ice stop - Stops ICE
-            /ice start - Starts ICE
+            打开插件窗口
+            /ice clear - 移除所有任务
+            /ice stop - 停止 ICE 插件运行
+            /ice start - 开始 ICE 插件运行
             /ice add | remove | toggle | only 
-            	(Ex. /ice add 405 406 410)
-            /ice flag [id] - Opens the map and marks where the area of gathering is.
-                (Ex. /ice flag 301)
+            	(示例: /ice add 405 406 410)
+            /ice flag [id] - 打开地图并标记采集区域位置
+                (示例: /ice flag 301)
             """);
         EzCmd.Add("/ice", OnCommand);
         EzCmd.Add("/IceCosmic", OnCommand);
@@ -79,7 +79,7 @@ public sealed partial class ICE : IDalamudPlugin
         TaskManager = new(new(showDebug: false));
         Svc.PluginInterface.UiBuilder.Draw += windowSystem.Draw;
         Svc.PluginInterface.UiBuilder.OpenMainUi += () =>
-        {
+        {   
             mainWindow2.IsOpen = true;
         };
         Svc.PluginInterface.UiBuilder.OpenConfigUi += () =>

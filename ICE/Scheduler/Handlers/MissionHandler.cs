@@ -162,7 +162,7 @@ internal static class MissionHandler
 
         return (classScore, cappedClassScore, totalScores, classId);
     }
-    internal static void TurnIn(WKSMissionInfomation z, bool abortIfNoReport = false)
+    internal static void TurnIn(WKSMissionInfomation z, bool abortIfNoReport = false) // Bug: 在紧急任务中不触发，无论采集/制作，已经处理了
     {
         if (EzThrottler.Throttle("Turning in item", 250))
         {
@@ -185,8 +185,8 @@ internal static class MissionHandler
                 else if (SchedulerMain.PossiblyStuck >= 2 && C.AnimationLockAbandon)
                 {
                     SchedulerMain.AnimationLockAbandonState = true;
-                    DuoLog.Error($"Unexpected error. I might be Animation Locked. " +
-                        (C.AnimationLockAbandon ? "Attempting unstuck." : "Please enable Experimental unstuck to attempt unstuck."));
+                    DuoLog.Error($"发生意外错误，可能是由于动画锁定状态导致。" + // Unexpected error. I might be Animation Locked. 
+                        (C.AnimationLockAbandon ? "正在尝试解除锁定。" : "请启用实验性解除锁定功能以尝试解决。")); // (C.AnimationLockAbandon ? "Attempting unstuck." : "Please enable Experimental unstuck to attempt unstuck.")
                 }
             }
         }
@@ -197,10 +197,10 @@ internal static class MissionHandler
         if (abortIfNoReport && C.StopOnAbort && !SchedulerMain.AnimationLockAbandonState)
         {
             SchedulerMain.StopBeforeGrab = true;
-            DuoLog.Error("Unexpected error. Stopping. You failed to reach your Score Target.\n" +
-                $"If you expect Mission ID {CosmicHelper.CurrentLunarMission} to not reach " + (C.Missions.SingleOrDefault(x => x.Id == CosmicHelper.CurrentLunarMission).TurnInSilver ? "Silver" : "Gold") +
-                " - please mark it as Silver/ASAP accordingly.\n" +
-                "If you were expecting it to reach the target, check your settings/gear.");
+            DuoLog.Error("发生意外错误，已停止运行。未能达到目标评价。\n" + // Unexpected error. Stopping. You failed to reach your Score Target.
+                $"如果您预期的任务 ID: {CosmicHelper.CurrentLunarMission} 无法达到 " + (C.Missions.SingleOrDefault(x => x.Id == CosmicHelper.CurrentLunarMission).TurnInSilver ? "银星" : "金星") +
+                " - 请将其汇报标记设置为 银星/尽快提交\n" +
+                "如果您预期能达成目标，请检查您的设置/装备。");
         }
         if ((abortIfNoReport || SchedulerMain.AnimationLockAbandonState) && CosmicHelper.CurrentLunarMission != 0)
         {

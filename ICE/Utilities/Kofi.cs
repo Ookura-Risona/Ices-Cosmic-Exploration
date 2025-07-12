@@ -50,9 +50,9 @@ internal class Kofi // Heavily borrowed from the Ecommons version.
     private static readonly uint ColorText = 0xFFFFFFFF;
 
     private static string PatreonButtonTooltip => $"""
-				If you like {Svc.PluginInterface.Manifest.Name}, please consider supporting it's developer via Ko-Fi! 
-				Help prevent against global warning by telling good dad jokes and keeping me warm.
-				Left click - to go to Ko-Fi;
+				如果您喜欢 {Svc.PluginInterface.Manifest.Name}，请考虑通过 Ko-Fi 支持开发者！
+				通过讲优质老爸笑话保持温暖，助力对抗全球变暖。
+				左键点击 - 前往 Ko-Fi;	
 				""";
 
     public static void DrawButton()

@@ -7,40 +7,40 @@ namespace ICE.Scheduler.Tasks
     {
         public static readonly List<Gamba> DefaultGambaItems = new()
         {
-            new Gamba { ItemId = 44505, Weight = 200, Type = GambaType.Mount }, // Vacuum Suit Identification Key
-            new Gamba { ItemId = 44509, Weight = 25, Type = GambaType.Emote }, // Ballroom Etiquette - Personal Perfection
-            new Gamba { ItemId = 47937, Weight = 50, Type = GambaType.Outfit }, // Cosmosuit Coffer
-            new Gamba { ItemId = 47966, Weight = 25, Type = GambaType.Minion }, // Micro Rover
-            new Gamba { ItemId = 48154, Weight = 5, Type = GambaType.Accessory }, // The Faces We Wear - Tinted Sunglasses
-            new Gamba { ItemId = 48160, Weight = 5, Type = GambaType.Accessory }, // Loparasol
-            new Gamba { ItemId = 23892, Weight = 0, Type = GambaType.Housing }, // Verdant Partition
-            new Gamba { ItemId = 48169, Weight = 0, Type = GambaType.Dye }, // Metallic Pink Dye
-            new Gamba { ItemId = 48170, Weight = 0, Type = GambaType.Dye }, // Metallic Ruby Red Dye
-            new Gamba { ItemId = 48171, Weight = 0, Type = GambaType.Dye }, // Metallic Cobalt Green Dye
-            new Gamba { ItemId = 48172, Weight = 0, Type = GambaType.Dye }, // Metallic Dark Blue Dye
-            new Gamba { ItemId = 43943, Weight = 0, Type = GambaType.Other }, // Cracked Prismaticrystal
-            new Gamba { ItemId = 43944, Weight = 0, Type = GambaType.Other }, // Cracked Novacrystal
-            new Gamba { ItemId = 48210, Weight = 0, Type = GambaType.Orchestrion }, // Stargazers Orchestrion Roll
-            new Gamba { ItemId = 48220, Weight = 0, Type = GambaType.Orchestrion }, // Echoes in the Distance Orchestrion Roll
-            new Gamba { ItemId = 48221, Weight = 0, Type = GambaType.Orchestrion }, // Close in the Distance (Instrumental) Orchestrion Roll
-            new Gamba { ItemId = 28724, Weight = 0, Type = GambaType.Other }, // Crafter's Delineation
-            new Gamba { ItemId = 48733, Weight = 0, Type = GambaType.Housing }, // Cosmotable
-            new Gamba { ItemId = 48734, Weight = 0, Type = GambaType.Housing }, // Cosmolamp
-            new Gamba { ItemId = 48136, Weight = 0, Type = GambaType.Housing }, // Drafting Table
-            new Gamba { ItemId = 6141,  Weight = 0, Type = GambaType.Other }, // Cordial HQ
-            new Gamba { ItemId = 48158, Weight = 0, Type = GambaType.Other }, // Magicked Prism (Cosmic Exploration)
-            new Gamba { ItemId = 41762, Weight = 0, Type = GambaType.Materia }, // Gatherer's Guerdon Materia XI
-            new Gamba { ItemId = 41763, Weight = 0, Type = GambaType.Materia }, // Gatherer's Guile Materia XI
-            new Gamba { ItemId = 41764, Weight = 0, Type = GambaType.Materia }, // Gatherer's Grasp Materia XI
-            new Gamba { ItemId = 41765, Weight = 0, Type = GambaType.Materia }, // Craftsman's Competence Materia XI
-            new Gamba { ItemId = 41766, Weight = 0, Type = GambaType.Materia }, // Craftsman's Cunning Materia XI
-            new Gamba { ItemId = 41767, Weight = 0, Type = GambaType.Materia }, // Craftsman's Command Materia XI
-            new Gamba { ItemId = 41775, Weight = 0, Type = GambaType.Materia }, // Gatherer's Guerdon Materia XII
-            new Gamba { ItemId = 41776, Weight = 0, Type = GambaType.Materia }, // Gatherer's Guile Materia XII
-            new Gamba { ItemId = 41777, Weight = 0, Type = GambaType.Materia }, // Gatherer's Grasp Materia XII
-            new Gamba { ItemId = 41778, Weight = 0, Type = GambaType.Materia }, // Craftsman's Competence Materia XII
-            new Gamba { ItemId = 41779, Weight = 0, Type = GambaType.Materia }, // Craftsman's Cunning Materia XII
-            new Gamba { ItemId = 41780, Weight = 0, Type = GambaType.Materia }, // Craftsman's Command Materia XII
+            new Gamba { ItemId = 44505, Weight = 200, Type = GambaType.坐骑 }, // Vacuum Suit Identification Key
+            new Gamba { ItemId = 44509, Weight = 25, Type = GambaType.情感动作 }, // Ballroom Etiquette - Personal Perfection
+            new Gamba { ItemId = 47937, Weight = 50, Type = GambaType.套装 }, // Cosmosuit Coffer
+            new Gamba { ItemId = 47966, Weight = 25, Type = GambaType.宠物 }, // Micro Rover
+            new Gamba { ItemId = 48154, Weight = 5, Type = GambaType.时尚配饰 }, // The Faces We Wear - Tinted Sunglasses
+            new Gamba { ItemId = 48160, Weight = 5, Type = GambaType.时尚配饰 }, // Loparasol
+            new Gamba { ItemId = 23892, Weight = 0, Type = GambaType.房屋用品 }, // Verdant Partition
+            new Gamba { ItemId = 48169, Weight = 0, Type = GambaType.染剂 }, // Metallic Pink Dye
+            new Gamba { ItemId = 48170, Weight = 0, Type = GambaType.染剂 }, // Metallic Ruby Red Dye
+            new Gamba { ItemId = 48171, Weight = 0, Type = GambaType.染剂 }, // Metallic Cobalt Green Dye
+            new Gamba { ItemId = 48172, Weight = 0, Type = GambaType.染剂 }, // Metallic Dark Blue Dye
+            new Gamba { ItemId = 43943, Weight = 0, Type = GambaType.其他 }, // Cracked Prismaticrystal
+            new Gamba { ItemId = 43944, Weight = 0, Type = GambaType.其他 }, // Cracked Novacrystal
+            new Gamba { ItemId = 48210, Weight = 0, Type = GambaType.管弦乐琴乐谱 }, // Stargazers Orchestrion Roll
+            new Gamba { ItemId = 48220, Weight = 0, Type = GambaType.管弦乐琴乐谱 }, // Echoes in the Distance Orchestrion Roll
+            new Gamba { ItemId = 48221, Weight = 0, Type = GambaType.管弦乐琴乐谱 }, // Close in the Distance (Instrumental) Orchestrion Roll
+            new Gamba { ItemId = 28724, Weight = 0, Type = GambaType.其他 }, // Crafter's Delineation
+            new Gamba { ItemId = 48733, Weight = 0, Type = GambaType.房屋用品 }, // Cosmotable
+            new Gamba { ItemId = 48734, Weight = 0, Type = GambaType.房屋用品 }, // Cosmolamp
+            new Gamba { ItemId = 48136, Weight = 0, Type = GambaType.房屋用品 }, // Drafting Table
+            new Gamba { ItemId = 6141,  Weight = 0, Type = GambaType.其他 }, // Cordial HQ
+            new Gamba { ItemId = 48158, Weight = 0, Type = GambaType.其他 }, // Magicked Prism (Cosmic Exploration)
+            new Gamba { ItemId = 41762, Weight = 0, Type = GambaType.魔晶石 }, // Gatherer's Guerdon Materia XI
+            new Gamba { ItemId = 41763, Weight = 0, Type = GambaType.魔晶石 }, // Gatherer's Guile Materia XI
+            new Gamba { ItemId = 41764, Weight = 0, Type = GambaType.魔晶石 }, // Gatherer's Grasp Materia XI
+            new Gamba { ItemId = 41765, Weight = 0, Type = GambaType.魔晶石 }, // Craftsman's Competence Materia XI
+            new Gamba { ItemId = 41766, Weight = 0, Type = GambaType.魔晶石 }, // Craftsman's Cunning Materia XI
+            new Gamba { ItemId = 41767, Weight = 0, Type = GambaType.魔晶石 }, // Craftsman's Command Materia XI
+            new Gamba { ItemId = 41775, Weight = 0, Type = GambaType.魔晶石 }, // Gatherer's Guerdon Materia XII
+            new Gamba { ItemId = 41776, Weight = 0, Type = GambaType.魔晶石 }, // Gatherer's Guile Materia XII
+            new Gamba { ItemId = 41777, Weight = 0, Type = GambaType.魔晶石 }, // Gatherer's Grasp Materia XII
+            new Gamba { ItemId = 41778, Weight = 0, Type = GambaType.魔晶石 }, // Craftsman's Competence Materia XII
+            new Gamba { ItemId = 41779, Weight = 0, Type = GambaType.魔晶石 }, // Craftsman's Cunning Materia XII
+            new Gamba { ItemId = 41780, Weight = 0, Type = GambaType.魔晶石 }, // Craftsman's Command Materia XII
         };
 
         public static void EnsureGambaWeightsInitialized(bool force = false)

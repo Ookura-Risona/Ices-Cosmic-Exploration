@@ -5,6 +5,8 @@ using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel.Sheets;
+using static ECommons.UIHelpers.AddonMasterImplementations.AddonMaster;
+using static ECommons.GenericHelpers;
 
 namespace ICE.Utilities;
 
@@ -74,6 +76,30 @@ public class PlayerHelper
         var maxGp = Svc.ClientState.LocalPlayer?.MaxGp ?? 0;
         return (int)maxGp;
     }
+
+    /*public static int GetLunarCredits()
+    {
+        if (TryGetAddonMaster<WKSHud>("WKSHud", out var hud) && hud.IsAddonReady)
+        {
+            return hud.LunarCredit; // 返回月球信用点数
+        }
+        else
+        {
+            return -1; // 获取失败
+        }
+    }
+
+    public static int GetCosmoCredits()
+    {
+        if (TryGetAddonMaster<WKSHud>("WKSHud", out var hud) && hud.IsAddonReady)
+        {
+            return hud.CosmoCredit; // 返回月球信用点数
+        }
+        else
+        {
+            return -1; // 获取失败
+        }
+    }*/
 
     internal static unsafe float GetDistanceToPlayer(Vector3 v3) => Vector3.Distance(v3, Player.GameObject->Position);
     internal static unsafe float GetDistanceToPlayer(IGameObject gameObject) => GetDistanceToPlayer(gameObject.Position);

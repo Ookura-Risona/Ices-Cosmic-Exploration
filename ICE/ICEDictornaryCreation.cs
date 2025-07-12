@@ -41,7 +41,7 @@ public sealed partial class ICE
 
             uint timeAndWeather = item.Unknown18;
             uint time = 0;
-            CosmicWeather weather = CosmicWeather.FairSkies;
+            CosmicWeather weather = CosmicWeather.晴朗;
             if (timeAndWeather <= 12)
             {
                 time = timeAndWeather;
@@ -95,7 +95,7 @@ public sealed partial class ICE
                 _ => None
             };
             attributes |= isCritical ? Critical : None;
-            attributes |= weather != CosmicWeather.FairSkies ? ProvisionalWeather : None;
+            attributes |= weather != CosmicWeather.晴朗 ? ProvisionalWeather : None;
             attributes |= time != 0 ? ProvisionalTimed : None;
             attributes |= previousMissionId != 0 ? ProvisionalSequential : None;
 

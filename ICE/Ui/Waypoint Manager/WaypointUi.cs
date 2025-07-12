@@ -33,10 +33,10 @@ public static class WaypointUi
         var paths = _pathManager.ListAllPaths();
         if (paths.Count == 0)
         {
-            ImGui.Text("No path files found.");
-            ImGui.InputText("New Path Name", ref _newFileName, 64);
+            ImGui.Text("找不到路线文件。"); // No path files found.
+            ImGui.InputText("新路线名称", ref _newFileName, 64); // New Path Name
             ImGui.SameLine();
-            if (ImGui.Button("Create New Path"))
+            if (ImGui.Button("创建新路线")) // Create New Path
             {
                 _currentPathName = _newFileName;
                 _currentPathFile = new PathFile { PathName = _currentPathName };
@@ -66,14 +66,14 @@ public static class WaypointUi
             ImGui.EndCombo();
         }
         ImGui.SameLine();
-        if (ImGui.Button("Delete"))
+        if (ImGui.Button("删除")) // Delete
         {
             _pathManager.Delete(_currentPathName);
         }
 
-        ImGui.InputText("New Path Name", ref _newFileName, 64);
+        ImGui.InputText("新路线名称", ref _newFileName, 64); // New Path Name
         ImGui.SameLine();
-        if (ImGui.Button("Create New Path"))
+        if (ImGui.Button("创建新路线")) // Create New Path
         {
             _currentPathName = _newFileName;
             _currentPathFile = new PathFile { PathName = _currentPathName };
@@ -88,7 +88,7 @@ public static class WaypointUi
 
         if (_currentPathFile.Waypoints.Count > 0)
         {
-            if (ImGui.Button("Test Route"))
+            if (ImGui.Button("测试路线")) // Test Route
             {
                 Vector3[] waypoints = _currentPathFile.Waypoints.Select(wp => wp.ToVector3()).ToArray();
 
@@ -106,7 +106,7 @@ public static class WaypointUi
             ImGui.Text($"[{i}] X:{wp.X:0.0} Y:{wp.Y:0.0} Z:{wp.Z:0.0}");
             ImGui.SameLine();
             bool jump = wp.Jump;
-            if (ImGui.Checkbox("Jump", ref jump))
+            if (ImGui.Checkbox("跳跃", ref jump)) // Jump
             {
                 wp.Jump = jump;
                 _currentPathFile.Waypoints[i] = wp; // write back
@@ -139,9 +139,9 @@ public static class WaypointUi
     private static void DrawAddWaypointSection()
     {
         ImGui.Separator();
-        ImGui.Text("Add New Waypoint:");
+        ImGui.Text("添加新路径点:"); // Add New Waypoint:
 
-        if (ImGui.Button("Add Current POS"))
+        if (ImGui.Button("添加当前位置")) // Add Current POS
         {
             _newWaypoint.X = Player.Position.X;
             _newWaypoint.Y = Player.Position.Y;
@@ -154,27 +154,27 @@ public static class WaypointUi
         ImGui.SetNextItemWidth(75);
         ImGui.InputFloat("X", ref _newWaypoint.X);
         ImGui.SameLine();
-        if (ImGui.Button("Set X"))
+        if (ImGui.Button("设置 X"))
         {
             _newWaypoint.X = Player.Position.X;
         }
         ImGui.SetNextItemWidth(75);
         ImGui.InputFloat("Y", ref _newWaypoint.Y);
         ImGui.SameLine();
-        if (ImGui.Button("Set Y"))
+        if (ImGui.Button("设置 Y"))
         {
             _newWaypoint.Y = Player.Position.Y;
         }
         ImGui.SetNextItemWidth(75);
         ImGui.InputFloat("Z", ref _newWaypoint.Z);
         ImGui.SameLine();
-        if (ImGui.Button("Set Z"))
+        if (ImGui.Button("设置 Z"))
         {
             _newWaypoint.Z = Player.Position.Z;
         }
-        ImGui.Checkbox("Jump", ref _newJumpFlag);
+        ImGui.Checkbox("跳跃", ref _newJumpFlag); // Jump
 
-        if (ImGui.Button("Add Waypoint"))
+        if (ImGui.Button("添加路径点")) // Add Waypoint
         {
             _currentPathFile!.Waypoints.Add(WaypointUtil.FromVector3(_newWaypoint, _newJumpFlag));
             _newWaypoint = Vector3.Zero;
@@ -185,7 +185,7 @@ public static class WaypointUi
     private static void DrawSaveSection()
     {
         ImGui.Separator();
-        if (ImGui.Button("Save Path File"))
+        if (ImGui.Button("保存路线文件")) // Save Path File
         {
             _pathManager.Save(_currentPathFile!);
         }
