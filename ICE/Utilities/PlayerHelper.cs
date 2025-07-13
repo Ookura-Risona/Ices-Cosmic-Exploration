@@ -77,30 +77,6 @@ public class PlayerHelper
         return (int)maxGp;
     }
 
-    /*public static int GetLunarCredits()
-    {
-        if (TryGetAddonMaster<WKSHud>("WKSHud", out var hud) && hud.IsAddonReady)
-        {
-            return hud.LunarCredit; // 返回月球信用点数
-        }
-        else
-        {
-            return -1; // 获取失败
-        }
-    }
-
-    public static int GetCosmoCredits()
-    {
-        if (TryGetAddonMaster<WKSHud>("WKSHud", out var hud) && hud.IsAddonReady)
-        {
-            return hud.CosmoCredit; // 返回月球信用点数
-        }
-        else
-        {
-            return -1; // 获取失败
-        }
-    }*/
-
     internal static unsafe float GetDistanceToPlayer(Vector3 v3) => Vector3.Distance(v3, Player.GameObject->Position);
     internal static unsafe float GetDistanceToPlayer(IGameObject gameObject) => GetDistanceToPlayer(gameObject.Position);
 

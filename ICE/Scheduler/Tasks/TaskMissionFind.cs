@@ -104,8 +104,6 @@ namespace ICE.Scheduler.Tasks
                 return;
             }
 
-            //P.TaskManager.Enqueue(TaskSpendingCredit.炫酷抽奖任务, "Checking for Spending LunarCredits"); //占位 消费月球票抽奖
-            //P.TaskManager.Enqueue(TaskSpendingCredit.炫酷购买任务, "Checking for Spending CosmoCredits"); //占位 消费宇宙票购物
             P.TaskManager.Enqueue(TaskRepair.GatherCheck, "Checking for repairs");
             P.TaskManager.Enqueue(TaskSpiritbond.TryExtractMateria, "Checking for materia");
 
