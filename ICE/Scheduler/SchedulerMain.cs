@@ -104,70 +104,34 @@ namespace ICE.Scheduler
                         break;
                 }
             }
-            /* switch (State)
-            {
-                case IceState.Idle:
-                    break;
-                case IceState.Gamba:
-                    TaskGamba.TryHandleGamba();
-                    break;
-                case IceState.AnimationLock:
-                    TaskAnimationLock.Enqueue();
-                    break;
-                case IceState.RepairMode:
-                    TaskRepair.GatherCheck();
-                    break;
-                case IceState.GrabbingMission:
-                    break;
-                case IceState.WaitForNonStandard:
-                    TaskMissionFind.WaitForNonStandard();
-                    break;
-                case IceState.GrabMission:
-                    TaskMissionFind.Enqueue();
-                    break;
-                case IceState.StartCraft:
-                    TaskCrafting.TryEnqueueCrafts();
-                    break;
-                case IceState.AbortInProgress:
-                case IceState.WaitForCrafts:
-                case IceState.CraftInProcess:
-                case IceState.CraftCheckScoreAndTurnIn:
-                    TaskScoreCheckCraft.TryCheckScore();
-                    break;
-                case IceState.GatherScoreandTurnIn:
-                    TaskScoreCheckGather.TryCheckScore();
-                    break;
-                case IceState.ManualMode:
-                    TaskManualMode.ZenMode();
-                    break;
-                case IceState.ResumeChecker:
-                    TaskMissionFind.EnqueueResumeCheck();
-                    break;
-                case IceState.GatherNormal:
-                    TaskGather.TryEnqueueGathering();
-                    break;
-                default:
-                    throw new Exception("Invalid state");
-            } */
         }
+
         public static void EnqueueResumeCheck()
         {
+            // Start the check by making the state idle, this clears all flags.
             State = Idle;
             PlayerHandlers.AutoAntiAFK();
             if (CosmicHelper.CurrentLunarMission != 0)
             {
+                // Mission was not 0, which means there's currently one active.
                 if (!AddonHelper.IsAddonActive("WKSMissionInfomation"))
                 {
-                    CosmicHelper.OpenStellarMission();
+                    P.TaskManager.Enqueue(() => CosmicHelper.OpenStellarMissionHud());
                     State = Start;
-                    return;
+                    return; // Makes sure that none of the other flags can be set, and returns back to start until the mission information is open
                 }
-                if (MissionHandler.IsMissionTimedOut())
-                    State |= AbortInProgress;
-                TaskMissionFind.UpdateStateFlags();
-                if (State.HasFlag(Craft) && P.Artisan.IsBusy())
-                    State |= Waiting;
-                State |= ScoringMission;
+                else
+                {
+                    // Checking for the mission, seeing if it's timed out. If so, then initiating the timeout sequence (aka trying to turnin/abort)
+                    if (MissionHandler.IsMissionTimedOut())
+                        State |= AbortInProgress;
+
+                    // Updating the flags for the state. 
+                    TaskMissionFind.UpdateStateFlags();
+                    if (State.HasFlag(Craft) && P.Artisan.IsBusy())
+                        State |= Waiting;
+                    State |= ScoringMission;
+                }
             }
             else if (AddonHelper.IsAddonActive("WKSLottery"))
                 State = Gambling;

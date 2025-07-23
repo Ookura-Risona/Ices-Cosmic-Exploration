@@ -1,9 +1,9 @@
 using ECommons.Automation.NeoTaskManager;
 using ECommons.Configuration;
-using ICE.Scheduler;
-using ICE.Ui;
 using ICE.IPC;
-using ICE.Scheduler.Handlers;
+using ICE.Ui;
+using ICE.Config;
+using Pictomancy;
 using System.Collections.Generic;
 using static ICE.Utilities.CosmicHelper;
 
@@ -12,10 +12,44 @@ namespace ICE;
 public sealed partial class ICE : IDalamudPlugin
 {
     public static string Name => "ICE";
-    public static Config C => P.Config;
 
     internal static ICE P = null!;
-    private readonly Config Config;
+    private readonly Configuration Config;
+    private static WaypointInfo? waypointInfo;
+
+    public static Configuration C => P.Config;
+    public static WaypointInfo D => waypointInfo ??= LoadConfig<WaypointInfo>();
+
+    // Yaml Config Loaders. For both loading a yaml in the config folder, and for embedded
+    private static T LoadConfig<T>() where T : IYamlConfig, new()
+    {
+        var path = typeof(T).GetProperty("ConfigPath")!.GetValue(null)!.ToString()!;
+        var config = YamlConfig.Load<T>(path);
+
+        if (config == null)
+        {
+            PluginLog.Warning($"[{typeof(T).Name}] Config was null. Creating new default.");
+            config = new T();
+            YamlConfig.Save(config, path);
+        }
+
+        PluginLog.Information($"[{typeof(T).Name}] Loaded from {path}");
+        return config;
+    }
+
+    private static T LoadEmbeddedConfig<T>(string resourceName) where T : IYamlConfig, new()
+    {
+        var config = YamlConfig.LoadFromResource<T>(resourceName);
+
+        if (config == null)
+        {
+            PluginLog.Warning($"[{typeof(T).Name}] Embedded config was null. Returning new default.");
+            config = new T();
+        }
+
+        PluginLog.Information($"[{typeof(T).Name}] Loaded from embedded resource: {resourceName}");
+        return config;
+    }
 
     // Window's that I use, base window to the settings... need these to actually show shit 
     internal WindowSystem windowSystem;
@@ -40,9 +74,10 @@ public sealed partial class ICE : IDalamudPlugin
     {
         P = this;
         ECommonsMain.Init(pi, P, Module.DalamudReflector, ECommons.Module.ObjectFunctions);
+        PictoService.Initialize(pi);
 
-        EzConfig.Migrate<Config>();
-        Config = EzConfig.Init<Config>();
+        EzConfig.Migrate<Configuration>();
+        Config = EzConfig.Init<Configuration>();
 
         //IPC's that are used
         TaskManager = new();
@@ -119,6 +154,7 @@ public sealed partial class ICE : IDalamudPlugin
         GenericHelpers.Safe(TextAdvancedManager.UnlockTA);
         GenericHelpers.Safe(YesAlreadyManager.Unlock);
         ECommonsMain.Dispose();
+        PictoService.Dispose();
     }
 
     private void OnCommand(string command, string args)
