@@ -135,7 +135,7 @@ internal class SettingsWindow : Window
     private bool useOnlyInMission = C.UseOnlyInMission;
     private string newProfileName = "";
 
-    private string[] MissionTypes = ["限定采集点", "采集 X 个物品", "时间竞速", "连锁冲分", "恩惠冲分", "连锁 + 恩惠冲分", "双职业"]; // ["Limited Nodes", "Gather x Amount", "Time Attack", "Chained Scoring", "Boon Scoring", "Chain + Boon Scoring", "Dual Class"]; 恩惠 = 采集暴击(或者馈赠技能)
+    private string[] MissionTypes = ["限量采集点", "采集 X 个物品", "时间竞速", "连锁冲分", "恩惠冲分", "连锁 + 恩惠冲分", "双职业"]; // ["Limited Nodes", "Gather x Amount", "Time Attack", "Chained Scoring", "Boon Scoring", "Chain + Boon Scoring", "Dual Class"]; 恩惠 = 采集暴击(或者馈赠技能)
     private int MissionIndex = 0;
 
     private void GatherSettings()

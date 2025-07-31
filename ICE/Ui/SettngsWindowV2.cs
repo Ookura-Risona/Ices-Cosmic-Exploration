@@ -214,7 +214,7 @@ internal class SettingsWindowV2 : Window
     private bool useOnlyInMission = C.UseOnlyInMission;
     private string newProfileName = "";
 
-    private string[] MissionTypes = ["限定采集点", "采集 X 个物品", "时间竞速", "连锁冲分", "恩惠冲分", "连锁 + 恩惠冲分", "双职业"];
+    private string[] MissionTypes = ["限量采集点", "采集 X 个物品", "时间竞速", "连锁冲分", "恩惠冲分", "连锁 + 恩惠冲分", "双职业"];
     private int MissionIndex = 0;
 
     private void GatherSettings()
