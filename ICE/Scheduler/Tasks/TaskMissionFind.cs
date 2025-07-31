@@ -1,10 +1,13 @@
 ﻿using ECommons.Automation;
+using ECommons.GameHelpers;
+using FFXIVClientStructs.FFXIV.Client.Game.WKS;
 using ICE.Ui;
+using ICE.Ui.DebugWindowTabs;
+using Lumina.Excel.Sheets;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ECommons.GameHelpers;
-using static ECommons.UIHelpers.AddonMasterImplementations.AddonMaster;
 using static ECommons.GenericHelpers;
+using static ECommons.UIHelpers.AddonMasterImplementations.AddonMaster;
 
 namespace ICE.Scheduler.Tasks
 {
@@ -109,16 +112,20 @@ namespace ICE.Scheduler.Tasks
             if (!SchedulerMain.State.HasFlag(IceState.GrabMission))
             {
                 // Don't know how we're here, but returning back to the start to make sure we're on the right path.
-                // Bad coding... I feel. 
+                // this... hmm... shouldn't be here I feel. Might be wrong. Not sure I like this
                 return;
             }
 
-            // Checking to see if you even HAVE any missions enabled to begin with. 
+            // Checking to see if you even HAVE any missions enabled to begin with.
             if (!(HasCritical || HasWeather || HasTimed || HasSequence || HasStandard))
             {
-                DuoLog.Error($"该职业没有启用任何任务: {Svc.ClientState.LocalPlayer?.ClassJob.Value.Name}。您忘记设置了吗？"); // No missions enabled for {Svc.ClientState.LocalPlayer?.ClassJob.Value.Name}. Did you forget to set me up?
-                SchedulerMain.DisablePlugin();
-                return;
+                // Esentially checking to make sure you don't have relic XP Grind here, due to wanting to automatically select the "best mission"
+                if (!(C.XPRelicGrind && !C.XPRelicOnlyEnabled)) // 非自动根据肝武经验挑选任务 && 非仅限已选任务
+                {
+                    DuoLog.Error($"该职业没有启用任何任务: {Svc.ClientState.LocalPlayer?.ClassJob.Value.Name}。您忘记设置了吗？");
+                    SchedulerMain.DisablePlugin();
+                    return;
+                }
             }
 
             // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -130,21 +137,30 @@ namespace ICE.Scheduler.Tasks
 
             P.TaskManager.Enqueue(UpdateValues, "Updating Task Mission Values");
             P.TaskManager.Enqueue(OpenMissionFinder, "Opening the Mission finder");
-            if (HasCritical)
-            {
-                P.TaskManager.Enqueue(CriticalButton, "Selecting Critical Mission");
-                P.TaskManager.Enqueue(FindCriticalMission, "Checking to see if critical mission available");
-            }
-            if (HasWeather || HasTimed || HasSequence) // Skip Checks if enabled mission doesn't have weather, timed or sequence?
-            {
-                P.TaskManager.Enqueue(WeatherButton, "Selecting Weather");
-                P.TaskManager.Enqueue(FindWeatherMission, "Checking to see if weather mission avaialable");
-            }
-            if (HasStandard)
+            if (C.XPRelicGrind)
             {
                 P.TaskManager.Enqueue(BasicMissionButton, "Selecting Basic Missions");
-                P.TaskManager.Enqueue(FindBasicMission, "Finding Basic Mission");
-                P.TaskManager.Enqueue(FindResetMission, "Checking for abandon mission");
+                P.TaskManager.Enqueue(FindBestRelicXP, "Selecting Best Relic XP Mission");
+                P.TaskManager.Enqueue(FindResetMission, "Checking Reset for Relic XP");
+            }
+            else
+            {
+                if (HasCritical)
+                {
+                    P.TaskManager.Enqueue(CriticalButton, "Selecting Critical Mission");
+                    P.TaskManager.Enqueue(FindCriticalMission, "Checking to see if critical mission available");
+                }
+                if (HasWeather || HasTimed || HasSequence) // Skip Checks if enabled mission doesn't have weather, timed or sequence?
+                {
+                    P.TaskManager.Enqueue(WeatherButton, "Selecting Weather");
+                    P.TaskManager.Enqueue(FindWeatherMission, "Checking to see if weather mission avaialable");
+                }
+                if (HasStandard)
+                {
+                    P.TaskManager.Enqueue(BasicMissionButton, "Selecting Basic Missions");
+                    P.TaskManager.Enqueue(FindBasicMission, "Finding Basic Mission");
+                    P.TaskManager.Enqueue(FindResetMission, "Checking for abandon mission");
+                }
             }
             P.TaskManager.Enqueue(GrabMission, "Grabbing the mission");
             DelayMission();
@@ -410,6 +426,72 @@ namespace ICE.Scheduler.Tasks
             return false;
         }
 
+        internal unsafe static bool? FindBestRelicXP()
+        {
+            if (EzThrottler.Throttle("Selecting Best Mission for XP"))
+            {
+                IceLogging.Debug($"Mission Name: {SchedulerMain.MissionName} | MissionId: {MissionId}");
+                if (MissionId != 0)
+                {
+                    IceLogging.Debug("You already have a mission found, skipping finding a basic mission");
+                    return true;
+                }
+
+                if (TryGetAddonMaster<WKSMission>("WKSMission", out var x) && x.IsAddonReady)
+                {
+                    var DRankMissions = C.Missions.Where(x => CosmicHelper.MissionInfoDict[x.Id].JobId == currentClassJob || CosmicHelper.MissionInfoDict[x.Id].JobId2 == currentClassJob).Where(x => x.Type == MissionType.Standard && CosmicHelper.MissionInfoDict[x.Id].Rank == 1);
+                    List<uint> MissionIds = new List<uint>();
+                    foreach (var entry in DRankMissions)
+                    {
+                        IceLogging.Debug($"Adding {entry.Id}");
+                        MissionIds.Add(entry.Id);
+                    }
+                    bool CorrectTab = false;
+                    foreach (var m in x.StellerMissions)
+                    {
+                        if (MissionIds.Contains(m.MissionId))
+                        {
+                            IceLogging.Debug($"Found: {m.MissionId}");
+                            CorrectTab = true;
+                            break;
+                        }
+                    }
+
+                    if (!CorrectTab)
+                    {
+                        if (EzThrottler.Throttle("Tabbing over to the basic missions"))
+                            x.BasicMissions();
+                    }
+                    else
+                    {
+                        var bestMissionXp = FindRelicMission();
+                        if (bestMissionXp != null)
+                        {
+                            foreach (var m in x.StellerMissions)
+                            {
+                                if (m.MissionId != bestMissionXp)
+                                    continue;
+                                else
+                                {
+                                    if (EzThrottler.Throttle($"Best mission is found [Mission XP]"))
+                                    {
+                                        IceLogging.Debug($"Best XP Mission to find: {bestMissionXp}");
+                                        IceLogging.Debug($"Currently selecting mission from ui: {m.MissionId} | Name: {m.Name}");
+                                        SelectMission(m);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (MissionId == 0)
+                            IceLogging.Debug("No mission was found to be optimal for xp. Continuing on");
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         internal unsafe static bool? FindResetMission()
         {
             if (EzThrottler.Throttle("FindResetMission"))
@@ -495,6 +577,170 @@ namespace ICE.Scheduler.Tasks
                 }
             }
             return false;
+        }
+
+        private class XPType
+        {
+            public int CurrentXP { get; set; }
+            public int NeededXP { get; set; }
+        }
+
+        private class Reward
+        {
+            public int Tier { get; set; }
+            public float Amount { get; set; }
+        }
+
+        private class MissionInfo
+        {
+            public uint Id { get; set; }
+            public string Name { get; set; }
+            public List<Reward> ExpReward { get; set; }
+        }
+
+        internal unsafe static int? FindRelicMission()
+        {
+            uint? currentJobId = PlayerHelper.GetClassJobId().Value;
+            var wksManager = WKSManager.Instance();
+            if (wksManager == null || wksManager->Research == null || !wksManager->Research->IsLoaded)
+                return null;
+
+            var job = currentJobId;
+            var toolClassId = (byte)(job - 7);
+            var stage = wksManager->Research->CurrentStages[toolClassId - 1];
+            var nextstate = wksManager->Research->UnlockedStages[toolClassId - 1];
+
+            if (Svc.Data.GetExcelSheet<WKSCosmoToolClass>().TryGetRow(toolClassId, out var row))
+            {
+
+            }
+
+            Dictionary<int, XPType> XPTable = new Dictionary<int, XPType>();
+
+            if (!MissionHud.UseXPDebugger)
+            {
+                for (byte type = 1; type <= 4; type++)
+                {
+                    if (!wksManager->Research->IsTypeAvailable(toolClassId, type))
+                        break;
+
+                    var neededXP = wksManager->Research->GetNeededAnalysis(toolClassId, type);
+
+                    var currentXp = wksManager->Research->GetCurrentAnalysis(toolClassId, type);
+                    var requiredXp = neededXP - currentXp;
+                    if (!XPTable.ContainsKey(type))
+                    {
+                        XPTable[type] = new XPType()
+                        {
+                            CurrentXP = currentXp,
+                            NeededXP = neededXP,
+                        };
+                    }
+                }
+            }
+            else
+            {
+                foreach (var entry in MissionHud.DummyXPTest)
+                {
+                    if (entry.Value.NeededXP != 0)
+                    {
+                        XPTable[entry.Key] = new XPType()
+                        {
+                            CurrentXP = entry.Value.CurrentXP,
+                            NeededXP = entry.Value.NeededXP,
+                        };
+                    }
+                }
+            }
+
+            var urgencies = new Dictionary<int, float>();
+            for (int i = 0; i < XPTable.Count; i++)
+            {
+                var bar = XPTable[i + 1];
+                urgencies[i + 1] = (bar.NeededXP > 0) ? 1f - ((float)bar.CurrentXP / bar.NeededXP) : 0f;
+                IceLogging.Debug($"XP Type: {i+1} | Urgency: {urgencies[i + 1]}");
+            }
+
+            Dictionary<uint, CosmicHelper.MissionListInfo> currentlyAvailable = new();
+
+            if (TryGetAddonMaster<WKSMission>("WKSMission", out var x) && x.IsAddonReady)
+            {
+                foreach (var mission in x.StellerMissions)
+                {
+                    if (CosmicHelper.MissionInfoDict.ContainsKey(mission.MissionId))
+                    {
+                        var entry = CosmicHelper.MissionInfoDict[mission.MissionId];
+                        currentlyAvailable.TryAdd(mission.MissionId, entry);
+                    }
+                }
+            }
+            IceLogging.Info($"Amount of available missions: {currentlyAvailable.Count}");
+
+            var rewardsDict = new Dictionary<uint, Dictionary<int, float>>();
+
+            foreach (var mission in currentlyAvailable)
+            {
+                var missionConfig = C.Missions.Where(x => x.Id == mission.Key).FirstOrDefault();
+                if (missionConfig != null)
+                {
+                    bool IgnoreManual = C.XPRelicIgnoreManual && missionConfig.ManualMode;
+                    bool IgnoreNotEnabled = C.XPRelicOnlyEnabled && !missionConfig.Enabled;
+                    IceLogging.Debug($" - - - - - - - ");
+                    IceLogging.Debug($"MissionID: {mission.Key} \n " +
+                                     $"Ignore Manual Mode: {C.XPRelicIgnoreManual} | Mission Manual Enabled: {missionConfig.ManualMode} | Skipping? {IgnoreManual} \n" +
+                                     $"Only Enabled Mode: {C.XPRelicOnlyEnabled} | Mission is Enabled: {missionConfig.Enabled} | Skipping? {IgnoreNotEnabled}");
+
+                    if (IgnoreManual)
+                        continue;
+                    if (IgnoreNotEnabled)
+                        continue;
+                    else
+                    {
+                        var rewardMap = new Dictionary<int, float>();
+                        foreach (var reward in mission.Value.ExperienceRewards)
+                        {
+                            IceLogging.Info($"Adding the following xp to {mission.Key} | Type: {reward.Type} | Amount: {reward.Amount}");
+                            rewardMap[reward.Type] = reward.Amount;
+                        }
+                        rewardsDict[mission.Key] = rewardMap;
+                    }
+                }
+            }
+
+            IceLogging.Debug($"Reward Dictionary Count: {rewardsDict.Count}");
+
+            int bestIndex = -1;
+            float bestScore = float.NegativeInfinity;
+
+            foreach (var kvp in rewardsDict)
+            {
+                int i = (int)kvp.Key;
+                var reward = kvp.Value;
+                float score = 0f;
+                IceLogging.Debug($"Currently checking mission: {i}");
+
+                foreach (var rewardEntry in reward)
+                {
+                    IceLogging.Debug($"Checking for value: {rewardEntry.Key}");
+                    if (urgencies.TryGetValue(rewardEntry.Key, out var urgency))
+                    {
+                        IceLogging.Debug($"Checking urgency for: {rewardEntry.Key}");
+                        score += urgency * rewardEntry.Value;
+                        IceLogging.Debug($"Adding score: {urgency * rewardEntry.Value}");
+                    }
+                }
+
+                if (score > bestScore)
+                {
+                    IceLogging.Debug($"New Best Score: {bestScore}");
+                    IceLogging.Debug($"Mission Number: {i}");
+                    bestScore = score;
+                    bestIndex = i;
+                }
+            }
+
+            IceLogging.Info($"Best relic xp has been completed. Best Relic Mission: {bestIndex}");
+            return (bestIndex > 0) ? bestIndex : null;
         }
 
         internal unsafe static bool? GrabMission()

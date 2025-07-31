@@ -104,12 +104,12 @@ internal class SettingsWindowV2 : Window
                 Overlay();
             else if (SelectedSetting == SettingOptions[4])
                 Misc();
-#if DEBUG     
+#if DEBUG
             else if (SelectedSetting == DebugOptions[0])
                 Debug();
-#endif
             else if (SelectedSetting == DebugOptions[1])
                 WaypointUi.WPUi();
+#endif
             else
             {
                 ImGui.Text($"右侧面板为空"); // Empty Right Panel

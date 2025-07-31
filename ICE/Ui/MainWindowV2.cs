@@ -270,7 +270,37 @@ namespace ICE.Ui
                 ImGui.Separator();
 
                 ImGui.Dummy(new(0, 10));
-                if (ImGui.Checkbox("自动挑选当前职业", ref autoPickCurrentJob)) // Auto Pick Current Job
+
+                bool EnableRelicXp = C.XPRelicGrind;
+                if (ImGui.Checkbox("自动根据研究数据挑选任务", ref EnableRelicXp)) // Auto-Pick For Relic XP
+                {
+                    C.XPRelicGrind = EnableRelicXp;
+                    C.Save();
+                }
+                if (EnableRelicXp)
+                {
+                    bool IgnoreManual = C.XPRelicIgnoreManual;
+                    if (ImGui.Checkbox("忽略手动模式任务", ref IgnoreManual)) // Ignore Manual Mode Missions
+                    {
+                        C.XPRelicIgnoreManual = IgnoreManual;
+                        C.Save();
+                    }
+
+                    bool OnlySelected = C.XPRelicOnlyEnabled;
+                    if (ImGui.Checkbox("仅限已启用的任务", ref OnlySelected)) // Only selected missions
+                    {
+                        C.XPRelicOnlyEnabled = OnlySelected;
+                        C.Save();
+                    }
+                }
+
+                ImGui.Spacing();
+
+                ImGui.Separator();
+
+                ImGui.Dummy(new(0, 10));
+
+                if (ImGui.Checkbox("自动挑选当前职业", ref autoPickCurrentJob))
                 {
                     C.AutoPickCurrentJob = autoPickCurrentJob;
                     C.Save();

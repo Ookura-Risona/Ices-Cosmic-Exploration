@@ -90,6 +90,9 @@ namespace ICE
         // Misc settings
         public bool EnableAutoSprint { get; set; } = true;
         public bool AutoAntiAFK { get; set; } = true; // 新增: 自动切换离开状态 默认启用
+        public bool XPRelicGrind { get; set; } = false;
+        public bool XPRelicIgnoreManual { get; set; } = false;
+        public bool XPRelicOnlyEnabled { get; set; } = false;
 
         public void Save()
         {
