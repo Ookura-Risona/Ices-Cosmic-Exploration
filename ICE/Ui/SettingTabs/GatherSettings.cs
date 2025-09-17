@@ -18,7 +18,7 @@ namespace ICE.Ui.SettingTabs
         private static bool useOnlyInMission = C.UseOnlyInMission;
         private static string newProfileName = "";
 
-        private static string[] MissionTypes = ["Limited Nodes", "Gather x Amount", "Time Attack", "Chained Scoring", "Boon Scoring", "Chain + Boon Scoring", "Dual Class"];
+        private static string[] MissionTypes = ["限量采集点", "采集 X 个物品", "时间竞速", "连锁冲分", "恩惠冲分", "连锁 + 恩惠冲分", "双职业"];
         private static int MissionIndex = 0;
 
         private static string exportString = "";
@@ -75,10 +75,10 @@ namespace ICE.Ui.SettingTabs
                 try
                 {
                     if (string.IsNullOrWhiteSpace(importString))
-                        return (false, null, "Import string is empty");
+                        return (false, null, "导入字符串为空");
 
                     if (!importString.StartsWith(PROFILE_PREFIX))
-                        return (false, null, "Invalid profile format - missing prefix");
+                        return (false, null, "无效的配置格式 - 缺少前缀");
 
                     string base64 = importString.Substring(PROFILE_PREFIX.Length);
 
@@ -88,24 +88,24 @@ namespace ICE.Ui.SettingTabs
                     var profile = JsonSerializer.Deserialize<ExportableProfile>(json);
 
                     if (profile.Version > CURRENT_VERSION)
-                        return (false, null, "Profile version is newer than supported");
+                        return (false, null, "配置版本高于当前支持的版本");
 
                     if (string.IsNullOrWhiteSpace(profile.Name))
-                        return (false, null, "Profile name cannot be empty");
+                        return (false, null, "配置名称不能为空");
 
                     return (true, profile, null);
                 }
                 catch (FormatException)
                 {
-                    return (false, null, "Invalid base64 format");
+                    return (false, null, "无效的 base64 格式");
                 }
                 catch (JsonException)
                 {
-                    return (false, null, "Invalid JSON format");
+                    return (false, null, "无效的 JSON 格式");
                 }
                 catch (Exception ex)
                 {
-                    return (false, null, $"Import failed: {ex.Message}");
+                    return (false, null, $"导入失败: {ex.Message}");
                 }
             }
 #nullable enable
@@ -143,11 +143,11 @@ namespace ICE.Ui.SettingTabs
                 {
                     ImGui.Indent(15);
 
-                    if (ImGui.TreeNode($"{label} Settings###Tree{uniqueId}{entryName}"))
+                    if (ImGui.TreeNode($"{label} 设置###Tree{uniqueId}{entryName}"))
                     {
                         int minGp = currentMinGp;
                         ImGui.AlignTextToFramePadding();
-                        ImGui.Text("Minimum GP");
+                        ImGui.Text("最低 GP");
                         ImGui.SameLine();
                         ImGui.SetNextItemWidth(200);
                         if (ImGui.SliderInt($"###Slider{uniqueId}{entryName}", ref minGp, minGpLimit, maxGpLimit))
@@ -157,7 +157,7 @@ namespace ICE.Ui.SettingTabs
                         }
                         int maxUse = currentMaxUse;
                         ImGui.AlignTextToFramePadding();
-                        ImGui.Text("Maximum use count");
+                        ImGui.Text("最大使用次数");
                         ImGui.SameLine();
                         ImGui.SetNextItemWidth(100);
                         if (ImGui.InputInt($"###Slider{uniqueId}{entryName}_1", ref maxUse, 1))
@@ -165,8 +165,8 @@ namespace ICE.Ui.SettingTabs
                             if (maxUse != currentMaxUse)
                                 onMaxUseChange(maxUse);
                         }
-                        ImGuiEx.HelpMarker("Set to -1 to allow for infinite uses \n" +
-                                           "Set to 1-> X to set maximum amount of uses per mission");
+                        ImGuiEx.HelpMarker("设置为 -1 时，允许无限使用 \n" +
+                                           "设置为 1 -> X 时，设定为每次任务的最大使用次数上限");
 
                         ImGui.TreePop();
                     }
@@ -188,11 +188,11 @@ namespace ICE.Ui.SettingTabs
                 {
                     ImGui.Indent(15);
 
-                    if (ImGui.TreeNode($"{label} Settings###Tree{uniqueId}{entryName}"))
+                    if (ImGui.TreeNode($"{label} 设置###Tree{uniqueId}{entryName}"))
                     {
                         int minGp = currentMinGp;
                         ImGui.AlignTextToFramePadding();
-                        ImGui.Text("Minimum GP");
+                        ImGui.Text("最低 GP");
                         ImGui.SameLine();
                         ImGui.SetNextItemWidth(200);
                         if (ImGui.SliderInt($"###Slider{uniqueId}{entryName}", ref minGp, minGpLimit, maxGpLimit))
@@ -202,7 +202,7 @@ namespace ICE.Ui.SettingTabs
                         }
                         int maxUse = currentMaxUse;
                         ImGui.AlignTextToFramePadding();
-                        ImGui.Text("Maximum use count");
+                        ImGui.Text("最大使用次数");
                         ImGui.SameLine();
                         ImGui.SetNextItemWidth(100);
                         if (ImGui.InputInt($"###Slider{uniqueId}{entryName}_1", ref maxUse, 1))
@@ -210,11 +210,11 @@ namespace ICE.Ui.SettingTabs
                             if (maxUse != currentMaxUse)
                                 onMaxUseChange(maxUse);
                         }
-                        ImGuiEx.HelpMarker("Set to -1 to allow for infinite uses \n" +
-                                           "Set to 1-> X to set maximum amount of uses per mission");
+                        ImGuiEx.HelpMarker("设置为 -1 时，允许无限使用 \n" +
+                                           "设置为 1 -> X 时，设定为每次任务的最大使用次数上限\"");
 
                         int MinItem = MinItemUsage;
-                        ImGui.Text($"Minimum BYII Item");
+                        ImGui.Text($"最低高产使用所需数量");
                         ImGui.SameLine();
                         ImGui.SetNextItemWidth(100);
                         if (ImGui.SliderInt($"###MinItemsBYII{uniqueId}{entryName}_1", ref MinItem, 2, 4))
@@ -222,9 +222,9 @@ namespace ICE.Ui.SettingTabs
                             if (MinItem != MinItemUsage)
                                 onMinItemMaxUseChange(MinItem);
                         }
-                        ImGuiEx.HelpMarker($"Set the minimum amount of items that you want BYII to activate on\n" +
-                                           $"Ex. Setting it to 2 will make it to where if you only activate if you need need 2 or more items\n" +
-                                           $"Useful if you're trying to save gp on gather x amount or dual class missions");
+                        ImGuiEx.HelpMarker($"设置使用高产所需的最低物品数\n" +
+                                           $"示例：设为 2 时，仅在需要收集 2 个或以上物品时才会使用\n" +
+                                           $"适用场景：节省GP（采集力），适用于\"收集 X 个物品\"或 双职业任务");
 
                         ImGui.TreePop();
                     }
@@ -234,7 +234,7 @@ namespace ICE.Ui.SettingTabs
 
             int maxGp = 1200;
 
-            if (ImGui.Checkbox("Self Repair on Gather", ref SelfRepairGather))
+            if (ImGui.Checkbox("采集时自动修理", ref SelfRepairGather))
             {
                 if (C.SelfRepairGather != SelfRepairGather)
                 {
@@ -245,7 +245,7 @@ namespace ICE.Ui.SettingTabs
             if (SelfRepairGather)
             {
                 ImGui.Indent(15);
-                ImGui.Text("Repair at");
+                ImGui.Text("修理阈值");
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(150);
                 if (ImGui.SliderFloat("###Repair %", ref SelfRepairPercent, 0f, 99f, "%.0f%%"))
@@ -258,7 +258,7 @@ namespace ICE.Ui.SettingTabs
                 }
                 ImGui.Unindent(15);
             }
-            if (ImGui.Checkbox("Extract Spiritbond on Gather", ref SelfSpiritbondGather))
+            if (ImGui.Checkbox("采集时精制魔晶石", ref SelfSpiritbondGather))
             {
                 if (C.SelfSpiritbondGather != SelfSpiritbondGather)
                 {
@@ -266,43 +266,46 @@ namespace ICE.Ui.SettingTabs
                     C.Save();
                 }
             }
-            if (ImGui.Checkbox("Auto Cordial", ref AutoCordial))
+            if (ImGui.Checkbox("自动强心剂", ref AutoCordial))
             {
                 C.AutoCordial = AutoCordial;
                 C.Save();
             }
-            ImGuiEx.HelpMarker("Will only work while using ICE and not manual mode\n" +
-                               "Will also pause pandora cordial usage while on the moon");
+            ImGuiEx.HelpMarker("仅在 ICE 运行时生效，手动模式无效\n" +
+                               "在宇宙探索地图中将暂停 Pandora 插件的自动强心剂功能");
             if (AutoCordial)
             {
-                if (ImGui.TreeNode("Cordial Settings"))
+                if (ImGui.TreeNode("强心剂设置"))
                 {
-                    if (ImGui.Checkbox("Inverse Priority (Watered -> Regular -> Hi)", ref InverseCordialPrio))
+                    if (ImGui.Checkbox("反转优先级 (轻型 -> 普通 -> 高级)", ref InverseCordialPrio))
                     {
                         C.inverseCordialPrio = InverseCordialPrio;
                         C.Save();
                     }
-                    if (ImGui.Checkbox("Prevent Overcap", ref PreventOvercap))
+                    if (ImGui.Checkbox("防止溢出", ref PreventOvercap))
                     {
                         C.PreventOvercap = PreventOvercap;
                         C.Save();
                     }
-                    if (ImGui.Checkbox("Use on Fisher", ref UseOnFisher))
+                    if (ImGui.Checkbox("应用于捕鱼人", ref UseOnFisher))
                     {
                         C.UseOnFisher = UseOnFisher;
                         C.Save();
                     }
-                    if (ImGui.Checkbox("Only use in mission", ref useOnlyInMission))
+                    if (ImGui.Checkbox("仅任务中使用", ref useOnlyInMission))
                     {
                         C.UseOnlyInMission = useOnlyInMission;
                         C.Save();
                     }
                     ImGui.SetNextItemWidth(200);
-                    if (ImGui.SliderInt("Gp Threshold", ref CordialMinGp, 0, maxGp))
+                    if (ImGui.SliderInt("GP 阈值", ref CordialMinGp, 0, maxGp))
                     {
                         C.CordialMinGp = CordialMinGp;
                         C.Save();
                     }
+                    // 补充提醒
+                    ImGuiEx.HelpMarker("计算方法: 角色GP上限 - 强心剂补充量\n" +
+                   "例如: 角色GP上限为 900 时，使用高级强心剂(+400)，那么 GP 阈值应该设置为 500 以下");
 
                     ImGui.TreePop();
                 }
@@ -311,10 +314,10 @@ namespace ICE.Ui.SettingTabs
             ImGui.Dummy(new(0, 5));
 
             ImGui.SetNextItemWidth(200);
-            ImGui.InputText("New Profile Name", ref newProfileName, 64);
+            ImGui.InputText("新配置名称", ref newProfileName, 64);
             using (ImRaii.Disabled(newProfileName == ""))
             {
-                if (ImGui.Button("Add Profile") && !string.IsNullOrWhiteSpace(newProfileName))
+                if (ImGui.Button("添加配置") && !string.IsNullOrWhiteSpace(newProfileName))
                 {
                     if (!C.GatherSettings.Any(x => x.Name == newProfileName))
                     {
@@ -333,12 +336,12 @@ namespace ICE.Ui.SettingTabs
             // ------------------
             ImGui.SetColumnWidth(0, 350);
 
-            ImGui.Text("Gather Profiles");
+            ImGui.Text("采集配置");
 
             bool canDelete = C.GatherSettings.Count > 1 && C.SelectedGatherIndex != 0;
             using (ImRaii.Disabled(!canDelete))
             {
-                if (ImGui.Button("Delete Selected Profile"))
+                if (ImGui.Button("删除选中的配置"))
                 {
                     var deletedProfile = C.GatherSettings[C.SelectedGatherIndex];
                     int deletedId = deletedProfile.Id;
@@ -379,8 +382,8 @@ namespace ICE.Ui.SettingTabs
 
             GatherProfile entry = C.GatherSettings[C.SelectedGatherIndex];
 
-            ImGui.Combo("Mission Type", ref MissionIndex, MissionTypes, MissionTypes.Length);
-            if (ImGui.Button("Apply to Mission Types"))
+            ImGui.Combo("任务类型", ref MissionIndex, MissionTypes, MissionTypes.Length);
+            if (ImGui.Button("应用到任务类型"))
             {
                 foreach (var mission in C.MissionConfig)
                 {
@@ -463,7 +466,7 @@ namespace ICE.Ui.SettingTabs
             // GP Settings
             int minGP = entry.MinimumGp;
             ImGui.SetNextItemWidth(100);
-            if (ImGui.SliderInt("Minimum GP to start mission", ref minGP, -1, maxGp))
+            if (ImGui.SliderInt("开始任务所需最低 GP", ref minGP, -1, maxGp))
             {
                 entry.MinimumGp = minGP;
                 C.Save();
@@ -472,23 +475,23 @@ namespace ICE.Ui.SettingTabs
             // Multiply gathered items on FIRST gather loop only. Should only be used for Dual Class really.
             int gatherMult = entry.DualClassCraftAmount;
             ImGui.SetNextItemWidth(100);
-            if (ImGui.InputInt("Dual Class Craft Amount", ref gatherMult, 1))
+            if (ImGui.InputInt("双职业任务制作数量", ref gatherMult, 1))
             {
                 entry.DualClassCraftAmount = gatherMult >= 1 ? gatherMult : 1;
                 C.Save();
             }
-            ImGuiEx.HelpMarker("This increases how many items you gather before you are 'done' before switching to crafting.\nSet this to however many items you need to craft to reach your target score.\nOnly affects Dual Class missions.");
+            ImGuiEx.HelpMarker("此选项将增加您在切换到制作流程前需要收集的物品数量(即达到\"完成\"状态)。\n根据您需要制作多少物品才能达到目标技巧点来调整此数值。\n只影响双职业任务。");
 
             // Boon Increase 2 (+30% Increase)
             DrawBuffSetting(
-                label: "Pioneer's / Mountaineer's Gift II",
+                label: "沃土 / 富矿的馈赠 II",
                 uniqueId: $"Boon2Inc{entry.Id}",
                 currentEnabled: entry.GatherBuffs.Buffs["BoonIncrease2"].Enabled,
                 currentMinGp: entry.GatherBuffs.Buffs["BoonIncrease2"].MinGp,
                 minGpLimit: 100,
                 maxGpLimit: maxGp,
                 entryName: entry.Name,
-                ActionInfo: "Apply a 30% buff to your boon chance.",
+                ActionInfo: "额外采集奖励发生率提升30%",
                 onEnabledChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["BoonIncrease2"].Enabled = newVal;
@@ -509,14 +512,14 @@ namespace ICE.Ui.SettingTabs
 
             // Boon Increase 1 (+10% Increase)
             DrawBuffSetting(
-                label: "Pioneer's / Mountaineer's Gift I",
+                label: "沃土 / 富矿的馈赠 I",
                 uniqueId: $"Boon1Inc{entry.Id}",
                 currentEnabled: entry.GatherBuffs.Buffs["BoonIncrease1"].Enabled,
                 currentMinGp: entry.GatherBuffs.Buffs["BoonIncrease1"].MinGp,
                 minGpLimit: 50,
                 maxGpLimit: maxGp,
                 entryName: entry.Name,
-                ActionInfo: "Apply a 10% buff to your boon chance.",
+                ActionInfo: "额外采集奖励发生率提升10%",
                 onEnabledChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["BoonIncrease1"].Enabled = newVal;
@@ -537,14 +540,14 @@ namespace ICE.Ui.SettingTabs
 
             // Tidings (+2 to boon instead of +1)
             DrawBuffSetting(
-                label: "Nophica's / Nald'thal's Tidings Buff",
+                label: "诺菲卡 / 纳尔札尔 福音",
                 uniqueId: $"TidingsBuff{entry.Id}",
                 currentEnabled: entry.GatherBuffs.Buffs["Tidings"].Enabled,
                 currentMinGp: entry.GatherBuffs.Buffs["Tidings"].MinGp,
                 minGpLimit: 200,
                 maxGpLimit: maxGp,
                 entryName: entry.Name,
-                ActionInfo: "Increases item yield from Gatherer's Boon by 1",
+                ActionInfo: "额外采集奖励发生时的获得数增加1个",
                 onEnabledChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["Tidings"].Enabled = newVal;
@@ -565,15 +568,15 @@ namespace ICE.Ui.SettingTabs
 
             // Yield II (+2 to all items on node)
             DrawBuffSetting(
-                label: "Blessed / Kings Yield II",
+                label: "天赐收成 / 莫非王土 II",
                 uniqueId: $"Blessed/KingsYieldIIBuff{entry.Id}",
                 currentEnabled: entry.GatherBuffs.Buffs["YieldII"].Enabled,
                 currentMinGp: entry.GatherBuffs.Buffs["YieldII"].MinGp,
                 minGpLimit: 500,
                 maxGpLimit: maxGp,
                 entryName: entry.Name,
-                ActionInfo: "Increases the number of items obtained when gathering by 2\n" +
-                            "Will only apply when the gathering node has full durability",
+                ActionInfo: "令获得数增加2个\n" +
+                            "只在采集点满耐久时使用",
                 onEnabledChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["YieldII"].Enabled = newVal;
@@ -594,15 +597,15 @@ namespace ICE.Ui.SettingTabs
 
             // Yield I (+1 to all items on node)
             DrawBuffSetting(
-                label: "Blessed / Kings Yield I",
+                label: "天赐收成 / 莫非王土 I",
                 uniqueId: $"Blessed/KingsYieldIBuff{entry.Id}",
                 currentEnabled: entry.GatherBuffs.Buffs["YieldI"].Enabled,
                 currentMinGp: entry.GatherBuffs.Buffs["YieldI"].MinGp,
                 minGpLimit: 400,
                 maxGpLimit: maxGp,
                 entryName: entry.Name,
-                ActionInfo: "Increases the number of items obtained when gathering by 1\n" +
-                            "Will only apply when the gathering node has full durability",
+                ActionInfo: "令获得数增加1个\n" +
+                            "只在采集点满耐久时使用",
                 onEnabledChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["YieldI"].Enabled = newVal;
@@ -623,15 +626,15 @@ namespace ICE.Ui.SettingTabs
 
             // Bonus Integrity (+1 integrity)
             DrawBuffSetting(
-                label: "Ageless Words / Solid Reason",
+                label: "农夫之智 / 石工之理",
                 uniqueId: $"Incrase Intregity{entry.Id}",
                 currentEnabled: entry.GatherBuffs.Buffs["BonusIntegrity"].Enabled,
                 currentMinGp: entry.GatherBuffs.Buffs["BonusIntegrity"].MinGp,
                 minGpLimit: 300,
                 maxGpLimit: maxGp,
                 entryName: entry.Name,
-                ActionInfo: "Increase the Integrity by 1\n" +
-                            "50% chance to grant Eureka Moment",
+                ActionInfo: "恢复1次采集次数\n" +
+                            "50%几率附加理智同兴预备状态",
                 onEnabledChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["BonusIntegrity"].Enabled = newVal;
@@ -652,15 +655,15 @@ namespace ICE.Ui.SettingTabs
 
             // Bountiful Yield/Harvest II (+Amount based on gathering)
             DrawCustomBuffSetting(
-                label: "Bountiful Yield II / Bountiful Harvest II",
+                label: "高产 II / 丰收 II",
                 uniqueId: $"Bountiful Yield II {entry.Id}",
                 currentEnabled: entry.GatherBuffs.Buffs["BountifulYieldII"].Enabled,
                 currentMinGp: entry.GatherBuffs.Buffs["BountifulYieldII"].MinGp,
                 minGpLimit: 100,
                 maxGpLimit: maxGp,
                 entryName: entry.Name,
-                ActionInfo: "Increase item's gained on next gathering attempt by 1, 2, or 3 \n" +
-                            "This is based on your gathering rating",
+                ActionInfo: "令下一次采集的获得数增加\n" +
+                            "获得力影响获得数的增加量（最小1～最大3）",
                 onEnabledChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["BountifulYieldII"].Enabled = newVal;
@@ -694,21 +697,21 @@ namespace ICE.Ui.SettingTabs
         public static void DrawExportImportSection()
         {
             ImGui.Separator();
-            ImGui.Text("Export/Import Profiles");
+            ImGui.Text("导出/导入配置");
             ImGui.Spacing();
 
             var currentProfile = C.GatherSettings[C.SelectedGatherIndex];
 
             // Export Section
-            if (ImGui.Button("Export Current Profile"))
+            if (ImGui.Button("导出当前配置"))
             {
                 exportString = GatherProfileExporter.ExportProfile(currentProfile);
-                exportError = string.IsNullOrEmpty(exportString) ? "Export failed!" : "";
+                exportError = string.IsNullOrEmpty(exportString) ? "导出失败!" : "";
             }
 
             if (!string.IsNullOrEmpty(exportString))
             {
-                ImGui.Text("Exported Profile (click to copy):");
+                ImGui.Text("已导出配置 (点击复制):");
                 ImGui.PushStyleColor(ImGuiCol.FrameBg, new Vector4(0.2f, 0.2f, 0.2f, 1.0f));
 
                 if (ImGui.InputTextMultiline("##ExportOutput", ref exportString, 4096,
@@ -719,7 +722,7 @@ namespace ICE.Ui.SettingTabs
 
                 ImGui.PopStyleColor();
 
-                if (ImGui.Button("Copy to Clipboard"))
+                if (ImGui.Button("复制到剪贴板"))
                 {
                     ImGui.SetClipboardText(exportString);
                 }
@@ -733,11 +736,11 @@ namespace ICE.Ui.SettingTabs
             ImGui.Spacing();
 
             // Import Section
-            ImGui.Text("Import Profile:");
+            ImGui.Text("导入配置:");
             ImGui.InputTextMultiline("##ImportInput", ref importString, 4096,
                 new Vector2(-1, ImGui.GetTextLineHeight() * 3));
 
-            if (ImGui.Button("Import Profile"))
+            if (ImGui.Button("导入配置"))
             {
                 var (success, profile, error) = GatherProfileExporter.ImportProfile(importString);
 
@@ -760,7 +763,7 @@ namespace ICE.Ui.SettingTabs
                     C.Save();
 
                     importString = "";
-                    importError = $"Successfully imported: {finalName}";
+                    importError = $"导入配置成功: {finalName}";
                 }
                 else
                 {

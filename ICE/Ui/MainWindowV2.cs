@@ -40,7 +40,7 @@ namespace ICE.Ui
                 MaximumSize = new Vector2(2000, 3000)
             };
 
-            TitleBarButtons.Add(new() { ShowTooltip = () => ImGui.SetTooltip("♥ Ko-fi (Buy me an ice coffee)"), Icon = FontAwesomeIcon.Heart, IconOffset = new(1, 1), Click = _ => GenericHelpers.ShellStart("https://ko-fi.com/ice643269") });
+            TitleBarButtons.Add(new() { ShowTooltip = () => ImGui.SetTooltip("♥ Ko-fi (请我喝杯冰咖啡)"), Icon = FontAwesomeIcon.Heart, IconOffset = new(1, 1), Click = _ => GenericHelpers.ShellStart("https://ko-fi.com/ice643269") });
 
             P.windowSystem.AddWindow(this);
 
@@ -102,7 +102,7 @@ namespace ICE.Ui
             ["DRank"] = new List<(uint id, bool gather, bool enabled)> ()
         };
 
-        private string[] missionSortOptions = ["Id", "Name", "Cosmo Credits", "Lunar Credits", "Exp I", "Exp II", "Exp III", "Exp IV", "Exp V", "Map Location"];
+        private string[] missionSortOptions = ["ID", "名称", "宇宙信用点", "月球信用点", "研究数据 I", "研究数据 II", "研究数据 III", "研究数据 IV", "研究数据 V", "地图位置"];
         private int missionSelectedOption = C.TableSortOption;
         private List<(uint id, bool gather, bool enabled)> SortMissionList(List<(uint id, bool gather, bool enabled)> missions)
         {
@@ -315,7 +315,7 @@ namespace ICE.Ui
                     ImGui.Unindent(15);
                 }
                 bool relicStop = C.StopOnceRelicFinished;
-                if (ImGui.Checkbox($"宇宙工具完成后停止", ref relicStop))
+                if (ImGui.Checkbox($"宇宙工具可报告时停止", ref relicStop))
                 {
                     C.StopOnceRelicFinished = relicStop;
                     C.Save();
@@ -855,10 +855,10 @@ namespace ICE.Ui
                 }
                 else
                 {
-                    ImGui.TextWrapped("What might be a pirates favorite letter?");
-                    ImGui.TextWrapped("You might think it's R, but their first love is the C <3");
+                    ImGui.TextWrapped("海盗最喜欢的字母是什么？");
+                    ImGui.TextWrapped("你可能觉得是 R，但他们最爱的其实是 C（sea）<3");
                     ImGui.Dummy(new Vector2(0, 10));
-                    ImGui.Text("Thank you for reading my dad joke");
+                    ImGui.Text("感谢你欣赏我的老爸笑话");
                 }
             }
             ImGui.EndChild();
@@ -1184,7 +1184,7 @@ namespace ICE.Ui
                         {
                             ImGui.BeginTooltip();
                             if (missionConfig.AutoTurnin)
-                                ImGui.Text($"自动汇报 - True");
+                                ImGui.Text($"自动 - True");
                             else
                             {
                                 if (missionConfig.TurninGold)
@@ -1228,7 +1228,7 @@ namespace ICE.Ui
 
                                 C.Save();
                             }
-                            ImGuiEx.HelpMarker("此选项将尽力获得最佳结果，但在必要时也会汇报任意结果而不中止。");
+                            ImGuiEx.HelpMarker("此选项将尽力获得最佳结果，但在必要时也会汇报任意结果而避免中止。");
 
                             ImGui.Separator();
 
@@ -1506,7 +1506,7 @@ namespace ICE.Ui
             }
 
             ImGui.Text($"选项: {QuickSelectedOption}");
-            ImGui.Text($"选择的职业: {C.SelectedJob}");
+            ImGui.Text($"选定的职业ID: {C.SelectedJob}");
             if (ImGui.Button("应用到所选配置"))
             {
                 var currentJob = Player.JobId;

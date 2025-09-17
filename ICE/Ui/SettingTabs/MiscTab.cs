@@ -24,27 +24,28 @@ namespace ICE.Ui.SettingTabs
         private static int mountItemsPerPage = 10;
 
         private static bool AutoMoonSprint = C.MoonSprint;
+        private static bool EnableAutoAntiAFK = C.AutoAntiAFK;
 
         // Mission Priority Settings
 
         public static void Draw()
         {
-            ImGui.Text("Overlay Settings");
+            ImGui.Text("悬浮窗设置");
 
-            if (ImGui.Checkbox("Show Overlay", ref showOverlay))
+            if (ImGui.Checkbox("显示 悬浮窗", ref showOverlay))
             {
                 C.ShowOverlay = showOverlay;
                 C.Save();
             }
 
-            if (ImGui.Checkbox("Show Seconds", ref ShowSeconds))
+            if (ImGui.Checkbox("显示 秒数", ref ShowSeconds))
             {
                 C.ShowSeconds = ShowSeconds;
                 C.Save();
             }
 
             bool showExpOverlay = C.ShowExpBars;
-            if (ImGui.Checkbox("Show Experience Bars on Overlay", ref showExpOverlay))
+            if (ImGui.Checkbox("显示 宇宙工具研究经验", ref showExpOverlay))
             {
                 C.ShowExpBars = showExpOverlay;
                 C.Save();
@@ -56,9 +57,15 @@ namespace ICE.Ui.SettingTabs
 
             ImGui.Dummy(new (0, 2));
 
-            if (ImGui.Checkbox("Auto-Use Moon Sprint", ref AutoMoonSprint))
+            if (ImGui.Checkbox("自动使用宇宙冲刺", ref AutoMoonSprint))
             {
                 C.MoonSprint = AutoMoonSprint;
+                C.Save();
+            }
+
+            if (ImGui.Checkbox("启用 自动离开设置为不切换", ref EnableAutoAntiAFK))
+            {
+                C.AutoAntiAFK = EnableAutoAntiAFK;
                 C.Save();
             }
 
@@ -67,7 +74,7 @@ namespace ICE.Ui.SettingTabs
             ImGui.Separator();
 
             bool repairAtVendor = C.RepairAtVendor;
-            if (ImGui.Checkbox("Repair at Vendor", ref repairAtVendor))
+            if (ImGui.Checkbox("NPC 修理工修理", ref repairAtVendor))
             {
                 C.RepairAtVendor = repairAtVendor;
                 C.Save();
@@ -76,14 +83,14 @@ namespace ICE.Ui.SettingTabs
             using (ImRaii.Disabled(repairAtVendor))
             {
                 bool selfRepairGather = C.SelfRepairGather;
-                if (ImGui.Checkbox("Self Repair Gather", ref selfRepairGather))
+                if (ImGui.Checkbox("采集时自己修理", ref selfRepairGather))
                 {
                     C.SelfRepairGather = selfRepairGather;
                     C.Save();
                 }
 
                 bool selfRepairCrafter = C.SelfRepairCrafter;
-                if (ImGui.Checkbox("Self Repair Crafter", ref selfRepairCrafter))
+                if (ImGui.Checkbox("制作时自己修理", ref selfRepairCrafter))
                 {
                     C.SelfRepairCrafter= selfRepairCrafter;
                     C.Save();
@@ -107,9 +114,9 @@ namespace ICE.Ui.SettingTabs
 
             ImGui.Separator();
 
-            ImGui.Text("Mission Priority Organizer");
+            ImGui.Text("任务优先级管理");
 
-            ImGui.Text("Drag items to reorder mission priority (higher = processed first):");
+            ImGui.Text("拖动项目以重新排序任务优先级(优先级越高 = 越优先处理)");
             ImGui.Separator();
 
             // Create a copy for manipulation
@@ -143,7 +150,7 @@ namespace ICE.Ui.SettingTabs
                         byte* data = (byte*)&draggedIndex;
                         ImGui.SetDragDropPayload("MISSION_TYPE", new ReadOnlySpan<byte>(data, sizeof(int)));
                     }
-                    ImGui.Text($"Moving: {GetMissionTypeName(missionType)}");
+                    ImGui.Text($"正在移动: {GetMissionTypeName(missionType)}");
                     ImGui.EndDragDropSource();
                 }
 
@@ -171,7 +178,7 @@ namespace ICE.Ui.SettingTabs
 
                 // Show priority number
                 ImGui.SameLine();
-                ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1.0f), $"(Priority: {i + 1})");
+                ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1.0f), $"(优先级: {i + 1})");
 
                 ImGui.PopID();
             }
@@ -186,7 +193,7 @@ namespace ICE.Ui.SettingTabs
             ImGui.Separator();
 
             // Reset to default button
-            if (ImGui.Button("Reset to Default"))
+            if (ImGui.Button("重置为默认"))
             {
                 C.MissionPrio = new List<ProvisionalTypes>
                 {
@@ -199,7 +206,7 @@ namespace ICE.Ui.SettingTabs
             ImGui.SameLine();
 
             // Show current order as text (for debugging/confirmation)
-            if (ImGui.Button("Show Current Order"))
+            if (ImGui.Button("显示当前顺序"))
             {
                 string orderText = string.Join(" → ", C.MissionPrio.Select(GetMissionTypeName));
                 ImGui.SetClipboardText(orderText);
@@ -207,7 +214,7 @@ namespace ICE.Ui.SettingTabs
 
             if (ImGui.IsItemHovered())
             {
-                ImGui.SetTooltip("Copies current priority order to clipboard");
+                ImGui.SetTooltip("复制当前优先级顺序到剪贴板");
             }
         }
 
@@ -216,9 +223,9 @@ namespace ICE.Ui.SettingTabs
         {
             return type switch
             {
-                ProvisionalTypes.ProvisionalWeather => "Weather Missions",
-                ProvisionalTypes.ProvisionalSequential => "Sequence Missions",
-                ProvisionalTypes.ProvisionalTimed => "Timed Missions",
+                ProvisionalTypes.ProvisionalWeather => "天气限定任务",
+                ProvisionalTypes.ProvisionalSequential => "连续任务",
+                ProvisionalTypes.ProvisionalTimed => "时间限定任务",
                 _ => type.ToString()
             };
         }
@@ -243,10 +250,10 @@ namespace ICE.Ui.SettingTabs
             bool mountInMission = C.UseMountInMission;
             float minMountRange = C.MountRadius;
 
-            if (ImGui.Button("Select Mounting Option"))
+            if (ImGui.Button("选择坐骑"))
             {
                 availableMounts.Clear();
-                availableMounts[0] = "Mount Roulette";
+                availableMounts[0] = "随机坐骑";
 
                 var mountSheet = Svc.Data.GetExcelSheet<Mount>();
 
@@ -268,12 +275,12 @@ namespace ICE.Ui.SettingTabs
             }
             ImGui.SameLine();
             ImGui.AlignTextToFramePadding();
-            ImGui.Text($"Mount: {C.MountName}");
+            ImGui.Text($"坐骑: {C.MountName}");
 
             if (ImGui.BeginPopup("Mount Options"))
             {
                 // Search box
-                ImGui.InputText("Search", ref mountSearchText, 100);
+                ImGui.InputText("搜索", ref mountSearchText, 100);
 
                 // Filter mounts based on search
                 var filteredMounts = availableMounts
@@ -305,7 +312,7 @@ namespace ICE.Ui.SettingTabs
                 // Navigation buttons
                 ImGui.Separator();
 
-                if (ImGui.Button("Previous") && mountDisplayOffset > 0)
+                if (ImGui.Button("上页") && mountDisplayOffset > 0)
                 {
                     mountDisplayOffset = Math.Max(0, mountDisplayOffset - mountItemsPerPage);
                 }
@@ -314,7 +321,7 @@ namespace ICE.Ui.SettingTabs
                 ImGui.Text($"{mountDisplayOffset + 1}-{Math.Min(mountDisplayOffset + mountItemsPerPage, totalItems)} of {totalItems}");
 
                 ImGui.SameLine();
-                if (ImGui.Button("Next") && mountDisplayOffset < maxOffset)
+                if (ImGui.Button("下页") && mountDisplayOffset < maxOffset)
                 {
                     mountDisplayOffset = Math.Min(maxOffset, mountDisplayOffset + mountItemsPerPage);
                 }
@@ -322,26 +329,26 @@ namespace ICE.Ui.SettingTabs
                 ImGui.EndPopup();
             }
 
-            if (ImGui.Checkbox("Use mount outside mission", ref mountOutsideMission))
+            if (ImGui.Checkbox("任务外使用坐骑", ref mountOutsideMission))
             {
                 C.UseMountOutsideMission = mountOutsideMission;
                 C.Save();
             }
 
-            if (ImGui.Checkbox("Use mount in mission", ref mountInMission))
+            if (ImGui.Checkbox("任务内使用坐骑", ref mountInMission))
             {
                 C.UseMountInMission = mountInMission;
                 C.Save();
             }
 
             ImGui.SetNextItemWidth(100);
-            if (ImGui.DragFloat("Minimum Mounting Range", ref minMountRange, 1))
+            if (ImGui.DragFloat("使用坐骑的最小范围", ref minMountRange, 1))
             {
                 C.MountRadius = minMountRange;
                 C.Save();
             }
             ImGui.SameLine();
-            ImGui.Checkbox("Visualize radius", ref visualizeRadius);
+            ImGui.Checkbox("半径可视化", ref visualizeRadius);
             if (visualizeRadius)
             {
                 using (var drawList = PictoService.Draw())

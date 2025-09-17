@@ -15,6 +15,7 @@ namespace ICE.Scheduler.Tasks
     {
         public static void Enqueue()
         {
+            PlayerHandlers.AutoAntiAFK();
             P.TaskManager.Enqueue(() => CheckState(), "Checking to see what state we should be in");
         }
 
@@ -30,8 +31,8 @@ namespace ICE.Scheduler.Tasks
                 {
                     {
                         SchedulerMain.State = IceState.Idle;
-                        Svc.Chat.Print("Stop At Player Level is enabled. \n" +
-                                       $"Your current level is: {Player.Level} and Goal: {C.TargetLevel}", "[I.C.E.]");
+                        Svc.Chat.Print("已启用: 等级达到阈值后停止 \n" +
+                                       $"您当前的等级为: {Player.Level} , 目标: {C.TargetLevel}", "[I.C.E.]");
                         return true;
                     }
                 }
@@ -42,8 +43,8 @@ namespace ICE.Scheduler.Tasks
 
                 if (scores.classScore >= C.CosmicScoreCap)
                 {
-                    Svc.Chat.Print("Stop At Cosmic Score is enabled. \n" +
-                                  $"Your current level is: {scores.classScore} and Goal: {C.CosmicScoreCap}", "[I.C.E.]");
+                    Svc.Chat.Print("已启用: 技巧点达到阈值后停止 \n" +
+                                  $"您当前的技巧点为: {scores.classScore} , 目标: {C.CosmicScoreCap}", "[I.C.E.]");
                     SchedulerMain.State = IceState.Idle;
                     return true;
                 }
@@ -70,7 +71,7 @@ namespace ICE.Scheduler.Tasks
                 {
                     if (hud.CosmoCredit >= C.CosmoCreditsCap)
                     {
-                        DuoLog.Information($"Stopping the plugin as you have {hud.CosmoCredit} Cosmocredits.");
+                        DuoLog.Information($"宇宙信用点已达到阈值: {hud.CosmoCredit}, 插件停止运行");
                         SchedulerMain.State = IceState.Idle;
                         return true;
                     }

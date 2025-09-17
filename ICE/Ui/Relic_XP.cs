@@ -53,7 +53,7 @@ namespace ICE.Ui
                 }
             }
 
-            ImGui.Text($"Stage: {stage}");
+            ImGui.Text($"阶段: {stage}");
 
             if (stage != 14)
             {
@@ -80,7 +80,7 @@ namespace ICE.Ui
                     else
                         xpType = "???";
 
-                    DrawXPBar($"Type: {xpType}", current, needed, size, max);
+                    DrawXPBar($"类型: {xpType}", current, needed, size, max);
                 }
             }
             else
