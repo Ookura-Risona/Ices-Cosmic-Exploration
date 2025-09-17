@@ -2237,7 +2237,7 @@ public static unsafe class GatheringUtil
                 new GathNodeInfo()
                 {
                     Position = new Vector3(-74.00f, 2.70f, 167.99f),
-                    LandZone = new Vector3(-72.76f, 1.70f, 165.23f),
+                    LandZone = new Vector3(-73.99649f, 2.703955f, 167.9916f), // too far
                     NodeId = 35409,
                 },
                 new GathNodeInfo()
