@@ -90,7 +90,7 @@ namespace ICE.Ui
 
                 var (classScore, cappedClassScore, totalScores, classId) = CosmicHelper.GetCosmicClassScores();
 
-                DrawXPBar("Score", (uint)classScore, 0, size, 500_000);
+                DrawXPBar("技巧点", (uint)classScore, 0, size, 500_000);
             }
         }
 
