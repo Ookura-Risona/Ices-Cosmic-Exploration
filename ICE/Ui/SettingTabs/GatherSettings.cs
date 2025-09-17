@@ -211,7 +211,7 @@ namespace ICE.Ui.SettingTabs
                                 onMaxUseChange(maxUse);
                         }
                         ImGuiEx.HelpMarker("设置为 -1 时，允许无限使用 \n" +
-                                           "设置为 1 -> X 时，设定为每次任务的最大使用次数上限\"");
+                                           "设置为 1 -> X 时，设定为每次任务的最大使用次数上限");
 
                         int MinItem = MinItemUsage;
                         ImGui.Text($"最低高产使用所需数量");
