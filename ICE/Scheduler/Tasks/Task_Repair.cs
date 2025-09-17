@@ -104,8 +104,21 @@ namespace ICE.Scheduler.Tasks
         }
         public static unsafe bool? RepairAtNpc()
         {
+            //IGameObject? gameObject = null;
+            //Utils.TryGetObjectByDataId(1052610, out gameObject);
+
+            // 追加法恩娜行星修理NPC的dataid
+            ulong[] repairNpcIds = { 1052610, 1052641 };
             IGameObject? gameObject = null;
-            Utils.TryGetObjectByDataId(1052610, out gameObject);
+
+            foreach (var id in repairNpcIds)
+            {
+                if (Utils.TryGetObjectByDataId(id, out var obj) && obj != null)
+                {
+                    gameObject = obj;
+                    break;
+                }
+            }
             var currentTarget = Svc.Targets.Target;
 
             if (!PlayerHelper.NeedsRepair(99.9f))
@@ -137,7 +150,7 @@ namespace ICE.Scheduler.Tasks
                     ECommons.Automation.Callback.Fire(iconString, true, 6);
                 }
             }
-            else if (currentTarget != null && currentTarget.DataId == 1052610)
+            else if (currentTarget != null && (currentTarget.DataId == 1052610 || currentTarget.DataId == 1052641)) // 补充dataid
             {
                 if (EzThrottler.Throttle("Attempting to interact with repair NPC"))
                 {
