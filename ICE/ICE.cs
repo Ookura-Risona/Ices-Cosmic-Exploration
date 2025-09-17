@@ -16,8 +16,10 @@ public sealed partial class ICE : IDalamudPlugin
     internal static ICE P = null!;
     private readonly Configuration Config;
     private static WaypointInfo? waypointInfo;
+    private static MissionConfigs missionConfigs;
 
-    public static Configuration C => P.Config;
+    public static Configuration OldConfig => P.Config;
+    public static MissionConfigs C => missionConfigs ??= LoadConfig<MissionConfigs>();
     public static WaypointInfo D => waypointInfo ??= LoadConfig<WaypointInfo>();
 
     // Yaml Config Loaders. For both loading a yaml in the config folder, and for embedded
@@ -53,9 +55,7 @@ public sealed partial class ICE : IDalamudPlugin
 
     // Window's that I use, base window to the settings... need these to actually show shit 
     internal WindowSystem windowSystem;
-    internal MainWindow mainWindow;
     internal MainWindowV2 mainWindow2;
-    internal SettingsWindow settingWindow;
     internal SettingsWindowV2 settingsWindowV2;
     internal OverlayWindow overlayWindow;
     internal DebugWindow debugWindow;
@@ -69,6 +69,8 @@ public sealed partial class ICE : IDalamudPlugin
     internal PandoraIPC Pandora;
     internal ArtisanIPC Artisan;
     internal VislandIPC Visland;
+    internal AutoHookIPC AutoHook;
+    internal IceCosmicExplorationIPC IceIpc;
 
     public ICE(IDalamudPluginInterface pi)
     {
@@ -86,25 +88,24 @@ public sealed partial class ICE : IDalamudPlugin
         Pandora = new();
         Artisan = new();
         Visland = new();
+        AutoHook = new();
+        IceIpc = new();
 
         // all the windows
         windowSystem = new();
-        mainWindow = new();
         mainWindow2 = new();
-        settingWindow = new();
         settingsWindowV2 = new();
         overlayWindow = new();
         debugWindow = new();
 
         EzCmd.Add("/icecosmic", OnCommand, """
             打开插件窗口
+            /ice help - 显示所有命令
             /ice clear - 移除所有任务
-            /ice stop - 停止 ICE 插件运行
-            /ice start - 开始 ICE 插件运行
+            /ice stop - 停止 ICE 运行
+            /ice start - 启动 ICE 运行
             /ice add | remove | toggle | only 
-            	(示例: /ice add 405 406 410)
             /ice flag [id] - 打开地图并标记采集区域位置
-                (示例: /ice flag 301)
             """);
         EzCmd.Add("/ice", OnCommand);
         EzCmd.Add("/IceCosmic", OnCommand);
@@ -119,15 +120,19 @@ public sealed partial class ICE : IDalamudPlugin
         };
         Svc.PluginInterface.UiBuilder.OpenConfigUi += () =>
         {
-            settingWindow.IsOpen = true;
+            settingsWindowV2.IsOpen = true;
         };
         DictionaryCreation();
-        TaskGamba.EnsureGambaWeightsInitialized();
+        Task_Gamba.EnsureGambaWeightsInitialized();
+        ConfigMigrator.UpdateConfigMissionList();
+        ConfigMigrator.MigrateConfigv1();
+        ConfigMigrator.CheckMissions();
     }
 
     private static void Init()
     {
         ExcelHelper.Init();
+        ConsumableInfo.Init();
     }
 
     private void Tick(object _)
@@ -169,12 +174,6 @@ public sealed partial class ICE : IDalamudPlugin
 
         var firstArg = subcommands[0];
 
-        if (firstArg.ToLower() == "old")
-        {
-            mainWindow.IsOpen = !mainWindow.IsOpen;
-            return;
-        }
-
         if (firstArg.ToLower() == "d" || firstArg.ToLower() == "debug")
         {
             debugWindow.IsOpen = true;
@@ -182,16 +181,15 @@ public sealed partial class ICE : IDalamudPlugin
         }
         else if (firstArg.ToLower() == "s" || firstArg.ToLower() == "settings")
         {
-            settingWindow.IsOpen = !settingWindow.IsOpen;
-            return;
-        }
-        else if (firstArg.ToLower() == "s2")
-        {
             settingsWindowV2.IsOpen = !settingsWindowV2.IsOpen;
+            return;
         }
         else if (firstArg.ToLower() == "clear")
         {
-            C.Missions.ForEach(x => x.Enabled = false);
+            foreach (var mission in C.MissionConfig)
+            {
+                mission.Value.Enabled = false;
+            }
             C.Save();
         }
         else if (firstArg.ToLower() == "stop")
@@ -208,9 +206,13 @@ public sealed partial class ICE : IDalamudPlugin
             var idSet = new HashSet<uint>(ids);
             if (ids.Length == 0) return;
 
-            C.Missions.Where(item => idSet.Contains(item.Id))
-                .ToList()
-                .ForEach(item => item.Enabled = true);
+            foreach (var id in idSet)
+            {
+                if (C.MissionConfig.TryGetValue(id, out var mission))
+                {
+                    mission.Enabled = true;
+                }
+            }
             C.Save();
         }
         else if (firstArg.ToLower() == "remove")
@@ -219,9 +221,13 @@ public sealed partial class ICE : IDalamudPlugin
             var idSet = new HashSet<uint>(ids);
             if (ids.Length == 0) return;
 
-            C.Missions.Where(item => idSet.Contains(item.Id))
-                .ToList()
-                .ForEach(item => item.Enabled = false);
+            foreach (var id in idSet)
+            {
+                if (C.MissionConfig.TryGetValue(id, out var mission))
+                {
+                    mission.Enabled = false;
+                }
+            }
             C.Save();
         }
         else if (firstArg.ToLower() == "toggle")
@@ -230,9 +236,13 @@ public sealed partial class ICE : IDalamudPlugin
             var idSet = new HashSet<uint>(ids);
             if (ids.Length == 0) return;
 
-            C.Missions.Where(item => idSet.Contains(item.Id))
-                .ToList()
-                .ForEach(item => item.Enabled = !item.Enabled);
+            foreach (var id in idSet)
+            {
+                if (C.MissionConfig.TryGetValue(id, out var mission))
+                {
+                    mission.Enabled = !mission.Enabled;
+                }
+            }
             C.Save();
         }
         else if (firstArg.ToLower() == "only")
@@ -241,8 +251,17 @@ public sealed partial class ICE : IDalamudPlugin
             var idSet = new HashSet<uint>(ids);
             if (ids.Length == 0) return;
 
-            C.Missions.ForEach(item => item.Enabled = idSet.Contains(item.Id));
-            C.Save();
+            foreach (var mission in C.MissionConfig.Where(x => x.Value.Enabled))
+            {
+                mission.Value.Enabled = false;
+            }
+            foreach (var id in idSet)
+            {
+                if (C.MissionConfig.TryGetValue (id, out var mission))
+                {
+                    mission.Enabled = true;
+                }
+            }
         }
         else if (firstArg.ToLower() == "flag")
         {
@@ -250,11 +269,29 @@ public sealed partial class ICE : IDalamudPlugin
             if (!PlayerHelper.IsInCosmicZone()) return;
 
             int missionId = int.Parse(subcommands[1]);
-            var info = MissionInfoDict.FirstOrDefault(mission => mission.Key == missionId);
+            var info = SheetMissionDict.FirstOrDefault(mission => mission.Key == missionId);
             if (info.Value == default) return;
             if (info.Value.MarkerId == 0) return;
 
-            Utils.SetGatheringRing(info.Value.TerritoryId, info.Value.X, info.Value.Y, info.Value.Radius, info.Value.Name);
+            Utils.SetGatheringRing(info.Value.TerritoryId, (int)info.Value.MapPosition.X, (int)info.Value.MapPosition.Y, info.Value.Radius, info.Value.Name);
+        }
+        else if (firstArg.ToLower() == "help")
+        {
+            string helpMessage = $"- - ICE 命令帮助 - - \n" +
+                                 $"/ice help - 显示所有可用命令\n" +
+                                 $"/ice -> 打开插件窗口\n" +
+                                 $"/ice s -> 打开设置菜单\n" +
+                                 $" - - - 任务相关命令 - - - \n" +
+                                 $"/ice stop - 停止 ICE 运行\n" +
+                                 $"/ice start - 启动 ICE 运行\n" +
+                                 $"以下命令可以使用单个或多个任务 ID, 一次性执行\n" +
+                                 $"例如: /ice add 10 155 185\n" +
+                                 $"/ice add (ids) - 启用指定任务\n" +
+                                 $"/ice remove (ids) - 移除/禁用指定任务\n" +
+                                 $"/ice toggle (ids) - 切换指定任务的启用状态" +
+                                 $"/ice only (ids) - 仅启用指定任务" +
+                                 $"/ice flag (id) - 打开地图并标记任务(如果该任务有地图标记)\n";
+            Svc.Chat.Print(helpMessage);
         }
     }
 }

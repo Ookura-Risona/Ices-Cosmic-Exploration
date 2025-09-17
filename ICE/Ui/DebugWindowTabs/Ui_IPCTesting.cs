@@ -1,0 +1,157 @@
+﻿using ECommons.ExcelServices.TerritoryEnumeration;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using ICE.IPC;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ICE.Ui.DebugWindowTabs
+{
+    internal class Ui_IPCTesting
+    {
+        private static int Radius = 10;
+        private static int XLoc = 0;
+        private static int YLoc = 0;
+        private static string importString = new string('\0', 2048); // Pre-allocate buffer
+        private static string SwapToPreset = string.Empty;
+        private static uint missionId = 0;
+        private static uint baitId = 0;
+        private static bool baitSwapped = false;
+
+        private static string SettingChange = "";
+        private static bool SettingState = false;
+
+        public static unsafe void Draw()
+        {
+            ImGui.Text($"Artisan Is Busy? {P.Artisan.IsBusy()}");
+            ImGui.Text($"{EzThrottler.GetRemainingTime("[Main Item(s)] Starting Main Craft")}");
+            if (ImGui.Button("Artisan, craft this"))
+            {
+                P.Artisan.CraftItem(36026, 1);
+            }
+
+            ImGui.SetNextItemWidth(125);
+            ImGui.InputInt("Radius", ref Radius);
+            ImGui.SetNextItemWidth(125);
+            ImGui.InputInt("X Location", ref XLoc);
+            ImGui.SetNextItemWidth(125);
+            ImGui.InputInt("Y Location", ref YLoc);
+
+            if (ImGui.Button($"Test Radius"))
+            {
+                var agent = AgentMap.Instance();
+
+                Utils.SetGatheringRing(agent->CurrentTerritoryId, XLoc, YLoc, Radius);
+            }
+
+            ImGui.Separator();
+            ImGui.Text("AutoHook");
+            ImGui.SetNextItemWidth(150);
+            ImGui.InputText("Preset String", ref importString, 2048);
+            if (ImGui.Button("Import"))
+            {
+                P.AutoHook.ImportAndSelectPreset(importString);
+                importString = string.Empty;
+            }
+            ImGui.SetNextItemWidth(150);
+            ImGui.InputText("Swap to preset", ref SwapToPreset);
+            if (ImGui.Button("Swap"))
+            {
+                P.AutoHook.SetPreset(SwapToPreset);
+            }
+            if (ImGui.Button("Apply Temp"))
+            {
+                P.AutoHook.CreateAndSelectAnonymousPreset(importString);
+            }
+            ImGui.SetNextItemWidth(200);
+            ImGui.InputUInt("Select mission to import", ref missionId);
+            if (ImGui.Button("Apply Mission Presets"))
+            {
+                P.AutoHook.DeleteAllAnonymousPresets();
+                var mission = CosmicHelper.SheetMissionDict[missionId];
+                if (mission != null)
+                {
+                    if (mission.Attributes.HasFlag(MissionAttributes.Fish))
+                    {
+                        var fishingPresets = GatheringUtil.FishingPreset[missionId];
+                        foreach (var preset in fishingPresets.FishingPreset)
+                        {
+                            P.AutoHook.CreateAndSelectAnonymousPreset(preset);
+                        }
+                    }
+                }
+            }
+            ImGui.InputUInt("Bait ID", ref baitId);
+            if (ImGui.Button("Swap to bait"))
+            {
+                 SwapBait(baitId);
+            }
+            if (ImGui.Button("Swap Bait... simple"))
+            {
+                if (CosmicHelper.CurrentBait == 0)
+                {
+                    IceLogging.Debug("Bait is not currently equipped");
+                }
+
+                P.AutoHook.SwapBaitById(baitId);
+            }
+            if (ImGui.Button("Stupid Test"))
+            {
+                if (CosmicHelper.CurrentBait == 0)
+                {
+                    IceLogging.Debug($"No bait is equipped");
+                }
+                else if (CosmicHelper.CurrentBait == null)
+                {
+                    IceLogging.Debug("Bait is null... aka not in the middle of a mission");
+                }
+                else
+                {
+                    IceLogging.Debug($"Current bait: {CosmicHelper.CurrentBait}");
+                }
+            }
+            ImGui.Text($"Is ICE Running? | {P.IceIpc.IsRunning()}");
+            if (ImGui.Button("Only Missions Via IPC"))
+            {
+                HashSet<uint> missionListIds = new() { 1, 3, 4, 7, 9, 11 };
+                P.IceIpc.OnlyMissions(missionListIds);
+            }
+            if (ImGui.Button("Change to gamba"))
+            {
+                SchedulerMain.State = IceState.Gambling;
+            }
+
+            ImGui.Separator();
+
+            ImGui.SetNextItemWidth(150);
+            ImGui.InputText("Setting Name", ref SettingChange);
+            ImGui.Checkbox("Setting Bool", ref SettingState);
+
+            if (ImGui.Button("Toggle Setting"))
+            {
+                P.IceIpc.ChangeSetting(SettingChange, SettingState);
+            }
+
+        }
+
+        private static void SwapBait(uint baitId)
+        {
+            _ = Task.Run(async () =>
+            {
+                baitSwapped = await TaskSwapBait(baitId);
+            });
+
+            _ = Task.Run(async () =>
+            {
+                await P.AutoHook.SwapBaitById(baitId);
+            });
+        }
+
+        private static async Task<bool> TaskSwapBait(uint bait)
+        {
+            return await P.AutoHook.SwapBaitById(bait);
+        }
+    }
+}

@@ -5,17 +5,26 @@ namespace ICE.Enums
     {
         Idle = 0,
         Start = 1,
-        Craft = 2,
-        Gather = 4,
-        Fish = 8,
-        ManualMode = 16,
-        GrabMission = 32,
-        ExecutingMission = 64,
-        ScoringMission = 128,
-        AbortInProgress = 256,
-        AnimationLock = 512,
-        Gambling = 1024,
-        Waiting = 2048,
-        RelicTurnin = 4096,
+        GrabMission = 2,
+        ExecutingMission = 3,
+        AbandonMission = 4,
+        ForceTurnin = 5,
+        ScoreCheck = 6,
+        ManualMode = 7,
+        Waiting = 8,
+
+        Repair = 11,
+        Gambling = 12,
+        RelicTurnin = 13,
+
+        Craft = 20,
+        Gather = 21,
+        Fish = 22,
+        DualClassCheck = 23,
+
+        ScoringMission = 30,
+        AnimationLock = 31,
+        TurninMission = 32,
+
     }
 }

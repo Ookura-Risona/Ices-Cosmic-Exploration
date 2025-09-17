@@ -1,10 +1,16 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
+﻿using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Objects.Types;
 using ECommons.Automation.NeoTaskManager;
 using ECommons.DalamudServices.Legacy;
+using ECommons.GameHelpers;
 using ECommons.Reflection;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using SharpDX.Direct3D11;
+using System;
 
 namespace ICE.Utilities;
 
@@ -35,7 +41,7 @@ public static unsafe class Utils
 
         Vector2 pos = MapToWorld(new Vector2(x, y), map.SizeFactor, map.OffsetX, map.OffsetY);
 
-        agent->IsFlagMarkerSet = false;
+        agent->FlagMarkerCount = 0;
         agent->SetFlagMapMarker(territoryId, map.RowId, pos.X, pos.Y);
         agent->OpenMapByMapId(map.RowId, territoryId);
     }
@@ -55,7 +61,7 @@ public static unsafe class Utils
         return objectPosition / scalar - center / scalar;
     }
 
-    public static bool? TargetgameObject(IGameObject? gameObject)
+    public static bool? TargetgameObjectTask(IGameObject? gameObject)
     {
         var x = gameObject;
         if (Svc.Targets.Target != null && Svc.Targets.Target.DataId == x.DataId)
@@ -83,6 +89,25 @@ public static unsafe class Utils
     {
         return Svc.Objects.OrderBy(PlayerHelper.GetDistanceToPlayer).FirstOrDefault(x => x.DataId == 2014616 || x.DataId == 2014618);
     }
+    public static void TargetgameObject(IGameObject? gameObject)
+    {
+        var x = gameObject;
+        var currentTarget = Svc.Targets.Target;
+        if (currentTarget != null && currentTarget.DataId == x.DataId)
+            return;
+
+        if (!GenericHelpers.IsOccupied())
+        {
+            if (x != null)
+            {
+                if (EzThrottler.Throttle($"Throttle targeting: {x.DataId}"))
+                {
+                    IceLogging.Info($"Attempting to set the target to: {x.DataId} | {x.Name}", "[Target Game Object]");
+                    Svc.Targets.SetTarget(x);
+                }
+            }
+        }
+    }
     public static unsafe void InteractWithObject(IGameObject? gameObject)
     {
         try
@@ -97,7 +122,6 @@ public static unsafe class Utils
             IceLogging.Error($"InteractWithObject: Exception: {ex}");
         }
     }
-
     public static unsafe void SetGatheringRing(uint territoryId, int x, int y, int radius, string? tooltip = "Node Location")
     {
         var map = ExcelHelper.TerritorySheet.GetRow(territoryId).Map.Value;
@@ -106,10 +130,51 @@ public static unsafe class Utils
         Vector2 pos = MapToWorld(new Vector2(x, y), map.SizeFactor, map.OffsetX, map.OffsetY);
         IceLogging.Debug($"Current map: {map.RowId} {territoryId} | {map.PlaceName.Value.Name} | {pos.X} {pos.Y} | {x} {y} | {radius} | {tooltip}");
 
-        agent->IsFlagMarkerSet = false;
+        agent->FlagMarkerCount = 0;
+        // agent->IsFlagMarkerSet = false;
         agent->SetFlagMapMarker(territoryId, map.RowId, x, y);
         agent->TempMapMarkerCount = 0;
         agent->AddGatheringTempMarker(x, y, radius, tooltip: tooltip);
         agent->OpenMap(map.RowId, territoryId, tooltip, MapType.GatheringLog);
+    }
+    public static unsafe void MountAction()
+    {
+        bool useMount = C.MountId != 0 && PlayerState.Instance()->IsMountUnlocked(C.MountId);
+
+        if (useMount)
+        {
+            ActionManager.Instance()->UseAction(ActionType.Mount, C.MountId);
+            IceLogging.Info($"Attempting to mount: {C.MountName}");
+        }
+        else
+        {
+            ActionManager.Instance()->UseAction(ActionType.GeneralAction, 9);
+            IceLogging.Info($"Resorting to using the mount roulette");
+        }
+    }
+    public static unsafe void Dismount()
+    {
+        if (Svc.Condition[ConditionFlag.Mounted])
+        {
+            ActionManager.Instance()->UseAction(ActionType.GeneralAction, 9);
+        }
+    }
+
+    public static uint ToUintABGR(Vector4 col)
+    {
+        byte a = (byte)(col.W * 255);
+        byte b = (byte)(col.Z * 255);
+        byte g = (byte)(col.Y * 255);
+        byte r = (byte)(col.X * 255);
+        return (uint)((a << 24) | (b << 16) | (g << 8) | r);
+    }
+
+    public static Vector4 FromUintABGR(uint color)
+    {
+        float a = ((color >> 24) & 0xFF) / 255f;
+        float b = ((color >> 16) & 0xFF) / 255f;
+        float g = ((color >> 8) & 0xFF) / 255f;
+        float r = (color & 0xFF) / 255f;
+        return new Vector4(r, g, b, a);
     }
 }

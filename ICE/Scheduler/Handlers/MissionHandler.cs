@@ -2,10 +2,12 @@ using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Memory;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;
+using ICE.Scheduler.Tasks.OldTask;
 using static ECommons.UIHelpers.AddonMasterImplementations.AddonMaster;
 
 internal static class MissionHandler
 {
+    /*
     internal static unsafe bool? HaveEnoughMain()
     {
         if (CosmicHelper.CurrentLunarMission == 0)
@@ -13,7 +15,7 @@ internal static class MissionHandler
 
         if (IsMissionTimedOut())
         {
-            SchedulerMain.State |= IceState.AbortInProgress;
+            SchedulerMain.State |= IceState.ForceTurnin;
             return true;
         }
         else if (CosmicHelper.CurrentMissionInfo.Attributes.HasFlag(MissionAttributes.Critical))
@@ -41,7 +43,7 @@ internal static class MissionHandler
             if (CosmicHelper.CurrentMissionInfo.Attributes.HasFlag(MissionAttributes.Limited)
             && SchedulerMain.NodesVisited >= SchedulerMain.CurrentNodeSet.Count)
             {
-                SchedulerMain.State |= IceState.AbortInProgress;
+                SchedulerMain.State |= IceState.ForceTurnin;
                 return true;
             }
             else
@@ -79,7 +81,7 @@ internal static class MissionHandler
         if (GenericHelpers.TryGetAddonMaster<WKSMissionInfomation>("WKSMissionInfomation", out var z) && z.IsAddonReady)
         {
             if (IsMissionTimedOut())
-                SchedulerMain.State |= IceState.AbortInProgress;
+                SchedulerMain.State |= IceState.ForceTurnin;
 
             if (CosmicHelper.CurrentMissionInfo.Attributes.HasFlag(MissionAttributes.Critical))
             {
@@ -115,7 +117,6 @@ internal static class MissionHandler
 
         return (currentScore, bronzeScore, silverScore, goldScore);
     }
-
     internal unsafe static bool IsMissionTimedOut()
     {
         if (GenericHelpers.TryGetAddonMaster<WKSMissionInfomation>("WKSMissionInfomation", out var z) && z.IsAddonReady)
@@ -131,38 +132,7 @@ internal static class MissionHandler
         }
         return false;
     }
-
-    internal unsafe static (int classScore, int cappedClassScore, int totalScores, uint classId) GetCosmicClassScores()
-    {
-        int classScore = 0;
-        int cappedClassScore = 0;
-        int totalScores = 0;
-        var wksManager = WKSManager.Instance();
-        var currentMissionId = wksManager->CurrentMissionUnitRowId;
-
-        uint classId;
-        if (currentMissionId > 0 &&
-            CosmicHelper.MissionInfoDict.TryGetValue(currentMissionId, out var missionInfo))
-            classId = missionInfo.JobId;
-        else
-            classId = (uint)(Svc.ClientState.LocalPlayer?.ClassJob.RowId);
-
-        if (classId is >= 8 and <= 18)
-        {
-            var scores = wksManager->Scores;
-
-            classScore = scores[(int)classId - 8];
-            cappedClassScore = Math.Min(500_000, classScore);
-
-            totalScores = 0;
-            for (int i = 0; i < scores.Length; ++i)
-                totalScores += Math.Min(500_000, scores[i]);
-        }
-
-
-        return (classScore, cappedClassScore, totalScores, classId);
-    }
-    internal static void TurnIn(WKSMissionInfomation z, bool abortIfNoReport = false) // Bug: 在紧急任务中不触发，无论采集/制作，已经处理了
+    internal static void TurnIn(WKSMissionInfomation z, bool abortIfNoReport = false)
     {
         if (EzThrottler.Throttle("Turning in item", 250))
         {
@@ -175,18 +145,18 @@ internal static class MissionHandler
                 {
                     IceLogging.Error("[TurnIn] Unexpected error. Potential Crafting Animation Lock.");
 #if DEBUG
-                    IceLogging.Error($"[TurnIn] PossiblyStuck: {SchedulerMain.PossiblyStuck} | AnimationLockToggle {C.AnimationLockAbandon} | AnimationLockState {SchedulerMain.AnimationLockAbandonState}");
+                    IceLogging.Error($"[TurnIn] PossiblyStuck: {SchedulerMain.PossiblyStuck} | AnimationLockToggle {OldConfig.AnimationLockAbandon} | AnimationLockState {SchedulerMain.AnimationLockAbandonState}");
 #endif
                 }
-                if (SchedulerMain.PossiblyStuck < 2 && C.AnimationLockAbandon)
+                if (SchedulerMain.PossiblyStuck < 2 && OldConfig.AnimationLockAbandon)
                 {
                     SchedulerMain.PossiblyStuck += 1;
                 }
-                else if (SchedulerMain.PossiblyStuck >= 2 && C.AnimationLockAbandon)
+                else if (SchedulerMain.PossiblyStuck >= 2 && OldConfig.AnimationLockAbandon)
                 {
                     SchedulerMain.AnimationLockAbandonState = true;
-                    DuoLog.Error($"发生意外错误，可能是由于动画锁定状态导致。" + // Unexpected error. I might be Animation Locked. 
-                        (C.AnimationLockAbandon ? "正在尝试解除锁定。" : "请启用实验性解除锁定功能以尝试解决。")); // (C.AnimationLockAbandon ? "Attempting unstuck." : "Please enable Experimental unstuck to attempt unstuck.")
+                    DuoLog.Error($"发生意外错误，可能是由于动画锁定状态导致。" +
+                        (OldConfig.AnimationLockAbandon ? "正在尝试解除锁定。" : "请启用实验性解除锁定功能以尝试解决。"));
                 }
             }
         }
@@ -194,11 +164,11 @@ internal static class MissionHandler
         IceLogging.Info("Attempting turnin");
         P.TaskManager.Enqueue(TurnInInternals, "Turning in", config);
 
-        if (abortIfNoReport && C.StopOnAbort && !SchedulerMain.AnimationLockAbandonState)
+        if (abortIfNoReport && OldConfig.StopOnAbort && !SchedulerMain.AnimationLockAbandonState)
         {
             SchedulerMain.StopBeforeGrab = true;
-            DuoLog.Error("发生意外错误，已停止运行。未能达到目标评价。\n" + // Unexpected error. Stopping. You failed to reach your Score Target.
-                $"如果您预期的任务 ID: {CosmicHelper.CurrentLunarMission} 无法达到 " + (C.Missions.SingleOrDefault(x => x.Id == CosmicHelper.CurrentLunarMission).TurnInSilver ? "银星" : "金星") +
+            DuoLog.Error("发生意外错误，已停止运行。未能达到目标评价。\n" +
+                $"如果您预期的任务 ID: {CosmicHelper.CurrentLunarMission} 无法达到 " + (OldConfig.Missions.SingleOrDefault(x => x.Id == CosmicHelper.CurrentLunarMission).TurnInSilver ? "银星" : "金星") +
                 " - 请将其汇报标记设置为 银星/尽快提交\n" +
                 "如果您预期能达成目标，请检查您的设置/装备。");
         }
@@ -210,7 +180,6 @@ internal static class MissionHandler
             P.TaskManager.Enqueue(TaskMissionFind.AbandonMission, "Aborting mission", new ECommons.Automation.NeoTaskManager.TaskManagerConfiguration() { TimeLimitMS = 5000 });
         }
     }
-
     private static unsafe bool? TurnInInternals()
     {
         if (EzThrottler.Throttle("UI", 250))
@@ -231,7 +200,7 @@ internal static class MissionHandler
                 return false;
             }
 
-            if (CosmicHelper.CurrentMissionInfo.Attributes.HasFlag(MissionAttributes.Critical) && !SchedulerMain.State.HasFlag(IceState.AbortInProgress))
+            if (CosmicHelper.CurrentMissionInfo.Attributes.HasFlag(MissionAttributes.Critical) && !SchedulerMain.State.HasFlag(IceState.ForceTurnin))
             {
                 if (EzThrottler.Throttle("Interacting with checkpoint", 250))
                 {
@@ -266,7 +235,6 @@ internal static class MissionHandler
         else
             return false;
     }
-
     public unsafe static bool ExitCraftGatherUI()
     {
         if (GenericHelpers.TryGetAddonMaster<WKSRecipeNotebook>("WKSRecipeNotebook", out var cr) && cr.IsAddonReady)
@@ -289,4 +257,5 @@ internal static class MissionHandler
         }
         return true;
     }
+    */
 }

@@ -1,6 +1,4 @@
-using Dalamud.Game.ClientState.Conditions;
-using System.Collections.Generic;
-using static ECommons.UIHelpers.AddonMasterImplementations.AddonMaster;
+using ECommons.GameHelpers;
 using static ICE.Enums.IceState;
 
 namespace ICE.Scheduler
@@ -10,41 +8,26 @@ namespace ICE.Scheduler
         internal static bool EnablePlugin()
         {
             State = Start;
-            StartClassJob = (Job)PlayerHelper.GetClassJobId();
+            StartClassJob = Player.Job;
             return true;
         }
         internal static bool DisablePlugin()
         {
+            IceLogging.Debug("Stopping the plugin state", "[Schedular - Disable Plugin]");
             P.TaskManager.Abort();
-            StopBeforeGrab = false;
-            State = Idle;
+            State = IceState.Idle;
             StartClassJob = Job.ADV;
-            if (P.Navmesh.IsRunning())
+            if (P.Navmesh.IsRunning() && P.Navmesh.IsReady())
                 P.Navmesh.Stop();
             return true;
         }
 
-        internal static string MissionName = string.Empty;
-        internal static bool inMission = false;
-        internal static bool Abandon = false;
-        internal static bool AnimationLockAbandonState = false;
-        internal static uint PossiblyStuck = 0;
-        internal static bool StopBeforeGrab = false;
-        internal static uint PreviousNodeSetId = 0;
-        internal static List<GatheringUtil.GathNodeInfo> CurrentNodeSet = [];
-        internal static int CurrentIndex = 0;
-        internal static uint NodesVisited = 0;
-        internal static bool GatherNodeMissing = false;
-        internal static List<uint> GathererBuffsUsed = [];
-        internal static int InitialGatheringItemMultiplier = 1;
-        internal static Vector3? NearestCollectionPoint = null;
-#if DEBUG
         // Debug only settings
         internal static bool DebugOOMMain = false;
         internal static bool DebugOOMSub = false;
-#endif
 
         internal static IceState State = Idle;
+        internal static MissionAttributes MissionState = MissionAttributes.None;
         internal static Job StartClassJob = Job.ADV;
 
         // <summary>
@@ -63,50 +46,52 @@ namespace ICE.Scheduler
         // </summary>
         internal static void Tick()
         {
-            if (Throttles.GenericThrottle && P.TaskManager.Tasks.Count == 0 && State != Idle)
+            if (Throttles.GenericThrottle && P.TaskManager.NumQueuedTasks == 0 && State != Idle)
             {
                 switch (State)
                 {
-                    case var s when s.HasFlag(Start):
-                        EnqueueResumeCheck();
+                    case Gambling:
+                        Task_Gamba.TryHandleGamba();
                         break;
-                    case var s when s.HasFlag(Craft) && s.HasFlag(Waiting):
-                        TaskCrafting.WaitTillActuallyDone();
+                    case Start:
+                        Task_CheckState.Enqueue();
                         break;
-                    case var s when s.HasFlag(ScoringMission) || s.HasFlag(AbortInProgress):
-                        TaskScoreCheckCraft.TryCheckScore();
+                    case Repair:
+                        Task_Repair.Enqueue();
                         break;
-                    case var s when s.HasFlag(AnimationLock):
-                        TaskAnimationLock.Enqueue();
+                    case GrabMission:
+                        Task_FindMission.Enqueue();
                         break;
-                    case var s when s.HasFlag(Gambling):
-                        TaskGamba.TryHandleGamba();
+                    case AbandonMission:
+                        Task_AbandonMission.Enqueue();
                         break;
-                    case var s when s.HasFlag(GrabMission) && s.HasFlag(Waiting):
-                        TaskMissionFind.WaitForNonStandard();
+                    case ExecutingMission:
+                        Task_ExecuteMission.Enqueue();
                         break;
-                    case var s when s.HasFlag(GrabMission):
-                        TaskMissionFind.Enqueue();
+                    case ScoreCheck:
+                        Task_CheckScore.Enqueue();
                         break;
-                    case var s when s.HasFlag(ManualMode) || s.HasFlag(Fish):
-                        TaskManualMode.ZenMode();
+                    case TurninMission:
+                        Task_TurninMission.Enqueue();
                         break;
-                    case var s when s.HasFlag(Gather) && s.HasFlag(ExecutingMission):
-                        TaskGather.TryEnqueueGathering();
+                    case Craft:
+                        Task_Craft.Enqueue();
                         break;
-                    case var s when s.HasFlag(Craft) && s.HasFlag(ExecutingMission):
-                        TaskCrafting.TryEnqueueCrafts();
+                    case Gather:
+                        Task_Gather.Enqueue();
+                        break;
+                    case Fish:
+                    case ManualMode:
+                        Task_Manual.Enqueue();
                         break;
                     default:
-                        if (C.StopOnAbort)
-                            throw new Exception("Invalid state");
-                        else
-                            EnqueueResumeCheck();
+                        DisablePlugin();
                         break;
                 }
             }
         }
 
+        /*
         public static void EnqueueResumeCheck()
         {
             // Start the check by making the state idle, this clears all flags.
@@ -141,5 +126,6 @@ namespace ICE.Scheduler
             if (AnimationLockAbandonState || (!(AddonHelper.IsAddonActive("WKSRecipeNotebook") || AddonHelper.IsAddonActive("RecipeNote")) && Svc.Condition[ConditionFlag.Crafting] && Svc.Condition[ConditionFlag.PreparingToCraft]))
                 State |= AnimationLock;
         }
+        */
     }
 }

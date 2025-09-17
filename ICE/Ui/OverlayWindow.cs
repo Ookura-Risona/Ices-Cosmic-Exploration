@@ -1,13 +1,20 @@
-using System.Globalization;
 using Dalamud.Game.Text;
+using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
+using ECommons.GameHelpers;
+using FFXIVClientStructs.FFXIV.Client.Game.WKS;
+using ICE.Config;
 using Lumina.Excel.Sheets;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 
 namespace ICE.Ui
 {
     internal class OverlayWindow : Window
     {
+        private uint selectedJob = C.SelectedJob;
         public OverlayWindow() : base("ICE Overlay", ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.AlwaysAutoResize)
         {
             P.windowSystem.AddWindow(this);
@@ -18,21 +25,13 @@ namespace ICE.Ui
             P.windowSystem.RemoveWindow(this);
         }
 
-        
+
 
         public override void Draw()
         {
-            ImGui.Text($"当前状态: " + SchedulerMain.State.ToString()); // Current state: 
-#if DEBUG
-            if (CosmicHelper.CurrentLunarMission != 0)
-            {
-                ImGui.Text($"Current node: {SchedulerMain.CurrentIndex} / Visited: {SchedulerMain.NodesVisited}");
-                ImGui.Text($"NodeSet: {CosmicHelper.MissionInfoDict[CosmicHelper.CurrentLunarMission].NodeSet}");
-                ImGui.Text($"Attributes: {CosmicHelper.CurrentMissionInfo.Attributes}");
-            }
-#endif
+            ImGui.Text($"当前状态: " + SchedulerMain.State.ToString());
 
-                ImGuiHelpers.ScaledDummy(2);
+            ImGuiHelpers.ScaledDummy(2);
             ImGui.Separator();
             ImGuiHelpers.ScaledDummy(2);
 
@@ -44,15 +43,16 @@ namespace ICE.Ui
             }
 
             (var currentTimedBonus, var nextTimedBonus) = PlayerHandlers.GetTimedJob();
-            if (currentTimedBonus.Value == null)
+            if (currentTimedBonus.Length == 0)
             {
                 ImGui.Text($"限时任务: 无 -> {string.Join(", ", nextTimedBonus.Value)} [{nextTimedBonus.Key.start:D2}:00]"); // Timed Mission(s)
             }
             else
             {
-                ImGui.Text($"限时任务: {string.Join(", ", currentTimedBonus.Value)} -> {string.Join(", ", nextTimedBonus.Value)} [{nextTimedBonus.Key.start:D2}:00]");
+                ImGui.Text($"限时任务: {string.Join(", ", currentTimedBonus)} -> {string.Join(", ", nextTimedBonus.Value)} [{nextTimedBonus.Key.start:D2}:00]");
             }
 
+            /* Temporarily Disabling this until I can figure out wtf is causing it to crash on non-english clients *-sighs-*
             (string type, var locations) = AnnouncementHandlers.CheckForRedAlert();
             if (type != null && locations != null)
             {
@@ -85,6 +85,8 @@ namespace ICE.Ui
 
             ImGuiHelpers.ScaledDummy(2);
             ImGui.Separator();
+
+            */
             ImGuiHelpers.ScaledDummy(2);
 
             DrawScore();
@@ -119,17 +121,30 @@ namespace ICE.Ui
                 }
             }
             ImGui.SameLine();
-            ImGui.Checkbox("当前任务结束后停止", ref SchedulerMain.StopBeforeGrab); // Stop after current mission
-            //    //    Type = Dalamud.Game.Text.XivChatType.Debug,
-            //    //});
-            //}
+            ImGui.Checkbox("当前任务结束后停止", ref Mission_Settings.StopAfterCurrent);
+
+            ImGuiHelpers.ScaledDummy(2);
+            ImGui.Separator();
+            ImGuiHelpers.ScaledDummy(2);
+
+            if (C.ShowExpBars)
+            {
+                var currentJobId = Player.JobId;
+
+                bool showExp = (CosmicHelper.CrafterJobList.Contains(currentJobId) || CosmicHelper.GatheringJobList.Contains(currentJobId));
+
+                if (CosmicHelper.CrafterJobList.Contains(currentJobId) || CosmicHelper.GatheringJobList.Contains(currentJobId))
+                {
+                    Relic_XP.DrawRelicXP((uint)currentJobId);
+                }
+            }
         }
 
         void DrawScore()
         {
             try
             {
-                var (classScore, cappedClassScore, totalScores, classId) = MissionHandler.GetCosmicClassScores();
+                var (classScore, cappedClassScore, totalScores, classId) = CosmicHelper.GetCosmicClassScores();
 
                 ImGui.TextUnformatted(string.Create(CultureInfo.InvariantCulture,
                     $"{Svc.Data.GetExcelSheet<ClassJob>().GetRow(classId).Name}: {(float)cappedClassScore / 500_000:P} ({classScore:N0})")); // 原始: Abbreviation

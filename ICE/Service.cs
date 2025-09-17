@@ -1,11 +1,10 @@
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.IoC;
+using ICE.IPC;
 
-namespace ICE
+namespace ICE;
+
+public static class Service
 {
-    internal class Service
-    {
-        internal static Configuration Config { get; set; } = null!;
-        internal static IGameObject gameObject { get; private set; } = null!;
-        public static IObjectTable ObjectTable { get; private set; } = null!;
-    }
+    public static IceCosmicExplorationIPC IPC { get; private set; } = null!;
 }
