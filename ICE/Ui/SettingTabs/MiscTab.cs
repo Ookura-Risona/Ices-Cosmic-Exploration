@@ -243,12 +243,14 @@ namespace ICE.Ui.SettingTabs
         }
 
         private static bool visualizeRadius = false;
+        private static bool visualizeDismountRadius = false;
 
         private static unsafe void MountSelection()
         {
             bool mountOutsideMission = C.UseMountOutsideMission;
             bool mountInMission = C.UseMountInMission;
             float minMountRange = C.MountRadius;
+            float dismountRange = C.DismountRadius;
 
             if (ImGui.Button("选择坐骑"))
             {
@@ -348,19 +350,27 @@ namespace ICE.Ui.SettingTabs
                 C.Save();
             }
             ImGui.SameLine();
-            ImGui.Checkbox("半径可视化", ref visualizeRadius);
-            if (visualizeRadius)
+            ImGui.Checkbox("可视化半径范围", ref visualizeRadius);
+            ImGui.SetNextItemWidth(100);
+            if (ImGui.DragFloat("下坐骑目标范围", ref dismountRange, 1))
             {
-                using (var drawList = PictoService.Draw())
-                {
-                    if (drawList == null)
-                        return;
+                C.DismountRadius = dismountRange;
+                C.Save();
+            }
+            ImGui.SameLine();
+            ImGui.Checkbox("可视化下坐骑半径范围", ref visualizeDismountRadius);
 
-                    var playerPos = Player.Position;
+            using (var drawList = PictoService.Draw())
+            {
+                if (drawList == null)
+                    return;
 
-                    // drawList.AddCircleFilled(playerPos, C.MountRadius, 2616716297, 2616716297);
+                var playerPos = Player.Position;
+
+                if (visualizeRadius)
                     PictoService.VfxRenderer.AddCircle("Mount_Radius Circle", playerPos, C.MountRadius, Utils.FromUintABGR(2616716297));
-                }
+                if (visualizeDismountRadius)
+                    PictoService.VfxRenderer.AddCircle("Dismount_Radius Circle", playerPos, C.DismountRadius, Utils.FromUintABGR(2601121571));
             }
         }
     }
