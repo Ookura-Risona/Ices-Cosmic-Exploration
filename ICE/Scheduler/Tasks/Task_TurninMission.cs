@@ -49,7 +49,7 @@ namespace ICE.Scheduler.Tasks
                     {
                         if (EzThrottler.Throttle("Turning into colleciton point"))
                         {
-                           P.Navmesh.Stop();
+                            P.Navmesh.Stop();
                             Utils.TargetgameObject(collectionPoint);
                             Utils.InteractWithObject(collectionPoint);
                         }

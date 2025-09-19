@@ -133,7 +133,10 @@ namespace ICE.Scheduler.Handlers
                                 {
                                     if (!C.PreventOvercap || (C.PreventOvercap && !WillOvercap(cordial.Value)))
                                     {
-                                        ActionManager.Instance()->UseAction(ActionType.Item, cordial.Key, extraParam: 65535);
+                                        if (!Player.IsBusy) // 临时修改，防止与上坐骑冲突
+                                        {
+                                            ActionManager.Instance()->UseAction(ActionType.Item, cordial.Key, extraParam: 65535);
+                                        }
                                         return;
                                     }
                                 }
