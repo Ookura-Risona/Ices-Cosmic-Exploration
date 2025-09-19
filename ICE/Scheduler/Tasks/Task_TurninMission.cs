@@ -1,5 +1,6 @@
 ﻿using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;
+using ICE.IPC;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,9 +49,14 @@ namespace ICE.Scheduler.Tasks
                     {
                         if (EzThrottler.Throttle("Turning into colleciton point"))
                         {
+                           P.Navmesh.Stop();
                             Utils.TargetgameObject(collectionPoint);
                             Utils.InteractWithObject(collectionPoint);
                         }
+                    }
+                    else if (collectionPoint != null && Player.DistanceTo(collectionPoint) < 999 && !Player.IsBusy)
+                    {
+                        P.Navmesh.PathfindAndMoveTo(collectionPoint.Position, false);
                     }
                 }
                 else if (GenericHelpers.TryGetAddonMaster<WKSMissionInfomation>("WKSMissionInfomation", out var missionInfo) && missionInfo.IsAddonReady)

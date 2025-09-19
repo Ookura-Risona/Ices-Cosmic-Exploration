@@ -214,11 +214,11 @@ namespace ICE.Scheduler.Tasks
                     bool repairVendor = C.RepairAtVendor && PlayerHelper.NeedsRepair(C.RepairPercent);
                     bool selfRepairCraft = C.SelfRepairCrafter && PlayerHelper.NeedsRepair(C.RepairPercent) && CosmicHelper.CrafterJobList.Contains(currentJob);
                     bool selfRepairGather = C.SelfRepairGather && PlayerHelper.NeedsRepair(C.RepairPercent) && CosmicHelper.GatheringJobList.Contains(currentJob);
-                    bool extractSpiritbond = C.SelfSpiritbondGather && Task_Spiritbond.IsSpiritbondReadyAny();
+                    bool extractSpiritbond = C.SelfSpiritbondGather && Task_Spiritbond.IsSpiritbondReadyAny() && Player.Job.IsDol(); // 临时: 限制为采集职业，避免死循环
 
                     if (extractSpiritbond)
                     {
-                        SchedulerMain.State = IceState.Spiritbond;
+                            SchedulerMain.State = IceState.Spiritbond;
                     }
                     else if (repairVendor ||  selfRepairCraft || selfRepairGather)
                     {

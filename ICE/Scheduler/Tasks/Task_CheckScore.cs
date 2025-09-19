@@ -381,7 +381,7 @@ namespace ICE.Scheduler.Tasks
                     // Hud info should be available. Now time to check the mission status.
                     var id = CosmicHelper.CurrentLunarMission;
                     var mission = CosmicHelper.SheetMissionDict[id];
-                    if (mission.Attributes.HasFlag(MissionAttributes.ScoreTimeRemaining))
+                    if (mission.Attributes.HasFlag(MissionAttributes.ScoreTimeRemaining) || mission.Attributes.HasFlag(MissionAttributes.Critical)) // 临时改动
                     {
                         // We're just checking to see if we have all the items for missions that have a score time remaining. 
                         // These are typically missions that have 6 gather points, and also require a certain amount of items.
