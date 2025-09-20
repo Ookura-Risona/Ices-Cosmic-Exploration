@@ -82,8 +82,8 @@ namespace ICE.Ui
         private bool showClassC = C.ShowClassC;
         private bool showClassD = C.ShowClassD;
 
-        private string SinusAsset = "ICE.Moons.Sinus_Ardorum.png";
-        private string PhaennaAsset = "ICE.Moons.Phaenna.png";
+        private string SinusAsset = "ICE.Resources.Sinus_Ardorum.png";
+        private string PhaennaAsset = "ICE.Resources.Phaenna.png";
 
         // Middle Column stuff
         private Dictionary<string, bool> headerStates = new();
@@ -148,6 +148,8 @@ namespace ICE.Ui
 
         private string[] missionOptions = ["Current Class", "All Missions", "Currently Enabled"];
         private string selectedOption = "Current Class";
+
+        private ImGuiTableFlags tableFlag = ImGuiTableFlags.Resizable;
 
         // Right Column stuff
         private uint selectedMission = 0;
@@ -515,6 +517,14 @@ namespace ICE.Ui
                     }
                     ImGui.EndCombo();
                 }
+
+                ImGui.SameLine();
+
+                ImGui.Text("表格帮助: ");
+                ImGui.SameLine();
+                ImGuiEx.IconWithTooltip(FontAwesomeIcon.QuestionCircle, "以下表格包含一些实用功能，包括: \n" +
+                                                                        "-> 右键点击表格顶部行可以选择隐藏某些列。这完全取决于您的个人偏好，不会影响任何功能。如果有些列对您来说没用或不关心，可以自由隐藏。\n" +
+                                                                        "-> 您可以自由调整列的顺序。不想让“手动”列紧挨着“启用”？或者您希望将“经验值”相关的列移到前面？都可以，只需拖动列标题到您想要的位置即可。");
 
                 ImGui.Dummy(new Vector2(0, 5));
 
@@ -1003,42 +1013,172 @@ namespace ICE.Ui
         {
             uint selectedJob = C.SelectedJob;
             // Fixed column count - include ALL possible columns
-            int totalColumns = 15; // Enabled, Manual, ID, Mission Name, Cosmo, Lunar, I, II, III, IV, Turnin, Gather, Notes
+            int totalColumns = 16; // Enabled, Manual, ID, Completion Status, Mission Name, Cosmo, Lunar, I, II, III, IV, Turnin, Gather, Notes
 
             ImGuiTableFlags tableFlags = ImGuiTableFlags.RowBg |
                                         ImGuiTableFlags.Borders |
-                                        ImGuiTableFlags.SizingFixedFit |
-                                        ImGuiTableFlags.Resizable |           // Allow column resizing
                                         ImGuiTableFlags.Reorderable |         // Allow column reordering
-                                        ImGuiTableFlags.Hideable;             // Allow hiding columns via right-click
+                                        ImGuiTableFlags.Hideable |             // Allow hiding columns via right-click
+                                        ImGuiTableFlags.SizingFixedFit;
 
             if (ImGui.BeginTable($"MissionList###{tableName}_{selectedJob}", totalColumns, tableFlags))
             {
                 float padding = 10f;
 
                 // Setup ALL columns - all visible by default, users can hide what they don't want via right-click
-                ImGui.TableSetupColumn("启用", ImGuiTableColumnFlags.WidthFixed, ImGui.CalcTextSize("启用").X + padding);
-                ImGui.TableSetupColumn("手动", ImGuiTableColumnFlags.WidthFixed, ImGui.CalcTextSize("手动").X + padding);
-                ImGui.TableSetupColumn("ID", ImGuiTableColumnFlags.WidthFixed, ImGui.CalcTextSize("99999").X + padding);
-                ImGui.TableSetupColumn("任务名称", ImGuiTableColumnFlags.WidthFixed, 250f);
-                ImGui.TableSetupColumn("宇宙信用点", ImGuiTableColumnFlags.WidthFixed, ImGui.CalcTextSize("宇宙信用点").X + padding);
-                ImGui.TableSetupColumn("月球信用点", ImGuiTableColumnFlags.WidthFixed, ImGui.CalcTextSize("月球信用点").X + padding);
-                ImGui.TableSetupColumn("技巧点", ImGuiTableColumnFlags.WidthFixed, ImGui.CalcTextSize("技巧点").X + padding);
+                ImGui.TableSetupColumn("启用");
+                ImGui.TableSetupColumn("手动");
+                ImGui.TableSetupColumn("ID");
+                ImGui.TableSetupColumn("✓");
+                ImGui.TableSetupColumn("任务名称");
+                ImGui.TableSetupColumn("宇宙信用点");
+                ImGui.TableSetupColumn("月球信用点");
+                ImGui.TableSetupColumn("技巧点");
 
                 // XP columns
                 float xpWidth = ImGui.CalcTextSize("III").X + padding;
-                ImGui.TableSetupColumn("I", ImGuiTableColumnFlags.WidthFixed, xpWidth);
-                ImGui.TableSetupColumn("II", ImGuiTableColumnFlags.WidthFixed, xpWidth);
-                ImGui.TableSetupColumn("III", ImGuiTableColumnFlags.WidthFixed, xpWidth);
-                ImGui.TableSetupColumn("IV", ImGuiTableColumnFlags.WidthFixed, xpWidth);
-                ImGui.TableSetupColumn("V", ImGuiTableColumnFlags.WidthFixed, xpWidth);
+                ImGui.TableSetupColumn("I");
+                ImGui.TableSetupColumn("II");
+                ImGui.TableSetupColumn("III");
+                ImGui.TableSetupColumn("IV");
+                ImGui.TableSetupColumn("V");
 
-                ImGui.TableSetupColumn("汇报模式", ImGuiTableColumnFlags.WidthFixed, ImGui.CalcTextSize("汇报模式").X + padding + 15);
-                ImGui.TableSetupColumn("采集配置", ImGuiTableColumnFlags.WidthFixed, ImGui.CalcTextSize("采集配置").X + padding + 15);
-                ImGui.TableSetupColumn("任务备注", ImGuiTableColumnFlags.WidthFixed, Math.Max(ImGui.CalcTextSize("任务备注").X + padding, 75));
+                ImGui.TableSetupColumn("汇报模式");
+                ImGui.TableSetupColumn("采集配置");
+                ImGui.TableSetupColumn("任务备注");
 
-                // Render headers with right-click menu
-                ImGui.TableHeadersRow();
+                if (tableFlag == ImGuiTableFlags.SizingFixedFit)
+                {
+                    tableFlag = ImGuiTableFlags.Resizable;
+                }
+
+                // Draw custom header row with tooltips
+                ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
+
+                // Column 0: Enabled
+                ImGui.TableSetColumnIndex(0);
+                ImGui.TableHeader("启用");
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.BeginTooltip();
+                    ImGui.Text("启用/禁用 自动化任务");
+                    ImGui.EndTooltip();
+                }
+
+                // Column 1: Manual
+                ImGui.TableSetColumnIndex(1);
+                ImGui.TableHeader("手动");
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.BeginTooltip();
+                    ImGui.Text("手动模式 - 需要人工干预");
+                    ImGui.EndTooltip();
+                }
+
+                // Column 2: ID
+                ImGui.TableSetColumnIndex(2);
+                ImGui.TableHeader("ID");
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.BeginTooltip();
+                    ImGui.Text("任务 ID 数字");
+                    ImGui.EndTooltip();
+                }
+
+                // Column 3: Completed (with Unicode checkmark)
+                ImGui.TableSetColumnIndex(3);
+                ImGui.TableHeader("✓");
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.BeginTooltip();
+                    ImGui.Text("任务完成状态");
+                    ImGui.EndTooltip();
+                }
+
+                // Column 4: Mission Name
+                ImGui.TableSetColumnIndex(4);
+                ImGui.TableHeader("任务名称");
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.BeginTooltip();
+                    ImGui.Text("点击任务名称查看详情");
+                    ImGui.EndTooltip();
+                }
+
+                // Continue this pattern for all your columns...
+                // Column 5: Cosmo
+                ImGui.TableSetColumnIndex(5);
+                ImGui.TableHeader("宇宙信用点");
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.BeginTooltip();
+                    ImGui.Text("宇宙信用点奖励");
+                    ImGui.EndTooltip();
+                }
+
+                // Column 6: Lunar
+                ImGui.TableSetColumnIndex(6);
+                ImGui.TableHeader("月球信用点");
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.BeginTooltip();
+                    ImGui.Text("月球信用点奖励");
+                    ImGui.EndTooltip();
+                }
+
+                // Column 7: Score
+                ImGui.TableSetColumnIndex(7);
+                ImGui.TableHeader("技巧点");
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.BeginTooltip();
+                    ImGui.Text("职业技巧点奖励");
+                    ImGui.EndTooltip();
+                }
+
+                // XP Columns (8-12)
+                string[] xpLabels = { "I", "II", "III", "IV", "V" };
+                for (int i = 0; i < 5; i++)
+                {
+                    ImGui.TableSetColumnIndex(8 + i);
+                    ImGui.TableHeader(xpLabels[i]);
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.BeginTooltip();
+                        ImGui.Text($"宇宙研究数据类型: {xpLabels[i]} 奖励");
+                        ImGui.EndTooltip();
+                    }
+                }
+
+                // Column 13: Turnin Mode
+                ImGui.TableSetColumnIndex(13);
+                ImGui.TableHeader("汇报模式");
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.BeginTooltip();
+                    ImGui.Text("配置任务汇报设置");
+                    ImGui.EndTooltip();
+                }
+
+                // Column 14: Gathering Profile
+                ImGui.TableSetColumnIndex(14);
+                ImGui.TableHeader("采集配置");
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.BeginTooltip();
+                    ImGui.Text("为采集任务选择采集配置");
+                    ImGui.EndTooltip();
+                }
+
+                // Column 15: Mission Notes
+                ImGui.TableSetColumnIndex(15);
+                ImGui.TableHeader("任务备注");
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.BeginTooltip();
+                    ImGui.Text("任务的补充说明与要求");
+                    ImGui.EndTooltip();
+                }
 
                 foreach (var entry in missions)
                 {
@@ -1069,12 +1209,15 @@ namespace ICE.Ui
                     if (CenterCheckbox("##EnableMission", ref enabled))
                     {
                         missionConfig.Enabled = enabled;
-                        if (GetOnlyPreviousMissionsRecursive(Id).Count >0)
+                        if (missionConfig.Enabled == true)
                         {
-                            foreach (var prevMission in GetOnlyPreviousMissionsRecursive(Id))
+                            if (GetOnlyPreviousMissionsRecursive(Id).Count >0)
                             {
-                                var prevMissionConfig = C.MissionConfig[prevMission];
-                                prevMissionConfig.Enabled = true;
+                                foreach (var prevMission in GetOnlyPreviousMissionsRecursive(Id))
+                                {
+                                    var prevMissionConfig = C.MissionConfig[prevMission];
+                                    prevMissionConfig.Enabled = true;
+                                }
                             }
                         }
 
@@ -1102,6 +1245,10 @@ namespace ICE.Ui
                     // Mission ID
                     ImGui.TableNextColumn();
                     CenterTextInTableCell(Id.ToString());
+
+                    // Completion Status
+                    ImGui.TableNextColumn();
+                    CompletionStatus(Id);
 
                     // Mission Name
                     ImGui.TableNextColumn();
@@ -1258,12 +1405,24 @@ namespace ICE.Ui
                             ImGui.EndPopup();
                         }
                     }
+                    bool gatherProfile = missionInfo.Attributes.HasFlag(MissionAttributes.Gather);
+                    bool collectable = missionInfo.Attributes.HasFlag(MissionAttributes.Collectables) || missionInfo.Attributes.HasFlag(MissionAttributes.ReducedItems);
 
                     // Gather Mission Profile Settings
                     ImGui.TableNextColumn();
-                    if (missionInfo.Attributes.HasFlag(MissionAttributes.Gather))
+                    if (gatherProfile && !collectable)
                     {
-                        string profileName = C.GatherSettings[missionConfig.GatherProfileId].Name;
+                        string profileName = "???";
+                        var profileSettings = C.GatherSettings.Where(x => x.Id == missionConfig.GatherProfileId).FirstOrDefault();
+
+                        if (profileSettings != null)
+                        {
+                            profileName = profileSettings.Name;
+                        }
+                        else
+                        {
+                            profileName = "???";
+                        }
 
                         if (CenterButton($"{profileName}##GatherProfile_{profileName}"))
                         {
@@ -1277,6 +1436,11 @@ namespace ICE.Ui
                         }
                         if (ImGui.BeginPopup("Selecting Gathering Profile"))
                         {
+                            if (missionConfig.GatherProfileId > C.GatherSettings.Count - 1)
+                            {
+                                missionConfig.GatherProfileId = 0;
+                            }
+
                             ImGui.Text($"当前已选择: {profileName}");
                             ImGui.Separator();
                             for (int i = 0; i < C.GatherSettings.Count; i++)
@@ -1327,7 +1491,7 @@ namespace ICE.Ui
                         }
                     }
 
-                        ImGui.TableNextColumn();
+                    ImGui.TableNextColumn();
                     int notesCount = 0;
 
                     ImGui.Dummy(new(2, 0));
@@ -1644,6 +1808,60 @@ namespace ICE.Ui
             var chain = new List<uint> { nextMissionId.Value };
             chain.AddRange(GetOnlyNextMissionsRecursive(nextMissionId.Value));
             return chain;
+        }
+
+        private static unsafe void CompletionStatus(uint id)
+        {
+            var manager = (WKSManagerCustom*)WKSManager.Instance();
+            var isCompleted = manager->IsMissionCompleted(id);
+            var isGold = manager->IsMissionGolded(id);
+
+            float availableWidth = ImGui.GetContentRegionAvail().X;
+
+            if (isCompleted)
+            {
+                if (isGold)
+                {
+                    // Center the image
+                    float imageWidth = 23f;
+                    float offsetX = (availableWidth - imageWidth) * 0.5f;
+
+                    if (offsetX > 0)
+                        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + offsetX);
+
+                    if (Svc.Texture.GetFromGame("ui/uld/WKSMission_hr1.tex") is { } tex)
+                    {
+                        if (tex.TryGetWrap(out var wrap, out var exc))
+                        {
+                            ImGui.Image(wrap.Handle, new Vector2(23, 23), new Vector2(0.2347f, 0.3500f), new Vector2(0.2959f, 0.6500f));
+                        }
+                    }
+                }
+                else
+                {
+                    // Center the font icon - you'll need to measure or estimate its width
+                    var iconText = FontAwesome.Check.ToString();
+                    var iconWidth = ImGui.CalcTextSize(iconText).X;
+                    float offsetX = (availableWidth - iconWidth) * 0.5f;
+
+                    if (offsetX > 0)
+                        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + offsetX);
+
+                    FontAwesome.Print(EColor.Green, FontAwesome.Check);
+                }
+            }
+            else
+            {
+                // Center the cross icon
+                var iconText = FontAwesome.Cross.ToString();
+                var iconWidth = ImGui.CalcTextSize(iconText).X;
+                float offsetX = (availableWidth - iconWidth) * 0.5f;
+
+                if (offsetX > 0)
+                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + offsetX);
+
+                FontAwesome.Print(EColor.Red, FontAwesome.Cross);
+            }
         }
 
         #endregion

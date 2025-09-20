@@ -8,22 +8,23 @@ namespace ICE.Scheduler.Handlers
         private static bool WasChanged = false;
         internal static void Tick()
         {
+            var currentState = SchedulerMain.State;
+            bool shouldDisable = SchedulerMain.State == IceState.GrabMission || SchedulerMain.State == IceState.AbandonMission;
+
             if (WasChanged)
             {
-                if (!SchedulerMain.State.HasFlag(IceState.GrabMission))
+                if (!shouldDisable)
                 {
                     WasChanged = false;
                     Unlock();
-                    IceLogging.Debug($"YesAlready unlocked");
                 }
             }
             else
             {
-                if (SchedulerMain.State.HasFlag(IceState.GrabMission))
+                if (shouldDisable)
                 {
                     WasChanged = true;
                     Lock();
-                    IceLogging.Debug($"YesAlready locked");
                 }
             }
         }

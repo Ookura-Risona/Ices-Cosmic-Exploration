@@ -2,7 +2,7 @@
 <Project Sdk="Dalamud.NET.Sdk/13.0">
 
   <PropertyGroup>
-    <Version>0.0.0.605</Version>
+    <Version>0.0.0.606</Version>
     <Description>Who said we couldn't explore the moon!.</Description>
     <PackageProjectUrl>https://github.com/goatcorp/ICE</PackageProjectUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
@@ -16,10 +16,10 @@
 
   <ItemGroup>
     <Content Include="ICE.json" />
-    <EmbeddedResource Include="Moons\Phaenna.png">
+    <EmbeddedResource Include="Resources\Phaenna.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="Moons\Sinus_Ardorum.png">
+    <EmbeddedResource Include="Resources\Sinus_Ardorum.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>

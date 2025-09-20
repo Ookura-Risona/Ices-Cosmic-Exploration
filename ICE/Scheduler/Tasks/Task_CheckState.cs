@@ -1,11 +1,7 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static ECommons.UIHelpers.AddonMasterImplementations.AddonMaster;
 using static ICE.Utilities.CosmicHelper;
 
@@ -21,28 +17,24 @@ namespace ICE.Scheduler.Tasks
 
         private static unsafe bool? CheckState()
         {
-            // Resetting the inital state, just to get a baseline set for everything.
-            SchedulerMain.State = IceState.Start;
             var currentMissionId = CosmicHelper.CurrentLunarMission;
 
             if (AddonHelper.IsAddonActive("WKSLottery"))
             {
+                IceLogging.Info("Setting State to gambling");
                 SchedulerMain.State = IceState.Gambling;
                 return true;
             }
             else
             {
-                if (C.StopWhenLevel)
+                if (C.StopWhenLevel && Player.Level >= C.TargetLevel)
                 {
-                    if (Player.Level >= C.TargetLevel)
-                    {
-                        {
-                            SchedulerMain.State = IceState.Idle;
-                            Svc.Chat.Print("已启用: 等级达到阈值后停止 \n" +
-                                           $"您的当前等级为: {Player.Level} , 目标: {C.TargetLevel}", "[I.C.E.]");
-                            return true;
-                        }
-                    }
+                    SchedulerMain.State = IceState.Idle;
+                    IceLogging.Info("Stop At Player Level is enabled. \n" +
+                                   $"Your current level is: {Player.Level} and Goal: {C.TargetLevel}", "[I.C.E.]");
+                    Svc.Chat.Print("已启用: 等级达到阈值后停止 \n" +
+                                   $"您的当前等级为: {Player.Level} , 目标: {C.TargetLevel}", "[I.C.E.]");
+                    return true;
                 }
                 if (C.StopOnceHitCosmicScore)
                 {
@@ -130,6 +122,7 @@ namespace ICE.Scheduler.Tasks
                     }
                     if (allComplete)
                     {
+                        IceLogging.Info("You have met all necessary relic xp, and you have \"Stop on Relic Completion\" enabled, so stopping for now");
                         SchedulerMain.State = IceState.Idle;
                         return true;
                     }
@@ -144,6 +137,7 @@ namespace ICE.Scheduler.Tasks
                         if (CosmicHandler.IsMissionTimedOut())
                         {
                             // Mission time has reached 0, checking the score/aborting if necessary
+                            IceLogging.Info("Mission is currently timed out. Going to abandon the mission state", "[Task: Check State]");
                             SchedulerMain.State = IceState.AbandonMission;
                             P.TaskManager.Tasks.Clear();
                             return true;
@@ -180,10 +174,13 @@ namespace ICE.Scheduler.Tasks
                             }
                             else if (Svc.Condition[ConditionFlag.Crafting] || P.Artisan.IsBusy())
                             {
+                                IceLogging.Info("We are on a crafter, and either in the middle of crafting or need to start.", "[Task: Check State]");
                                 SchedulerMain.State = IceState.Craft;
                             }
                             else if (Svc.Condition[ConditionFlag.Gathering])
                             {
+                                Mission_Settings.ResetNodeCounter();
+                                IceLogging.Info("On a gathering class, kicking over to the gathering action", "[Task: Check State]");
                                 SchedulerMain.State = IceState.Gather;
                             }
                             else
@@ -218,14 +215,17 @@ namespace ICE.Scheduler.Tasks
 
                     if (extractSpiritbond)
                     {
-                            SchedulerMain.State = IceState.Spiritbond;
+                        IceLogging.Info("Extracting spiritbond is enabled. And you have some to extract. Going to go do so now", "[Task: Check State]");
+                        SchedulerMain.State = IceState.Spiritbond;
                     }
                     else if (repairVendor ||  selfRepairCraft || selfRepairGather)
                     {
+                        IceLogging.Info("We need to repair! So going to go repair", "[Task: Check State]");
                         SchedulerMain.State = IceState.Repair;
                     }
                     else
                     {
+                        IceLogging.Info("Not in the middle of a mission, and don't need to repair/extract materia. So going to grab mission", "[Task: Check State]");
                         SchedulerMain.State = IceState.GrabMission;
                     }
                 }
