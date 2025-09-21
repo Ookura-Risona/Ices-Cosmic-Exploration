@@ -27,10 +27,10 @@ public static unsafe partial class CosmicHelper
     public static List<int> GreyIconList = new List<int>() { 91031, 91032, 91033, 91034, 91035, 91036, 91037, 91038, 91039, 91040, 91041 };
     public static Dictionary<CosmicWeather, int> WeatherIds = new()
     {
-        [CosmicWeather.UmbralWind] = 60219,
-        [CosmicWeather.MoonDust] = 60222,
-        [CosmicWeather.Clouds] = 60203,
-        [CosmicWeather.Rain] = 60207,
+        [CosmicWeather.灵风] = 60219,
+        [CosmicWeather.月尘] = 60222,
+        [CosmicWeather.阴云] = 60203,
+        [CosmicWeather.小雨] = 60207,
     };
 
     public static readonly int MinimumLevel = 10;
