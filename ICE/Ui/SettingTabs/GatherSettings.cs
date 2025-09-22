@@ -303,9 +303,10 @@ namespace ICE.Ui.SettingTabs
                         C.CordialMinGp = CordialMinGp;
                         C.Save();
                     }
-                    // 补充提醒
-                    ImGuiEx.HelpMarker("计算方法: 角色GP上限 - 强心剂补充量\n" +
-                   "例如: 角色GP上限为 900 时，使用高级强心剂(+400)，那么 GP 阈值应该设置为 500 以下");
+                    ImGui.SameLine();
+                    ImGuiEx.HelpMarker("此值为在使用强心剂之前, 最低所需的 GP(采集力)\n" +
+                                       "如果设置为 0, 即使启动了此功能也不会使用强心剂(因为... 您的 GP(采集力) 永远不会为 0)\n" +
+                                       "补充说明: 设定值不要为 0 或溢出 GP(采集力) 上限, 比如 900 上限则设定为 500 以下(举例高级强心剂), 设置为 0 无效是代码层面的问题");
 
                     ImGui.TreePop();
                 }

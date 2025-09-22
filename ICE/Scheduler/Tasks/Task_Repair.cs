@@ -166,7 +166,7 @@ namespace ICE.Scheduler.Tasks
 
             return false;
         }
-        private unsafe static bool OpenSelfRepair()
+        public unsafe static bool OpenSelfRepair()
         {
             if (GenericHelpers.TryGetAddonByName<AtkUnitBase>("Repair", out var x) && GenericHelpers.IsAddonReady(x))
             {
@@ -177,7 +177,7 @@ namespace ICE.Scheduler.Tasks
                 ActionManager.Instance()->UseAction(ActionType.GeneralAction, 6);
             return false;
         }
-        private unsafe static bool SelfRepair()
+        public unsafe static bool SelfRepair()
         {
             if (!PlayerHelper.NeedsRepair(C.RepairPercent))
             {
@@ -209,7 +209,7 @@ namespace ICE.Scheduler.Tasks
             }
             return false;
         }
-        private unsafe static bool CloseRepair()
+        public unsafe static bool CloseRepair()
         {
             if (GenericHelpers.TryGetAddonMaster<SelectYesno>("SelectYesno", out var Yesno) && Yesno.IsAddonReady)
             {

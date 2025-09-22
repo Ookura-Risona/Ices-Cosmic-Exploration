@@ -699,6 +699,7 @@ namespace ICE.Ui
                         ("任务名称:", mission.Name),
                         ("宇宙信用点:", mission.CosmoCredit.ToString()),
                         ("月球信用点", mission.LunarCredit.ToString()),
+                        ("铜星需求:", mission.BronzeScore.ToString()),
                         ("银星需求:", mission.SilverScore.ToString()),
                         ("金星需求:", mission.GoldScore.ToString())
                     };
@@ -732,6 +733,7 @@ namespace ICE.Ui
                         foreach (var xp in mission.RelicXpInfo.OrderBy(x => x.Key))
                         {
                             ImGui.TableNextRow();
+                            ImGui.TableSetColumnIndex(0);
                             string type = "";
                             switch (xp.Key)
                             {
