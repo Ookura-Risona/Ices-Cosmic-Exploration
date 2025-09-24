@@ -640,7 +640,8 @@ namespace ICE.Scheduler.Tasks
                 {
                     if (EzThrottler.Throttle("Desynthing the item"))
                     {
-                        ECommons.Automation.Callback.Fire(desynthWindow, true, 12, 0);
+                        if (!Player.IsBusy) // 临时处理动画锁异常导致永远卡在 Occupied39 的问题
+                            ECommons.Automation.Callback.Fire(desynthWindow, true, 12, 0);
                     }
                 }
                 else if (GenericHelpers.TryGetAddonMaster<WKSMissionInfomation>("WKSMissionInfomation", out var missionInfo) && missionInfo.IsAddonReady)
