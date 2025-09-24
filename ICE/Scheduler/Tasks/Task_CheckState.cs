@@ -30,8 +30,9 @@ namespace ICE.Scheduler.Tasks
                 if (C.StopWhenLevel && Player.Level >= C.TargetLevel)
                 {
                     SchedulerMain.State = IceState.Idle;
-                    IceLogging.ChatInfo("已启用: 等级达到阈值后停止 \n" +
+                    IceLogging.ChatInfo("等级达到阈值后停止条件已激活 \n" +
                                        $"您的当前等级为: {Player.Level} , 目标: {C.TargetLevel}", "[I.C.E.]");
+                    SoundAlert.PlaySoundAlert();
                     return true;
                 }
                 if (C.StopOnceHitCosmicScore)
@@ -40,9 +41,10 @@ namespace ICE.Scheduler.Tasks
 
                     if (scores.classScore >= C.CosmicScoreCap)
                     {
-                        IceLogging.ChatInfo("已启用: 技巧点达到阈值后停止 \n" +
+                        IceLogging.ChatInfo("技巧点达到阈值后停止条件已激活 \n" +
                                            $"您的当前技巧点为: {scores.classScore} , 目标: {C.CosmicScoreCap}", "[I.C.E.]");
                         SchedulerMain.State = IceState.Idle;
+                        SoundAlert.PlaySoundAlert();
                         return true;
                     }
                 }
@@ -56,9 +58,10 @@ namespace ICE.Scheduler.Tasks
                     PlayerHelper.GetItemCount(itemId, out var credits);
                     if (credits >= C.LunarCreditsCap)
                     {
-                        IceLogging.ChatInfo($"You've either hit the Lunar Credit threshold, or gone above it.\n" +
-                                            $"Stopping I.C.E.", "[I.C.E.]");
+                        IceLogging.ChatInfo($"您的月球/法恩娜信用点已达到或超过阈值 \n" +
+                                            $"I.C.E. 停止运行", "[I.C.E.]");
                         SchedulerMain.State = IceState.Idle;
+                        SoundAlert.PlaySoundAlert();
                         return true;
                     }
                 }
@@ -68,6 +71,7 @@ namespace ICE.Scheduler.Tasks
                     {
                         IceLogging.ChatInfo($"宇宙信用点已达到阈值: {hud.CosmoCredit} , 插件停止运行", "[I.C.E.]");
                         SchedulerMain.State = IceState.Idle;
+                        SoundAlert.PlaySoundAlert();
                         return true;
                     }
                 }
@@ -119,6 +123,7 @@ namespace ICE.Scheduler.Tasks
                     {
                         IceLogging.Info("You have met all necessary relic xp, and you have \"Stop on Relic Completion\" enabled, so stopping for now");
                         SchedulerMain.State = IceState.Idle;
+                        SoundAlert.PlaySoundAlert();
                         return true;
                     }
                     else

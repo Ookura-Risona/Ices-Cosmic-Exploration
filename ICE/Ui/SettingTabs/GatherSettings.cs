@@ -147,7 +147,7 @@ namespace ICE.Ui.SettingTabs
                     {
                         int minGp = currentMinGp;
                         ImGui.AlignTextToFramePadding();
-                        ImGui.Text("最低 GP");
+                        ImGui.Text("低于此 GP 使用强心剂");
                         ImGui.SameLine();
                         ImGui.SetNextItemWidth(200);
                         if (ImGui.SliderInt($"###Slider{uniqueId}{entryName}", ref minGp, minGpLimit, maxGpLimit))
@@ -298,7 +298,7 @@ namespace ICE.Ui.SettingTabs
                         C.Save();
                     }
                     ImGui.SetNextItemWidth(200);
-                    if (ImGui.SliderInt("GP 阈值", ref CordialMinGp, 0, maxGp))
+                    if (ImGui.SliderInt("GP 低于设定值时使用强心剂", ref CordialMinGp, 0, maxGp))
                     {
                         C.CordialMinGp = CordialMinGp;
                         C.Save();

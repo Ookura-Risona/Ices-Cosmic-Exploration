@@ -132,6 +132,8 @@ namespace ICE.Config
         public bool UseMountOutsideMission { get; set; } = true;
         public bool UseMountInMission { get; set; } = true;
         public float LeftColumnWidth { get; set; } = 300f;
+        public bool PlaySoundAlert { get; set; } = false;
+        public Sounds Sounds { get; set; } = Sounds.Sound01;
         public bool AutoAntiAFK { get; set; } = true; // Add: 自动切换离开状态默认
 
         #endregion

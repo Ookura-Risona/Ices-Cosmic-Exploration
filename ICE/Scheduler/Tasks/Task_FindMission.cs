@@ -447,6 +447,27 @@ namespace ICE.Scheduler.Tasks
                     if (C.XPRelicOnlyEnabled && BasicMissionCount != 0)
                     {
                         IceLogging.Debug($"Only relic grind was enabled. Continuing to re-roll mission now");
+                        HashSet<uint> EnabledMissions = new();
+                        foreach (var mission in C.MissionConfig.Where(x => x.Value.Enabled && SheetMissionDict[x.Key].Jobs.Contains(Player.JobId)))
+                        {
+                            EnabledMissions.Add(mission.Key);
+                        }
+
+
+                        string exARankStr = string.Join(", ", ExARankMissions);
+                        string aRankStr = string.Join(", ", ARankMissions);
+                        string bRankStr = string.Join(", ", BRankMissions);
+                        string cRankStr = string.Join(", ", CRankMissions);
+                        string dRankStr = string.Join(", ", DRankMissions);
+                        string enabledStr = string.Join(", ", EnabledMissions);
+
+                        IceLogging.Debug($"ExA Rank: {exARankStr}");
+                        IceLogging.Debug($"A Rank: {aRankStr}");
+                        IceLogging.Debug($"B Rank: {bRankStr}");
+                        IceLogging.Debug($"C Rank: {cRankStr}");
+                        IceLogging.Debug($"D Rank: {dRankStr}");
+                        IceLogging.Debug($"Enabled Missions: {enabledStr}");
+                        IceLogging.Debug($"Planet: {Player.Territory}");
                         P.TaskManager.Insert(() => FindReroll(), "Finding Reroll mission for Relic Grind");
                         return true;
                     }
@@ -745,7 +766,6 @@ namespace ICE.Scheduler.Tasks
                 new(() => Navmesh_MoveToMission(missionId), "Checking if movement is necessary", Utils.TaskConfig),
                 new(() => FrameDelay(8), "Waiting 8 frames before next action"),
                 new(() => GrabMission(missionId), "Selecting mission for grabbing"),
-                new(() => Mission_Settings.nodeTotal = 0, "Resetting total node counter"),
                 new(() => FrameDelay(16), "Giving time before you kick in the mission")
             );
         }
@@ -770,8 +790,11 @@ namespace ICE.Scheduler.Tasks
                             SchedulerMain.State = IceState.ExecutingMission;
                         IceLogging.Debug($"Current State upon  grabbing mission: {SchedulerMain.State}");
                         P.TaskManager.Tasks.Clear();
+                        Mission_Settings.nodeTotal = 0;
                         P.TaskManager.Insert(() => CosmicHelper.CurrentLunarMission != 0);
                         IceLogging.Debug($"Are we expected to reroll? {reroll}", "[Grab Mission]");
+                        Mission_Settings.StartJob = Player.JobId;
+
                         return true;
                     }
                     else
@@ -899,58 +922,7 @@ namespace ICE.Scheduler.Tasks
                 // Then need to add the last path to it once the base has been generated, to make sure that you're facing to the fishing hole properly.
                 var location = missionEntry.MapPosition;
                 var distance = Player.DistanceTo(location);
-                if (GatheringUtil.FishingLocation.TryGetValue(location, out var fisherSpotInfos))
-                {
-                    if (!P.Navmesh.IsRunning())
-                    {
-                        foreach (var spot in fisherSpotInfos)
-                        {
-                            if (Player.DistanceTo(spot.FishingSpot) < 2)
-                            {
-                                return true;
-                            }
-                        }
-
-                        // Not in any of the pre-made fishing spots. So time to calculate a path and move to it.
-                        if (fishingPath.Count == 0 && !P.Navmesh.PathfindInProgress())
-                        {
-                            // The current pathfinding does not have a route already made up. Time to create one. 
-                            // Make sure to store the route that is selected somewhere, so it knows which one to pathfind to next
-                            if (EzThrottler.Throttle("Starting to find path"))
-                            {
-                                int randomIndex = _random.Next(fisherSpotInfos.Count);
-                                fishingEntry = fisherSpotInfos[randomIndex];
-
-                                UpdateFishingPath(fishingEntry.NavtoSpot);
-                                // Fire and forget - this will update pathTo when complete
-                            }
-                        }
-                        else if (fishingPath.Count > 0 && !P.Navmesh.IsRunning())
-                        {
-                            if (EzThrottler.Throttle("Telling navmesh to move to the fishing spot"))
-                            {
-                                // A path has been made up! Time to
-                                // -> Randomly select a spot to move to
-                                // -> Add that spot to the end of the route
-                                // -> Proceed to move to that route
-                                fishingPath.Add(fishingEntry.FishingSpot);
-                                P.Navmesh.MoveTo(new List<Vector3>(fishingPath), false);
-                                fishingPath.Clear(); // this just exist to reset the current path in case you stop navmesh somehow
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (PlayerHelper.IsPlayerNotBusy() && !Svc.Condition[ConditionFlag.Mounted] && C.UseMountOutsideMission && distance > C.MountRadius)
-                        {
-                            if (EzThrottler.Throttle("Attempting to mount up"))
-                            {
-                                Utils.MountAction();
-                            }
-                        }
-                        return false;
-                    }
-                }
+                // TODO: Fix this for fisher
             }
             else
             {
