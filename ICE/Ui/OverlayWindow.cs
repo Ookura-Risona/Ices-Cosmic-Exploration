@@ -31,7 +31,8 @@ namespace ICE.Ui
         {
             ImGui.Text($"当前状态: " + SchedulerMain.State.ToString());
 #if DEBUG
-            ImGui.Text($"当前收藏品状态:: {Mission_Settings.CollectableStep}");
+            ImGui.Text($"当前收藏品状态: {Mission_Settings.CollectableStep}");
+            ImGui.Text($"当前节点计数: {Mission_Settings.nodeTotal}");
 #endif
 
             ImGuiHelpers.ScaledDummy(2);
@@ -98,9 +99,9 @@ namespace ICE.Ui
             ImGui.Separator();
             ImGuiHelpers.ScaledDummy(2);
 
-            if (ImGuiEx.IconButton("\uf013##Config", "打开 ICE")) // Open ICE
+            if (ImGuiEx.IconButton(FontAwesomeIcon.Home, "打开 ICE"))
             {
-                P.mainWindow2.IsOpen = true;
+                P.mainWindow.IsOpen = true;
             }
             ImGui.SameLine();
 

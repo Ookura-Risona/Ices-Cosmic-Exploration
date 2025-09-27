@@ -1187,5 +1187,17 @@ public static unsafe partial class CosmicHelper
 
     };
 
+    public static Dictionary<uint, List<uint>> MissionUnlock = new()
+    {
+        [499] = new() { 82, 397 },
+        [500] = new() { 217, 397 },
+        [501] = new() { 262, 397 },
+        [505] = new() { 37, 442 },
+        [506] = new() { 127, 442 },
+        [507] = new() { 307, 442 },
+        [510] = new() { 172, 487 },
+        [511] = new() { 352, 487 }
+    };
+
     #endregion
 }

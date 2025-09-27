@@ -1,13 +1,5 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
-using ECommons.Configuration;
 using ECommons.GameHelpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using static Dalamud.Interface.Utility.Raii.ImRaii;
 using static ECommons.UIHelpers.AddonMasterImplementations.AddonMaster;
 
 namespace ICE.Scheduler.Tasks
@@ -241,6 +233,13 @@ namespace ICE.Scheduler.Tasks
             {
                 if (missionInfo.Addon->AtkValuesCount > 4) // Really just here to make sure that the addon atkValues are fully loaded...
                 {
+                    if (CosmicHandler.IsMissionTimedOut())
+                    {
+                        SchedulerMain.State = IceState.AbandonMission;
+                        P.TaskManager.Tasks.Clear();
+                        return true;
+                    }
+
                     var Id = CosmicHelper.CurrentLunarMission;
                     // var mission = CosmicHelper.Dict_CosmicMissions[Id];
                     var mission = CosmicHelper.SheetMissionDict[Id];
@@ -375,6 +374,7 @@ namespace ICE.Scheduler.Tasks
                     if (CosmicHandler.IsMissionTimedOut())
                     {
                         SchedulerMain.State = IceState.AbandonMission;
+                        P.TaskManager.Tasks.Clear();
                         return true;
                     }
 
@@ -424,6 +424,8 @@ namespace ICE.Scheduler.Tasks
                                 // We've hit the node total, and can't gather anymore. Just going to try and turnin/abandon
                                 SchedulerMain.State = IceState.AbandonMission;
                                 Mission_Settings.nodeTotal = 0;
+                                P.TaskManager.Tasks.Clear();
+                                return true;
                             }
                         }
 
@@ -549,6 +551,13 @@ namespace ICE.Scheduler.Tasks
             {
                 if (missionInfo.Addon->AtkValuesCount > 4) // Really just here to make sure that the addon atkValues are fully loaded...
                 {
+                    if (CosmicHandler.IsMissionTimedOut())
+                    {
+                        SchedulerMain.State = IceState.AbandonMission;
+                        P.TaskManager.Tasks.Clear();
+                        return true;
+                    }
+
                     var Id = CosmicHelper.CurrentLunarMission;
                     // var mission = CosmicHelper.Dict_CosmicMissions[Id];
                     var mission = CosmicHelper.SheetMissionDict[Id];
@@ -620,7 +629,19 @@ namespace ICE.Scheduler.Tasks
                     }
                     else
                     {
+                        var config = C.MissionConfig[Id];
+                        var currentScore = missionInfo.CurrentScore;
+                        var bronzeScore = mission.BronzeScore;
+                        var silverScore = mission.SilverScore;
+                        var goldScore = mission.GoldScore;
+
                         IceLogging.Debug("Minimum scoring isn't met for your current preset. Continuing on", "[Craft Scoring]");
+                        IceLogging.Info("Currently Enabled:\n" +
+                                        $"Bronze Enable: {config.TurninBronze} | Score: {bronzeScore}" +
+                                        $"Silver Enable: {config.TurninSilver} | Score: {silverScore}" +
+                                        $"Gold Enabled: {config.TurninGold} | Score: {goldScore}" +
+                                        $"Any Turnin Enabled: {config.AutoTurnin}" +
+                                        $"Current Score: {missionInfo.CurrentScore}");
 
                         return true;
                     }

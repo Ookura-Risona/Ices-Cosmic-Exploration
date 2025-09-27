@@ -1,6 +1,7 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game.WKS;
+using ICE.Sounds;
 using System.Collections.Generic;
 using static ECommons.UIHelpers.AddonMasterImplementations.AddonMaster;
 using static ICE.Utilities.CosmicHelper;
@@ -32,7 +33,11 @@ namespace ICE.Scheduler.Tasks
                     SchedulerMain.State = IceState.Idle;
                     IceLogging.ChatInfo("等级达到阈值后停止条件已激活 \n" +
                                        $"您的当前等级为: {Player.Level} , 目标: {C.TargetLevel}", "[I.C.E.]");
-                    SoundAlert.PlaySoundAlert();
+                    if (C.PlaySoundAlert)
+                    {
+                        _ = SoundPlayer.PlaySoundAsync();
+                    }
+                    
                     return true;
                 }
                 if (C.StopOnceHitCosmicScore)
@@ -44,7 +49,10 @@ namespace ICE.Scheduler.Tasks
                         IceLogging.ChatInfo("技巧点达到阈值后停止条件已激活 \n" +
                                            $"您的当前技巧点为: {scores.classScore} , 目标: {C.CosmicScoreCap}", "[I.C.E.]");
                         SchedulerMain.State = IceState.Idle;
-                        SoundAlert.PlaySoundAlert();
+                        if (C.PlaySoundAlert)
+                        {
+                            _ = SoundPlayer.PlaySoundAsync();
+                        }
                         return true;
                     }
                 }
@@ -61,7 +69,10 @@ namespace ICE.Scheduler.Tasks
                         IceLogging.ChatInfo($"您的月球/法恩娜信用点已达到或超过阈值 \n" +
                                             $"I.C.E. 停止运行", "[I.C.E.]");
                         SchedulerMain.State = IceState.Idle;
-                        SoundAlert.PlaySoundAlert();
+                        if (C.PlaySoundAlert)
+                        {
+                            _ = SoundPlayer.PlaySoundAsync();
+                        }
                         return true;
                     }
                 }
@@ -71,7 +82,10 @@ namespace ICE.Scheduler.Tasks
                     {
                         IceLogging.ChatInfo($"宇宙信用点已达到阈值: {hud.CosmoCredit} , 插件停止运行", "[I.C.E.]");
                         SchedulerMain.State = IceState.Idle;
-                        SoundAlert.PlaySoundAlert();
+                        if (C.PlaySoundAlert)
+                        {
+                            _ = SoundPlayer.PlaySoundAsync();
+                        }
                         return true;
                     }
                 }
@@ -123,7 +137,10 @@ namespace ICE.Scheduler.Tasks
                     {
                         IceLogging.Info("You have met all necessary relic xp, and you have \"Stop on Relic Completion\" enabled, so stopping for now");
                         SchedulerMain.State = IceState.Idle;
-                        SoundAlert.PlaySoundAlert();
+                        if (C.PlaySoundAlert)
+                        {
+                            _ = SoundPlayer.PlaySoundAsync();
+                        }
                         return true;
                     }
                     else

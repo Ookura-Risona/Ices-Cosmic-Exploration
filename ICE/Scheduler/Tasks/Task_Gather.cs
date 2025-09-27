@@ -472,7 +472,7 @@ namespace ICE.Scheduler.Tasks
             };
         }
 
-        public static bool NormalGpRotation(int collectability, bool missingDur = false)
+        public static unsafe bool NormalGpRotation(int collectability, bool missingDur = false)
         {
             if (EzThrottler.Throttle("Executing HighGPRotation", 100))
             {
@@ -481,8 +481,14 @@ namespace ICE.Scheduler.Tasks
 
                 if (step == 0)
                 {
-                    // Start of the rotation
-                    if (CanUseCollectableAction("Scrutiny"))
+                    if (!PlayerHelper.HasStatusId(3911) && GatheringUtil.CollectStandardCharges() > 0)
+                    {
+                        if (EzThrottler.Throttle("Using special buff", 1000))
+                        {
+                            ActionManager.Instance()->UseAction(ActionType.GeneralAction, 27);
+                        }
+                    }
+                    else if (CanUseCollectableAction("Scrutiny"))
                     {
                         UseCollectableBuff("Scrutiny");
                     }
@@ -497,7 +503,14 @@ namespace ICE.Scheduler.Tasks
                     // Option 1
                     if (!PlayerHelper.HasStatusId(3911))
                     {
-                        if (CanUseCollectableAction("Scrutiny"))
+                        if (!PlayerHelper.HasStatusId(3911) && GatheringUtil.CollectStandardCharges() > 0)
+                        {
+                            if (EzThrottler.Throttle("Using special buff"))
+                            {
+                                ActionManager.Instance()->UseAction(ActionType.GeneralAction, 27);
+                            }
+                        }
+                        else if (CanUseCollectableAction("Scrutiny"))
                         {
                             UseCollectableBuff("Scrutiny");
                         }
@@ -589,7 +602,10 @@ namespace ICE.Scheduler.Tasks
             var jobId = Player.JobId;
 
             var actionId = collectorBuffs[action].ClassAction[jobId].ActionId;
-            ActionManager.Instance()->UseAction(ActionType.Action, actionId);
+            if (EzThrottler.Throttle("Using Action Buff", 500))
+            {
+                ActionManager.Instance()->UseAction(ActionType.Action, actionId);
+            }
         }
 
         public static unsafe void UseCollectableAction(string action)
@@ -598,7 +614,10 @@ namespace ICE.Scheduler.Tasks
             var jobId = Player.JobId;
 
             var actionId = collectorAction[action].ClassAction[jobId].ActionId;
-            ActionManager.Instance()->UseAction(ActionType.Action, actionId);
+            if (EzThrottler.Throttle("using Action Action for collectables"))
+            {
+                ActionManager.Instance()->UseAction(ActionType.Action, actionId);
+            }
         }
 
         public static bool? CheckReduceMission()

@@ -68,6 +68,7 @@ namespace ICE.Config
         };
         public bool ShowSinusMissions { get; set; } = true;
         public bool ShowPhaennaMissions { get; set; } = true;
+        public bool RemoveAfterGold { get; set; } = false;
 
         #endregion
 
@@ -77,6 +78,10 @@ namespace ICE.Config
         public bool ShowManualMode { get; set; } = false;
         public bool HideUnsupportedMissions { get; set; } = false;
         public bool AutoPickCurrentJob { get; set; } = false;
+        public bool ShowCompletionWindow { get; set; } = false;
+        public bool ShowCompletionOnlyJob { get; set; } = false;
+        public bool ShowSelectedJobOnly { get; set; } = false;
+        public bool ShowCompletion_MissingGold { get; set; } = false;
 
         #endregion
 
@@ -133,7 +138,7 @@ namespace ICE.Config
         public bool UseMountInMission { get; set; } = true;
         public float LeftColumnWidth { get; set; } = 300f;
         public bool PlaySoundAlert { get; set; } = false;
-        public Sounds Sounds { get; set; } = Sounds.Sound01;
+        public float SoundVolume { get; set; } = 0.5f;
         public bool AutoAntiAFK { get; set; } = true; // Add: 自动切换离开状态默认
 
         #endregion
