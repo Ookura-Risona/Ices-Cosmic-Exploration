@@ -771,7 +771,7 @@ namespace ICE.Ui
                 if (ImGui.IsItemHovered())
                 {
                     ImGui.BeginTooltip();
-                    ImGui.Text("Mission ID number");
+                    ImGui.Text("任务 ID 数字");
                     ImGui.EndTooltip();
                 }
 
@@ -882,7 +882,7 @@ namespace ICE.Ui
                     bool critical = missionInfo.Attributes.HasFlag(MissionAttributes.Critical);
 
                     bool dualclass = craftMission && (gatherMission || fishMission);
-                    bool unsupported = UnsupportedMissions.Ids.Contains(Id) || missionInfo.Jobs.Contains(18) || (missionInfo.Jobs.Overlaps(CosmicHelper.GatheringJobList) && critical);
+                    bool unsupported = UnsupportedMissions.Ids.Contains(Id) || (missionInfo.Jobs.Overlaps(CosmicHelper.GatheringJobList) && critical);
                     bool hideUnsupported = C.HideUnsupportedMissions;
 
                     if (unsupported && hideUnsupported)
@@ -1581,7 +1581,7 @@ namespace ICE.Ui
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("按 任务 ID 搜索"); // Search by Mission ID Number
+                    ImGui.SetTooltip("按 任务ID 搜索"); // Search by Mission ID Number
                 }
 
                 // Column 4: Mission Name

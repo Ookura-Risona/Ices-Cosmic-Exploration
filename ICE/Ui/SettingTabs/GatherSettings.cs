@@ -473,7 +473,28 @@ namespace ICE.Ui.SettingTabs
                 C.Save();
             }
 
+            ImGui.Text("双职业任务制作数量去哪了?"); // Where'd the dual craft amount go?
+            ImGui.SameLine();
+            ImGui.Dummy(new(5, 0));
+            ImGui.SameLine();
+            ImGui.TextDisabled("?");
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetNextWindowSize(new(400.0f, 0.0f)); // Fixed width, auto height
+                ImGui.BeginTooltip();
+
+                ImGui.TextWrapped("简答: 现在已经内置了\n" +
+                 "详解: 说实话, 这个系统本身就很繁琐。而且随着 SE 决定第二个星球不再有双职业制作任务, 我觉得直接把它绑到评价系统里会更好。实际上你只需要:\n" +
+                 "金星: 3 个物品\n" +
+                 "银星: 2 个物品\n" +
+                 "铜星: 1 个物品\n" +
+                 "就能达到门槛。即使第一次没达成, 它也会继续采集。 再加上这样一来，我就不用为了...... 4 个任务去管理钓鱼配置文件了？在我看来有点小小的多余。\n" +
+                 "所以现在的运作方式是: 选择一项汇报选项(金星/任意 都一样), 它会采集制作所需数量 -> 完成后自动汇报任务。\n" +
+                 "现在你们谁都不能再让它去做 27 个物品了。停下！它说的是制作 (╯°Д°)╯︵/(.□ . \\)");
+                ImGui.EndTooltip();
+            }
             // Multiply gathered items on FIRST gather loop only. Should only be used for Dual Class really.
+            /*
             int gatherMult = entry.DualClassCraftAmount;
             ImGui.SetNextItemWidth(100);
             if (ImGui.InputInt("双职业任务制作数量", ref gatherMult, 1))
@@ -482,6 +503,7 @@ namespace ICE.Ui.SettingTabs
                 C.Save();
             }
             ImGuiEx.HelpMarker("此选项将增加您在切换到制作流程前需要收集的物品数量(即达到\"完成\"状态)。\n根据您需要制作多少物品才能达到目标技巧点来调整此数值。\n只影响双职业任务。");
+            */
 
             // Boon Increase 2 (+30% Increase)
             DrawBuffSetting(

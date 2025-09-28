@@ -659,7 +659,7 @@ namespace ICE.Scheduler.Tasks
                 {
                     if (EzThrottler.Throttle("Desynthing the item"))
                     {
-                        if (!Player.IsBusy) // 临时处理动画锁异常导致永远卡在 Occupied39 的问题
+                        if (!Player.IsBusy)
                             ECommons.Automation.Callback.Fire(desynthWindow, true, 12, 0);
                     }
                 }
