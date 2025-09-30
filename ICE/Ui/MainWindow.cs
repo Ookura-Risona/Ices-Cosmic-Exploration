@@ -720,7 +720,7 @@ namespace ICE.Ui
             {
                 float padding = 10f;
 
-                // Setup ALL columns - all visible by default, users can hide what they don't want via right-click
+                // Setup ALL columns
                 ImGui.TableSetupColumn("启用");
                 ImGui.TableSetupColumn("手动");
                 ImGui.TableSetupColumn("ID");
@@ -748,16 +748,44 @@ namespace ICE.Ui
                 // Column 0: Enabled
                 ImGui.TableSetColumnIndex(0);
                 ImGui.TableHeader("启用");
+                if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                {
+                    ImGui.OpenPopup("Enabled Options");
+                }
                 if (ImGui.IsItemHovered())
                 {
                     ImGui.BeginTooltip();
                     ImGui.Text("启用/禁用 自动执行任务");
+                    ImGui.Text($"左键点击选项");
                     ImGui.EndTooltip();
+                }
+                if (ImGui.BeginPopup("Enabled Options"))
+                {
+                    if (ImGui.Button("全部启用"))
+                    {
+                        foreach (var mission in missions)
+                        {
+                            C.MissionConfig[mission.id].Enabled = true;
+                        }
+                        C.Save();
+                    }
+
+                    if (ImGui.Button("全部禁用"))
+                    {
+                        foreach (var mission in missions)
+                        {
+                            C.MissionConfig[mission.id].Enabled = false;
+                        }
+                        C.Save();
+                    }
+
+                    ImGui.EndPopup();
                 }
 
                 // Column 1: Manual
                 ImGui.TableSetColumnIndex(1);
-                ImGui.TableHeader("手动");
+                ImGui.AlignTextToFramePadding();
+                ImGui.TableHeader("手动l");
                 if (ImGui.IsItemHovered())
                 {
                     ImGui.BeginTooltip();
@@ -1524,6 +1552,44 @@ namespace ICE.Ui
 
         private unsafe void CompletionWindow()
         {
+            List<uint> missionIds = new();
+            foreach (var mission in CosmicHelper.SheetMissionDict)
+            {
+                if (C.ShowCompletionOnlyJob && !mission.Value.Jobs.Contains(Player.JobId))
+                    continue;
+
+                if (C.ShowSelectedJobOnly && !mission.Value.Jobs.Contains(C.SelectedJob))
+                    continue;
+
+                if (!C.ShowSinusMissions && mission.Value.TerritoryId == 1237)
+                    continue;
+
+                if (!C.ShowPhaennaMissions && mission.Value.TerritoryId == 1291)
+                    continue;
+
+                if (C.ShowCompletion_MissingGold)
+                {
+                    var managerPtr = WKSManager.Instance();
+                    if (managerPtr == null) continue;
+
+                    var manager = (WKSManagerCustom*)managerPtr;
+                    var isGold = manager->IsMissionGolded(mission.Key);
+
+                    if (isGold)
+                        continue;
+                }
+
+                if (!string.IsNullOrEmpty(_idSearchText) && !mission.Key.ToString().Contains(_idSearchText, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (!string.IsNullOrEmpty(_nameSearchText) && !mission.Value.Name.Contains(_nameSearchText, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                missionIds.Add(mission.Key);
+            }
+
+
+
             ImGuiTableFlags tableFlags = ImGuiTableFlags.RowBg |
                             ImGuiTableFlags.Borders |
                             ImGuiTableFlags.Reorderable |         // Allow column reordering
@@ -1565,11 +1631,37 @@ namespace ICE.Ui
                 // Column 2: Enabled
                 ImGui.TableSetColumnIndex(2);
                 ImGui.TableHeader("启用");
+                if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                {
+                    ImGui.OpenPopup("Enabled Options");
+                }
                 if (ImGui.IsItemHovered())
                 {
                     ImGui.BeginTooltip();
-                    ImGui.Text("启用任务以完成"); // Enable the mission for completion
+                    ImGui.Text("启用任务以完成");
                     ImGui.EndTooltip();
+                }
+                if (ImGui.BeginPopup("Enabled Options"))
+                {
+                    if (ImGui.Button("全部启用"))
+                    {
+                        foreach (var mission in missionIds)
+                        {
+                            C.MissionConfig[mission].Enabled = true;
+                        }
+                        C.Save();
+                    }
+
+                    if (ImGui.Button("全部禁用"))
+                    {
+                        foreach (var mission in missionIds)
+                        {
+                            C.MissionConfig[mission].Enabled = false;
+                        }
+                        C.Save();
+                    }
+
+                    ImGui.EndPopup();
                 }
 
                 // Column 3: ID
