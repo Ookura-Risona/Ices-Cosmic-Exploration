@@ -785,7 +785,7 @@ namespace ICE.Ui
                 // Column 1: Manual
                 ImGui.TableSetColumnIndex(1);
                 ImGui.AlignTextToFramePadding();
-                ImGui.TableHeader("手动l");
+                ImGui.TableHeader("手动");
                 if (ImGui.IsItemHovered())
                 {
                     ImGui.BeginTooltip();
