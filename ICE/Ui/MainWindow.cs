@@ -756,7 +756,7 @@ namespace ICE.Ui
                 {
                     ImGui.BeginTooltip();
                     ImGui.Text("启用/禁用 自动执行任务");
-                    ImGui.Text($"左键点击选项");
+                    ImGui.Text($"左键点击查看选项");
                     ImGui.EndTooltip();
                 }
                 if (ImGui.BeginPopup("Enabled Options"))
