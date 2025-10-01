@@ -10,6 +10,7 @@ namespace ICE.Ui.SettingTabs
         private static bool SelfRepairGather = C.SelfRepairGather;
         private static float SelfRepairPercent = C.RepairPercent;
         private static bool SelfSpiritbondGather = C.SelfSpiritbondGather;
+        private static bool AutoFisherCast = C.AutoFisherCast;
         private static bool AutoCordial = C.AutoCordial;
         private static bool InverseCordialPrio = C.inverseCordialPrio;
         private static bool UseOnFisher = C.UseOnFisher;
@@ -266,6 +267,15 @@ namespace ICE.Ui.SettingTabs
                     C.Save();
                 }
             }
+            if (ImGui.Checkbox("自动在钓鱼任务开始时抛竿", ref AutoFisherCast)) // 新增: 自动在钓鱼任务开始时抛竿，用于适配 MissFisher 的钓鱼逻辑
+            {
+                if (C.AutoFisherCast != AutoFisherCast)
+                {
+                    C.AutoFisherCast = AutoFisherCast;
+                    C.Save();
+                }
+            }
+            ImGuiEx.HelpMarker("自动在捕鱼人任务开始时执行\"抛竿\"技能, 取消勾选则不会在任务开始时自动抛竿。");
             if (ImGui.Checkbox("自动强心剂", ref AutoCordial))
             {
                 C.AutoCordial = AutoCordial;

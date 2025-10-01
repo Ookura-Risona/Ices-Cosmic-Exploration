@@ -126,6 +126,8 @@ namespace ICE.Scheduler.Tasks
 
         public static unsafe bool? GoldCheck()
         {
+            IceLogging.Debug($"Starting GoldCheck for PreviousMissionId: {PreviousMissionId}");
+
             var managerPtr = WKSManager.Instance();
             if (managerPtr == null) return false;
 
@@ -134,6 +136,7 @@ namespace ICE.Scheduler.Tasks
 
             if (C.RemoveAfterGold && isGold)
             {
+                IceLogging.Info($"Disabling mission {PreviousMissionId} after gold rating");
                 C.MissionConfig[PreviousMissionId].Enabled = false;
             }
             if (C.RemoveAfterGold && !isGold)

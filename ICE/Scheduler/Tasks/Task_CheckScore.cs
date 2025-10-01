@@ -46,12 +46,12 @@ namespace ICE.Scheduler.Tasks
         public static unsafe bool? Fish()
         {
             string handle = "[Score Check: Fish]";
+            var id = CosmicHelper.CurrentLunarMission;
 
             if (GenericHelpers.TryGetAddonMaster<WKSMissionInfomation>("WKSMissionInfomation", out var missionInfo) && missionInfo.IsAddonReady)
             {
                 if (missionInfo.Addon->AtkValuesCount > 4) // Really just here to make sure that the addon atkValues are fully loaded...
                 {
-                    var id = CosmicHelper.CurrentLunarMission;
                     if (CosmicHelper.SheetMissionDict.TryGetValue(id, out var missionEntry))
                     {
                         if (missionEntry.Attributes.HasFlag(MissionAttributes.ScoreTimeRemaining))
@@ -440,7 +440,7 @@ namespace ICE.Scheduler.Tasks
         {
             if (GenericHelpers.TryGetAddonMaster<WKSMissionInfomation>("WKSMissionInfomation", out var missionInfo) && missionInfo.IsAddonReady)
             {
-                if (missionInfo.Addon ->AtkValuesCount > 4) // Really just here to make sure that the addon atkValues are fully loaded...
+                if (missionInfo.Addon->AtkValuesCount > 4) // Really just here to make sure that the addon atkValues are fully loaded...
                 {
                     if (CosmicHandler.IsMissionTimedOut())
                     {

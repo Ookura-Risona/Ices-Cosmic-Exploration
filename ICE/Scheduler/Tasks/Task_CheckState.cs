@@ -14,6 +14,10 @@ namespace ICE.Scheduler.Tasks
         public static void Enqueue()
         {
             PlayerHandlers.AutoAntiAFK();
+            if (Svc.ClientState.LocalPlayer.ClassJob.RowId == 18)
+            {
+                PlayerHandlers.CheckHookPluginConflicts();
+            }
             P.TaskManager.Enqueue(() => CheckState(), "Checking to see what state we should be in");
         }
 

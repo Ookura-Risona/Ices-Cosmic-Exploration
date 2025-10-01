@@ -1,6 +1,8 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using ICE.Sounds;
+using ICE.Config;
 using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
@@ -27,8 +29,53 @@ namespace ICE.Scheduler.Tasks
             // if craft not required, fish
             // wait for fishing to be done
 
-            P.TaskManager.Enqueue(() => Task_CheckScore.Fish());
-            P.TaskManager.Enqueue(() => FishingCheck());
+            // 追加检查任务是否正在进行中，重走处理提交任务的流程，这是为了处理 ICE 插件被其他钓鱼插件汇报任务所导致的混乱
+            // 其他几个任务也没有任务中检查... 出问题再修吧
+            var id = CosmicHelper.CurrentLunarMission;
+
+            if (id == 0)
+            {
+                if (P.AutoHook.Installed)
+                {
+                    P.AutoHook.DeleteAllAnonymousPresets();
+                }
+
+                if (Mission_Settings.StopAfterCurrent)
+                {
+                    IceLogging.Debug($"Stop after current was enabled. Stopping now", "[Fishing Patch]");
+                    SchedulerMain.State = IceState.Idle;
+                    Mission_Settings.StopAfterCurrent = false;
+                    P.TaskManager.Tasks.Clear();
+
+                    if (C.RemoveAfterGold)
+                    {
+                        P.TaskManager.Enqueue(() => Task_TurninMission.GoldCheck());
+                    }
+                    if (C.PlaySoundAlert)
+                    {
+                        _ = SoundPlayer.PlaySoundAsync();
+                    }
+                }
+                else
+                {
+                    IceLogging.Debug($"Stop after current wasn't enabled. Grabbing another mission", "[Fishing Patch]");
+                    SchedulerMain.State = IceState.Start;
+                    if (C.RemoveAfterGold)
+                    {
+                        P.TaskManager.Enqueue(() => Task_TurninMission.GoldCheck());
+                    }
+                }
+
+                //SchedulerMain.State = IceState.Start;
+                //IceLogging.Debug("Restarting...", "[Fishing Patch]");
+                return;
+            }
+            else
+            {
+                Task_TurninMission.PreviousMissionId = id;
+                P.TaskManager.Enqueue(() => Task_CheckScore.Fish());
+                P.TaskManager.Enqueue(() => FishingCheck());
+            }
         }
 
         private static unsafe bool? FishingCheck()
@@ -115,7 +162,10 @@ namespace ICE.Scheduler.Tasks
                 else if (EzThrottler.Throttle("Starting to fish", 1000))
                 {
                     IceLogging.Debug("Telling it to start fishing", handle);
-                    ActionManager.Instance()->UseAction(ActionType.Action, 289);
+                    if (C.AutoFisherCast)
+                    {
+                        ActionManager.Instance()->UseAction(ActionType.Action, 289); // 任务开始时抛竿
+                    }
                 }
                 return false;
             }

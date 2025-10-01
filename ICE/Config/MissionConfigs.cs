@@ -97,6 +97,7 @@ namespace ICE.Config
 
         #region Gathering Settings
         public int SelectedGatherIndex { get; set; } = 0;
+        public bool AutoFisherCast { get; set; } = true; // 新增: 捕鱼人是否在任务开始时自动抛竿
 
         #region Cordial Settings
 
