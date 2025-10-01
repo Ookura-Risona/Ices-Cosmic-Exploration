@@ -287,16 +287,6 @@ namespace ICE.Ui.SettingTabs
                         C.PreventOvercap = PreventOvercap;
                         C.Save();
                     }
-                    if (ImGui.Checkbox("应用于捕鱼人", ref UseOnFisher))
-                    {
-                        C.UseOnFisher = UseOnFisher;
-                        C.Save();
-                    }
-                    if (ImGui.Checkbox("仅任务中使用", ref useOnlyInMission))
-                    {
-                        C.UseOnlyInMission = useOnlyInMission;
-                        C.Save();
-                    }
                     ImGui.SetNextItemWidth(200);
                     if (ImGui.SliderInt("GP 低于设定值时使用强心剂", ref CordialMinGp, 0, maxGp))
                     {
