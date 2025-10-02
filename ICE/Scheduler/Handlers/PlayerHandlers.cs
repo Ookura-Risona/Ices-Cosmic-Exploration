@@ -91,21 +91,28 @@ internal static unsafe class PlayerHandlers
     {
         Svc.PluginInterface.InstalledPlugins.TryGetFirst(x => x.InternalName == "AutoHook", out var Autohook);
         Svc.PluginInterface.InstalledPlugins.TryGetFirst(x => x.InternalName == "MissFisher", out var Missfisher);
-        if (Autohook.IsLoaded && Missfisher.IsLoaded)
+        bool isAutohookLoaded = Autohook?.IsLoaded ?? false;
+        bool isMissfisherLoaded = Missfisher?.IsLoaded ?? false;
+        if (isAutohookLoaded && isMissfisherLoaded)
         {
             Svc.Toasts.ShowQuest($"注意！您同时启用了 MissFisher 与 AutoHook 插件，请禁用不使用的钓鱼插件以保证插件正常运行！", new QuestToastOptions() { PlaySound = true, DisplayCheckmark = true });
             DuoLog.Warning("注意！您同时启用了 MissFisher 与 AutoHook 插件，请禁用不使用的钓鱼插件以保证插件正常运行！");
         }
+        else if (!isAutohookLoaded && !isMissfisherLoaded)
+        {
+            //Svc.Toasts.ShowQuest("请安装并启用 AutoHook 或 MissFisher 其中一个插件作为钓鱼插件，否则钓鱼将无法自动运行。", new QuestToastOptions() { PlaySound = true, DisplayCheckmark = true });
+            //DuoLog.Warning("请安装并启用 AutoHook 或 MissFisher 其中一个插件作为钓鱼插件，否则钓鱼将无法自动运行。");
+        }
         else if (C.AutoFisherCastSwitch)
         {
-            if (Autohook.IsLoaded && !Missfisher.IsLoaded && !C.AutoFisherCast)
+            if (isAutohookLoaded && !isMissfisherLoaded && !C.AutoFisherCast)
             {
                 Svc.Toasts.ShowQuest($"检测到您正在使用 AutoHook 作为钓鱼插件，自动启用了\"自动在钓鱼任务开始时抛竿\"设置", new QuestToastOptions() { PlaySound = true, DisplayCheckmark = true });
                 DuoLog.Warning("检测到您正在使用 AutoHook 作为钓鱼插件，自动启用了\"自动在钓鱼任务开始时抛竿\"设置");
                 C.AutoFisherCast = true;
                 C.Save();
             }
-            else if (!Autohook.IsLoaded && Missfisher.IsLoaded && C.AutoFisherCast)
+            else if (!isAutohookLoaded && isMissfisherLoaded && C.AutoFisherCast)
             {
                 Svc.Toasts.ShowQuest($"检测到您正在使用 MissFisher 作为钓鱼插件，自动禁用了\"自动在钓鱼任务开始时抛竿\"设置", new QuestToastOptions() { PlaySound = true, DisplayCheckmark = true });
                 DuoLog.Warning("检测到您正在使用 MissFisher 作为钓鱼插件，自动禁用了\"自动在钓鱼任务开始时抛竿\"设置");
@@ -115,12 +122,12 @@ internal static unsafe class PlayerHandlers
         }
         else if (!C.AutoFisherCastSwitch)
         {
-            if (Autohook.IsLoaded && !Missfisher.IsLoaded && !C.AutoFisherCast)
+            if (isAutohookLoaded && !isMissfisherLoaded && !C.AutoFisherCast)
             {
                 Svc.Toasts.ShowQuest($"检测到您正在使用 AutoHook 作为钓鱼插件，请在设置中勾选\"自动在钓鱼任务开始时抛竿\"选项", new QuestToastOptions() { PlaySound = true, DisplayCheckmark = true });
                 DuoLog.Warning("检测到您正在使用 AutoHook 作为钓鱼插件，请在设置中勾选\"自动在钓鱼任务开始时抛竿\"选项");
             }
-            else if (!Autohook.IsLoaded && Missfisher.IsLoaded && C.AutoFisherCast)
+            else if (!isAutohookLoaded && isMissfisherLoaded && C.AutoFisherCast)
             {
                 Svc.Toasts.ShowQuest($"检测到您正在使用 MissFisher 作为钓鱼插件，请在设置中取消勾选\"自动在钓鱼任务开始时抛竿\"选项", new QuestToastOptions() { PlaySound = true, DisplayCheckmark = true });
                 DuoLog.Warning("检测到您正在使用 MissFisher 作为钓鱼插件，请在设置中取消勾选\"自动在钓鱼任务开始时抛竿\"选项");
