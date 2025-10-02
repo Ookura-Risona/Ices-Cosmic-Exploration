@@ -11,6 +11,7 @@ namespace ICE.Ui.SettingTabs
         private static float SelfRepairPercent = C.RepairPercent;
         private static bool SelfSpiritbondGather = C.SelfSpiritbondGather;
         private static bool AutoFisherCast = C.AutoFisherCast;
+        private static bool AutoFisherCastSwitch = C.AutoFisherCastSwitch;
         private static bool AutoCordial = C.AutoCordial;
         private static bool InverseCordialPrio = C.inverseCordialPrio;
         private static bool UseOnFisher = C.UseOnFisher;
@@ -177,6 +178,9 @@ namespace ICE.Ui.SettingTabs
 
             void DrawCustomBuffSetting(string label, string uniqueId, bool currentEnabled, int currentMinGp, int minGpLimit, int maxGpLimit, string entryName, string ActionInfo, Action<bool> onEnabledChange, Action<int> onMinGpChange, int currentMaxUse, Action<int> onMaxUseChange, int MinItemUsage, Action<int> onMinItemMaxUseChange)
             {
+                // Sync
+                AutoFisherCast = C.AutoFisherCast;
+
                 bool enabled = currentEnabled;
                 if (ImGui.Checkbox($"{label}###Enable{uniqueId}", ref enabled))
                 {
@@ -269,13 +273,19 @@ namespace ICE.Ui.SettingTabs
             }
             if (ImGui.Checkbox("自动在钓鱼任务开始时抛竿", ref AutoFisherCast)) // 新增: 自动在钓鱼任务开始时抛竿，用于适配 MissFisher 的钓鱼逻辑
             {
-                if (C.AutoFisherCast != AutoFisherCast)
-                {
                     C.AutoFisherCast = AutoFisherCast;
+                    C.Save();
+            }
+            ImGuiEx.HelpMarker("自动在捕鱼人任务开始时执行\"抛竿\"技能, 取消勾选则不会在任务开始时自动抛竿。");
+            if (ImGui.Checkbox("自动根据钓鱼插件切换自动抛竿设置", ref AutoFisherCastSwitch))
+            {
+                if (C.AutoFisherCastSwitch != AutoFisherCastSwitch)
+                {
+                    C.AutoFisherCastSwitch = AutoFisherCastSwitch;
                     C.Save();
                 }
             }
-            ImGuiEx.HelpMarker("自动在捕鱼人任务开始时执行\"抛竿\"技能, 取消勾选则不会在任务开始时自动抛竿。");
+            ImGuiEx.HelpMarker("控制\"自动在钓鱼任务开始时抛竿\"选项根据钓鱼插件启用情况自动切换\nAutoHook = 启用\nMissFisher = 禁用\n两个钓鱼插件同时启用 = 无动作");
             if (ImGui.Checkbox("自动强心剂", ref AutoCordial))
             {
                 C.AutoCordial = AutoCordial;
