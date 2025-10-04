@@ -585,7 +585,10 @@ namespace ICE.Scheduler.Tasks
                 if (EzThrottler.Throttle("Starting to fish", 1000))
                 {
                     IceLogging.Debug("Telling it to start fishing", handle);
-                    ActionManager.Instance()->UseAction(ActionType.Action, 289);
+                    if (C.AutoFisherCast)
+                    {
+                        ActionManager.Instance()->UseAction(ActionType.Action, 289); // 任务中自动抛竿
+                    }
                 }
                 return false;
             }

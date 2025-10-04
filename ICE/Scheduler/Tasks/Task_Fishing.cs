@@ -169,7 +169,7 @@ namespace ICE.Scheduler.Tasks
                     IceLogging.Debug("Telling it to start fishing", handle);
                     if (C.AutoFisherCast)
                     {
-                        ActionManager.Instance()->UseAction(ActionType.Action, 289); // 任务开始时抛竿
+                        ActionManager.Instance()->UseAction(ActionType.Action, 289); // 任务中自动抛竿
                     }
                 }
                 return false;

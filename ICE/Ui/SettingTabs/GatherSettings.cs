@@ -271,12 +271,12 @@ namespace ICE.Ui.SettingTabs
                     C.Save();
                 }
             }
-            if (ImGui.Checkbox("自动在钓鱼任务开始时抛竿", ref AutoFisherCast)) // 新增: 自动在钓鱼任务开始时抛竿，用于适配 MissFisher 的钓鱼逻辑
+            if (ImGui.Checkbox("自动在钓鱼任务进行时抛竿", ref AutoFisherCast)) // 新增: 自动在钓鱼任务进行时抛竿，包括首杆，用于适配 MissFisher 的钓鱼逻辑
             {
                     C.AutoFisherCast = AutoFisherCast;
                     C.Save();
             }
-            ImGuiEx.HelpMarker("自动在捕鱼人任务开始时执行\"抛竿\"技能, 取消勾选则不会在任务开始时自动抛竿。");
+            ImGuiEx.HelpMarker("自动在捕鱼人任务(包括双职业任务)进行时自动尝试执行\"抛竿\"技能, 取消勾选则不会在任务进行时自动抛竿。");
             if (ImGui.Checkbox("自动根据钓鱼插件切换自动抛竿设置", ref AutoFisherCastSwitch))
             {
                 if (C.AutoFisherCastSwitch != AutoFisherCastSwitch)
@@ -285,7 +285,7 @@ namespace ICE.Ui.SettingTabs
                     C.Save();
                 }
             }
-            ImGuiEx.HelpMarker("控制\"自动在钓鱼任务开始时抛竿\"选项根据钓鱼插件启用情况自动切换\nAutoHook = 启用\nMissFisher = 禁用\n两个钓鱼插件同时启用 = 无动作");
+            ImGuiEx.HelpMarker("控制\"自动在钓鱼任务进行时抛竿\"选项根据钓鱼插件启用情况自动切换\nAutoHook = 启用\nMissFisher = 禁用\n两个钓鱼插件同时启用 = 无动作");
             if (ImGui.Checkbox("自动强心剂", ref AutoCordial))
             {
                 C.AutoCordial = AutoCordial;
