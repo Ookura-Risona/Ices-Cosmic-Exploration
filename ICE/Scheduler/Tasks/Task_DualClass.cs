@@ -3,6 +3,7 @@ using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using ICE.Config;
+using ICE.Sounds;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,8 +18,50 @@ namespace ICE.Scheduler.Tasks
     {
         public static void Enqueue()
         {
-            Task_CheckScore.Enqueue();
-            P.TaskManager.Enqueue(() => CheckMaterials(), "Checking status for dual craft missions", Utils.TaskConfig);
+            // 追加检查任务是否正在进行中，重走处理提交任务的流程，这是为了处理 ICE 插件被其他钓鱼插件汇报任务所导致的混乱
+            // 我忘了这个也有钓鱼任务
+            var id = CosmicHelper.CurrentLunarMission;
+
+            if (id == 0)
+            {
+                if (P.AutoHook.Installed)
+                {
+                    P.AutoHook.DeleteAllAnonymousPresets();
+                }
+
+                if (Mission_Settings.StopAfterCurrent)
+                {
+                    IceLogging.Debug($"Stop after current was enabled. Stopping now", "[Dual Mission Patch]");
+                    SchedulerMain.State = IceState.Idle;
+                    Mission_Settings.StopAfterCurrent = false;
+                    P.TaskManager.Tasks.Clear();
+
+                    if (C.RemoveAfterGold)
+                    {
+                        P.TaskManager.Enqueue(() => Task_TurninMission.GoldCheck());
+                    }
+                    if (C.PlaySoundAlert)
+                    {
+                        _ = SoundPlayer.PlaySoundAsync();
+                    }
+                }
+                else
+                {
+                    IceLogging.Debug($"Stop after current wasn't enabled. Grabbing another mission", "[Dual Mission Patch]");
+                    SchedulerMain.State = IceState.Start;
+                    if (C.RemoveAfterGold)
+                    {
+                        P.TaskManager.Enqueue(() => Task_TurninMission.GoldCheck());
+                    }
+                }
+                return;
+            }
+            else
+            {
+                Task_TurninMission.PreviousMissionId = id;
+                Task_CheckScore.Enqueue();
+                P.TaskManager.Enqueue(() => CheckMaterials(), "Checking status for dual craft missions", Utils.TaskConfig);
+            }
         }
 
         private static unsafe bool? CheckMaterials()
