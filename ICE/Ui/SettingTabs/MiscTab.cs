@@ -30,6 +30,17 @@ namespace ICE.Ui.SettingTabs
 
         public static void Draw()
         {
+            bool showInfoButton = C.ShowInfoButton;
+            if (ImGui.Checkbox("显示 额外信息按钮", ref showInfoButton))
+            {
+                C.ShowInfoButton = showInfoButton;
+                C.Save();
+            }
+
+            ImGui.Dummy(new Vector2(0, 5));
+            ImGui.Separator();
+            ImGui.Dummy(new Vector2(0, 5));
+
             ImGui.Text("悬浮窗设置");
 
             if (ImGui.Checkbox("显示 悬浮窗", ref showOverlay))

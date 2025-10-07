@@ -13,7 +13,7 @@ namespace ICE.Ui
 {
     internal class InfoWindow : Window
     {
-        public InfoWindow() : base($"Ice's Cosmic Exploration - Info")
+        public InfoWindow() : base($"Ice's Cosmic Exploration - 信息")
         {
             Flags = ImGuiWindowFlags.None;
             SizeConstraints = new()
@@ -34,80 +34,86 @@ namespace ICE.Ui
 
         public override void Draw()
         {
-            DrawSection("What is this plugin?",
+            DrawSection("这是什么插件？",
             new[]
             {
-                "The jack of all trades to helping you automate your moon crimes, and helping you get the relics/missions that you need. It helps you do the following:",
-                "Select which missions you would like to farm out, and reroll until it eventually gets it available.",
-                "View the completion status of missions and see what've you done, completed, and gotten a gold rating on.",
-                "Allows you to help automate farming of relics. There are some other plugin dependencies required for this if you don't have them already (more info is down below with each class section)",
-                "Are you farming score? Select which missions you would like to do, and let it run. I do not advice running this overnight, that is a good way to get yourself banned. Especially it being a public area",
+                "这是一个帮助你自动化完成月球犯罪的万事通，帮助你获得你需要的宇宙工具/探索任务。它能做到以下几点：",
+                "选择你想要刷取的任务，插件会自动重刷直到任务出现。",
+                "查看任务完成状态，了解哪些任务已做过、已完成以及取得金星评价。",
+                "允许你自动化刷取宇宙工具的研究数据。你需要安装一些额外的依赖插件（更多信息见下方职业部分）。",
+                "想刷技巧点？选择你想要的任务，运行即可。我不建议通宵挂机运行，这很容易导致账号被封，尤其是在公共区域。",
             });
-            DrawSection("Crafting",
+            DrawSection("制作",
             [
-                "Artisan is required for crafting to be fully automated",
-                "All you need to do is make sure to have the missions that you want to run selected, and let it run.", 
-                "Artisan is also has a built in function to repair at a certain point, you can let that run if you choose to let it repair, or can use the built in repair option that will run before missions.",
-                "Some things to note: If you are using the setting \"Raphael Solver\", make sure that you set the timeout for generating macros accordingly.",
-                "Also, unless you turn on \"Generate on Expert Recipies\", it will not generate on expert/master recipies. (These look very similar to normal ones, but they have special buffs that rotate in while crafting."
+                "需要 Artisan 插件才能实现全自动制作",
+                "你只需要确保已选择好所有你想要的任务，然后运行即可",
+                "Artisan 也有一个内置的在设定阈值修理装备的功能，你可以选择使用它，或者使用 ICE 插件内置的修理选项在任务开始前进行修理。",
+                "一些注意事项：如果你使用 \"Raphael 求解器\" 设置，确保根据自身情况来设置宏生成超时时间。",
+                "另外，除非你启用了 \"在专家配方上生成\"，否则不会在专家/高难度配方上生成宏。（这些配方看上去与普通配方相似，但制作过程中有特殊 Buff 轮换出现）"
             ],
             new[]
             {
                 new SectionButton 
                 {
-                    Label = "Install Artisan Repo", 
+                    Label = "安装 Artisan Repo", 
                     OnClick = () => InstallArtisanRepo(), 
                     IsVisible = () => !DalamudReflector.HasRepo("https://love.puni.sh/ment.json")
                 },
                 new SectionButton
                 {
-                    Label = isInstallingArtisan ? "Installing..." : "Install Artisan",
+                    Label = isInstallingArtisan ? "正在安装..." : "安装 Artisan",
                     OnClick = () => _ = InstallArtisan(),
                     IsVisible = () => !Utils.HasPlugin("Artisan") && !isInstallingArtisan
                 }
             });
-            DrawSection("Gathering [BTN + MIN]",
+            DrawSection("采集 [园艺工 + 采矿工]",
             [
-                "Gathering for botanist and miner are actually built into the plugin!",
-                "All you need to do is setup a gathering profile (this can be done through the settings -> Gathering tab) to what kind of mission you are doing. And make sure that profile is selected for the mission.",
-                "Collectables are also ran in through the plugin as well. The main thing you need for this to work is Vnavmesh, this will allow you to run between the gathering nodes at full automation",
+                "插件已经内置了园艺工与采矿工的采集功能！",
+                "只需设置一个采集配置文件（在 设置 -> 采集 标签页完成），并根据任务类型进行应用。请确保该配置文件已被选中用于对应任务。",
+                "插件同样支持采集收藏品。实现这一功能的关键在于 Vnavmesh 插件，它可以让你在采集点之间全自动移动。",
             ],
             new[]
             {
                 new SectionButton
                 {
-                    Label = "Install Navmesh Repo",
+                    Label = "安装 Navmesh Repo",
                     OnClick = () => InstallNavmeshRepo(),
                     IsVisible = () => !DalamudReflector.HasRepo("https://puni.sh/api/repository/veyn")
                 },
                 new SectionButton
                 {
-                    Label = isInstallingArtisan ? "Installing..." : "Install Navmesh",
+                    Label = isInstallingArtisan ? "正在安装..." : "安装 Navmesh",
                     OnClick = () => _ = InstallNavmesh(),
                     IsVisible = () => !Utils.HasPlugin("vnavmesh") && !isInstallingNavmesh
                 }
             });
-            DrawSection("Gathering [FISHER]",
+            DrawSection("采集 [捕鱼人]",
             [
-                "Fishing for cosmic... is pain. There's no getting around it. It's rng at it's finest. And you're not guarenteed gold score either.",
-                "You need AutoHook installed. This is used to help automate the whole process.",
-                "For missions that are supported, you don't actually need to do anything, the presets are built into the plugin and will automatically import/delete themselves when done.",
-                "If you would like to use your own preset, just make sure to enable it in the \"Select Preset\" button, and type the name of the preset that you are using",
-                "Navmesh is also required to make sure that you are in a correct spot of the fishing hole to be able to fish.",
+                "宇宙钓鱼... 真的很折磨。这是没办法的事，随机性真是太极致了。无法保证一定能拿到金星评价。",
+                "你需要安装 AutoHook 插件，它能帮助你自动化整个钓鱼流程。",
+                "对于已支持的任务，你实际上什么都不用做，预设已在内置的插件中，在任务开始时自动导入，任务结束时自动删除。",
+                "如果你想使用自己的预设，只需在 \"选择配置\" 按钮中进行启用，输入你所的使用预设名称。",
+                "同时需要 Navmesh 插件，以确保你能站在钓场的正确位置进行钓鱼。",
+                "如果你需要 自动确认收藏品 的帮助指南，下方还附有一个按钮，点击后会打开对应的 Wiki 指南页面。"
             ],
             new[]
             {
                 new SectionButton
                 {
-                    Label = "Install Autohook Repo",
-                    OnClick = () => InstallNavmeshRepo(),
-                    IsVisible = () => !DalamudReflector.HasRepo("https://puni.sh/api/repository/veyn")
+                    Label = "安装 Autohook Repo",
+                    OnClick = () => InstallAutoHookRepo(),
+                    IsVisible = () => !DalamudReflector.HasRepo("https://love.puni.sh/ment.json")
                 },
                 new SectionButton
                 {
-                    Label = isInstallingArtisan ? "Installing..." : "Install Autohook",
-                    OnClick = () => _ = InstallNavmesh(),
-                    IsVisible = () => !Utils.HasPlugin("vnavmesh") && !isInstallingNavmesh
+                    Label = isInstallingArtisan ? "正在安装..." : "安装 Autohook",
+                    OnClick = () => _ = InstallAutoHook(),
+                    IsVisible = () => !Utils.HasPlugin("AutoHook") && !isInstallingAutoHook
+                },
+                new SectionButton
+                {
+                    Label = "如何自动确认收藏品",
+                    OnClick = () => GenericHelpers.ShellStart("https://github.com/PunishXIV/AutoHook/blob/main/AcceptCollectable.md")
                 }
             });
         }
@@ -157,7 +163,29 @@ namespace ICE.Ui
             }
         }
 
+        private bool isInstallingAutoHook = false;
 
+        private void InstallAutoHookRepo()
+        {
+            DalamudReflector.AddRepo("https://love.puni.sh/ment.json", true);
+            DalamudReflector.SaveDalamudConfig();
+        }
+
+        private async Task InstallAutoHook()
+        {
+            if (isInstallingAutoHook) return; // Already installing
+
+            isInstallingAutoHook = true;
+            try
+            {
+                await DalamudReflector.AddPlugin("https://love.puni.sh/ment.json", "AutoHook");
+                DalamudReflector.SaveDalamudConfig();
+            }
+            finally
+            {
+                isInstallingAutoHook = false;
+            }
+        }
 
         public class SectionButton
         {
@@ -166,10 +194,29 @@ namespace ICE.Ui
             public Func<bool> IsVisible { get; set; } // Returns true to show the button
         }
 
-        private void DrawSection(string title, string[] bulletPoints, SectionButton[] buttons = null)
+        private void DrawSection(string title, string[] bulletPoints, SectionButton[] buttons = null, string[] RequiredPlugins = null)
         {
-            using var colorBackground = ImRaii.PushColor(ImGuiCol.ChildBg, Utils.ToUintABGR(EColor.Black));
-            using var colorBorder = ImRaii.PushColor(ImGuiCol.Border, Utils.ToUintABGR(EColor.Yellow));
+            // Get the current window background color
+            uint windowBg = ImGui.GetColorU32(ImGuiCol.WindowBg);
+
+            // Convert to Vector4 for easier manipulation
+            var bgColor = ImGui.ColorConvertU32ToFloat4(windowBg);
+
+            // Darken it by a factor (e.g., 0.85 = 85% brightness)
+            bgColor.X *= 0.85f; // R
+            bgColor.Y *= 0.85f; // G
+            bgColor.Z *= 0.85f; // B
+                                // bgColor.W stays the same (alpha)
+
+            // Convert back to uint
+            uint darkerBg = ImGui.ColorConvertFloat4ToU32(bgColor);
+
+            using var colorBackground = ImRaii.PushColor(ImGuiCol.ChildBg, darkerBg);
+
+            // For border, you could also derive it from the current border or keep it as-is
+            // Option 1: Use current border color
+            uint currentBorder = ImGui.GetColorU32(ImGuiCol.Border);
+            using var colorBorder = ImRaii.PushColor(ImGuiCol.Border, currentBorder);
 
             // Calculate the height needed
             float height = ImGui.GetStyle().WindowPadding.Y; // Top padding

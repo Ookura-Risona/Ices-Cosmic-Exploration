@@ -18,23 +18,6 @@ namespace ICE.Ui.SettingTabs
 
         public static void Draw()
         {
-            if (ImGui.Checkbox("[实验性] 解除动画锁", ref animationLockAbandon))
-            {
-                C.AnimationLockAbandon = animationLockAbandon;
-                C.Save();
-            }
-            // ImGui.Checkbox("[Experimental] Animation Lock Manual Unstuck", ref SchedulerMain.AnimationLockAbandonState);
-
-            if (ImGui.Checkbox("发生错误时停止", ref stopOnAbort))
-            {
-                C.StopOnAbort = stopOnAbort;
-                C.Save();
-            }
-            ImGuiEx.HelpMarker(
-                "警告！此安全功能将在出现异常时强制停止运行！\n" +
-                "您已获知风险，禁用后果自负。"
-            );
-
             if (ImGui.Checkbox("忽略非宇宙探索相关提示", ref rejectUnknownYesNo))
             {
                 C.RejectUnknownYesno = rejectUnknownYesNo;

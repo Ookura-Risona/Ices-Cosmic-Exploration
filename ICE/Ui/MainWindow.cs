@@ -23,7 +23,7 @@ namespace ICE.Ui
     {
         public MainWindow() :
 #if DEBUG
-        base($"Ice's Cosmic Exploration {P.GetType().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion} Debug build###ICEDebugMainWindowV2")
+        base($"Ice's Cosmic Exploration {P.GetType().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion} [Debug Build] ###ICEMainWindow2")
 #else
         base($"Ice's Cosmic Exploration {P.GetType().Assembly.GetName().Version} ###ICEMainWindow2")
 #endif
@@ -176,6 +176,14 @@ namespace ICE.Ui
                 P.settingsWindowV2.IsOpen = !P.settingsWindowV2.IsOpen;
             }
             bool onlyGrabMission = C.OnlyGrabMission;
+            if (C.ShowInfoButton)
+            {
+                if (ImGui.Button("额外信息", new Vector2(ImGui.GetContentRegionAvail().X, 30)))
+                {
+                    P.infoWindow.IsOpen = true;
+                }
+            }
+
             if (ImGui.Checkbox($"只刷取任务", ref onlyGrabMission))
             {
                 C.OnlyGrabMission = onlyGrabMission;
@@ -322,6 +330,7 @@ namespace ICE.Ui
                     C.StopOnceRelicFinished = relicStop;
                     C.Save();
                 }
+
                 bool playSoundAlert = C.PlaySoundAlert;
                 if (ImGui.Checkbox("完成后播放提示音", ref playSoundAlert)) // Play Sound Alert on Stop
                 {
@@ -351,6 +360,24 @@ namespace ICE.Ui
 
             if (ImGui.CollapsingHeader("研究数据设置")) // Relic XP Settings
             {
+                bool relicTurnin = C.TurninRelic;
+                if (ImGui.Checkbox($"自动提交可报告的宇宙工具", ref relicTurnin)) // Turnin if relic is complete
+                {
+                    C.TurninRelic = relicTurnin;
+                    C.Save();
+                }
+                ImGui.SameLine();
+                ImGui.TextDisabled("?");
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("这是关于这个功能的提示说明。如果我将来修改了这个功能，这个提示也会随之改变。 \n" +
+                                     "1: 此功能会检查你的当前职业（不是菜单中选择的职业，是实际当前职业）进行提交宇宙工具。 \n" +
+                                     "2: 你必须不装备宇宙工具，才能让此功能完全地自动运行。 \n" +
+                                     "\t- 原因是我现在懒得写这部分逻辑。（将来可能会改主意 *耸肩*） \n" +
+                                     "3: 此功能的优先级高于 \"宇宙工具可报告时停止\" 选项，如果两个都启用，它会选择报告而不是停止，并继续执行任务。 \n" +
+                                     "4: 如果你当前是能工巧匠职业，报告后会自动返回你之前正在制作的位置。 \n" +
+                                     "\t- 这是可选的，你可以自由关闭。我个人喜欢这样设置，方便我回到自己选定的安静区域。");
+                }
                 bool EnableRelicXp = C.XPRelicGrind;
                 if (ImGui.Checkbox("自动根据研究数据选择任务", ref EnableRelicXp)) // Auto-Pick For Relic XP
                 {
