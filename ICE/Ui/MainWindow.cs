@@ -1625,13 +1625,13 @@ namespace ICE.Ui
 
             if (ImGui.BeginTable("Completion Window", 7, tableFlags))
             {
-                ImGui.TableSetupColumn("Class");
-                ImGui.TableSetupColumn("CompletionStatus");
-                ImGui.TableSetupColumn("Enabled");
+                ImGui.TableSetupColumn("职业");
+                ImGui.TableSetupColumn("任务完成状态");
+                ImGui.TableSetupColumn("启用");
                 ImGui.TableSetupColumn("ID", ImGuiTableColumnFlags.WidthFixed, -1);
-                ImGui.TableSetupColumn("Mission Name", ImGuiTableColumnFlags.WidthFixed , -1);
-                ImGui.TableSetupColumn("Manual Mode");
-                ImGui.TableSetupColumn("Rank");
+                ImGui.TableSetupColumn("任务名称", ImGuiTableColumnFlags.WidthFixed , -1);
+                ImGui.TableSetupColumn("手动");
+                ImGui.TableSetupColumn("类别");
 
                 ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
 
