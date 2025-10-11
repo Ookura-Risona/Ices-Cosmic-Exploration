@@ -730,8 +730,8 @@ namespace ICE.Scheduler.Tasks
                     }
                 }
 
-                IceLogging.ChatInfo("Provisional Grind has found no missions.", "[ICE: Provisional Grind]");
-                IceLogging.ChatInfo("Going to wait ~5s before checking again", "[ICE: Provisional Grind]");
+                IceLogging.ChatInfo("刷取临时性任务没有找到任何任务", "[ICE: Provisional Grind]");
+                IceLogging.ChatInfo("将在大约 5 秒后再次检查", "[ICE: Provisional Grind]");
                 P.TaskManager.EnqueueDelay(5000);
                 return true;
             }
