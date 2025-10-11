@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using static Dalamud.Interface.Utility.Raii.ImRaii;
+using static MissionTimer;
 using static System.Windows.Forms.AxHost;
 
 namespace ICE.Ui
@@ -410,6 +411,28 @@ namespace ICE.Ui
             }
             WindowSpacer();
 
+            // - - - - - - - - - - - - - - - - - - - -
+            // 3.1 Section, Provisional Grind Button
+            // - - - - - - - - - - - - - - - - - - - - 
+
+            bool grindProvisionals = C.GrindProvisionals;
+            if (ImGui.Checkbox("刷取临时性任务", ref grindProvisionals))
+            {
+                C.GrindProvisionals = grindProvisionals;
+                C.Save();
+            }
+            ImGui.SameLine();
+            ImGui.TextDisabled("?");
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetTooltip("根据 Discord 的更新日志解释此功能: \n" +
+                    "1. 此选项会根据任务与职业的优先级，自动切换职业，刷取已启用的 连续/天气限定/紧急探索任务 此类临时性任务 \n" +
+                    "2. 您可以用此功能去追踪这些限时性质(天气、ET)的任务，设置好需要的任务后让插件循环执行这些任务"
+                );
+            }
+
+                WindowSpacer();
+
             // - - - - - - - - - - - - - - - - -
             // 4th Section, Planet Selection
             // - - - - - - - - - - - - - - - - -
@@ -666,6 +689,21 @@ namespace ICE.Ui
                     }
 
                     C.Save();
+                }
+
+                WindowSpacer();
+
+                bool disable = SchedulerMain.State != IceState.Idle;
+
+                using (ImRaii.Disabled(!disable))
+                {
+                    if (ImGui.Button("清理 _anon Autohook 预设"))
+                    {
+                        if (P.AutoHook.Installed)
+                        {
+                            P.AutoHook.DeleteAllAnonymousPresets();
+                        }
+                    }
                 }
             }
 
@@ -2005,6 +2043,77 @@ namespace ICE.Ui
                         ImGui.Text($"[{lockedMission}] - {CosmicHelper.SheetMissionDict[lockedMission].Name}");
                     }
 
+                }
+
+                WindowSpacer();
+                ImGui.Text($"任务时间!");
+
+                if (C.MissionConfig.TryGetValue(selectedMission, out var config))
+                {
+                    bool allowDelete = (ImGui.IsKeyDown(ImGuiKey.LeftShift) || ImGui.IsKeyDown(ImGuiKey.RightShift)) && (ImGui.IsKeyDown(ImGuiKey.LeftCtrl) || ImGui.IsKeyDown(ImGuiKey.RightCtrl));
+
+                    using (ImRaii.Disabled(!allowDelete))
+                    {
+                        if (ImGui.Button("重置统计"))
+                        {
+                            P.MissionTimer.ResetTimers(selectedMission);
+                        }
+                    }
+                    if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                    {
+                        ImGui.BeginTooltip();
+                        ImGui.Text("按住 Shift + Ctrl");
+                        ImGui.EndTooltip();
+                    }
+
+                    if (config.Times.Count > 0)
+                    {
+                        ImGui.Text($"最佳时间: {TimeSpan.FromSeconds(config.BestTime):mm\\:ss\\.ff}");
+                        ImGui.Text($"平均时间: {TimeSpan.FromSeconds(config.AverageTime):mm\\:ss\\.ff}");
+                    }
+                    else
+                    {
+                        ImGui.Text("最佳时间: --:--:--");
+                        ImGui.Text("平均时间: --:--:--");
+                    }
+
+                    ImGui.Text($"完成次数: {config.TotalCompletions}");
+
+                    if (CosmicHelper.SheetMissionDict.TryGetValue(selectedMission, out var missionInfo))
+                    {
+                        var baseScore = missionInfo.ClassScore; // Adjust this based on your actual property name
+
+                        ImGui.Separator();
+                        ImGui.Text("预估每小时技巧点:");
+                        ImGui.SameLine();
+                        ImGui.TextDisabled("?");
+                        if (ImGui.IsItemHovered())
+                        {
+                            ImGui.BeginTooltip();
+                            ImGui.Text("这里的假设前提是:");
+                            ImGui.Text("1: 你每次都能以完美的随机数运气拿到想要的任务");
+                            ImGui.Text("2: 你每次都能达到评价阈值");
+                            ImGui.Text("这些计算基于你的平均用时。 \n所以最好多跑几轮任务来得到更准确的时间。");
+                            ImGui.EndTooltip();
+                        }
+
+                        var bronzePerHour = MissionStatsCalculator.CalculateScorePerHour(config.AverageTime, baseScore, 1.0);
+                        var silverPerHour = MissionStatsCalculator.CalculateScorePerHour(config.AverageTime, baseScore, 4.0);
+                        var goldPerHour = MissionStatsCalculator.CalculateScorePerHour(config.AverageTime, baseScore, 5.0);
+
+                        ImGui.TextColored(new Vector4(0.8f, 0.5f, 0.3f, 1.0f), $"铜星: {bronzePerHour:F0} 技巧点/小时");
+                        ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1.0f), $"银星: {silverPerHour:F0} 技巧点/小时");
+                        ImGui.TextColored(new Vector4(1.0f, 0.84f, 0.0f, 1.0f), $"金星: {goldPerHour:F0} 技巧点/小时");
+                    }
+
+
+                    if (config.Times.Count > 0 && ImGui.CollapsingHeader("View All Completed Times"))
+                    {
+                        for (int i = 0; i < config.Times.Count; i++)
+                        {
+                            ImGui.Text($"[{i+1}] \u2192 {TimeSpan.FromSeconds(config.Times[i]):mm\\:ss\\.ff}");
+                        }
+                    }
                 }
             }
             else

@@ -120,137 +120,24 @@ namespace ICE.Ui.SettingTabs
             }
 
             ImGui.Separator();
-
-            MountSelection();
-
-            ImGui.Separator();
-
-            ImGui.Text("任务优先级管理");
-
-            ImGui.Text("拖动项目以重新排序任务优先级(优先级越高 = 越优先处理)");
-            ImGui.Separator();
-
-            // Create a copy for manipulation
-            var currentOrder = C.MissionPrio.ToList();
-            bool orderChanged = false;
-
-            for (int i = 0; i < currentOrder.Count; i++)
+            int TimeHistory = C.TimeHistoryLimit;
+            ImGui.SetNextItemWidth(100);
+            if (ImGui.InputInt("平均时间历史保留数", ref TimeHistory))
             {
-                ImGui.PushID(i);
-
-                var missionType = currentOrder[i];
-
-                ImGui.PushFont(UiBuilder.IconFont);
-                ImGui.Text(GetMissionTypeIcon(missionType));
-                ImGui.PopFont();
-
-                ImGui.SameLine();
-
-                // Making the text the only selectable thing... trying to make it WITH the icon is messy
-                string displayText = GetMissionTypeName(missionType);
-                bool isSelected = false;
-                ImGui.Selectable(displayText, isSelected, ImGuiSelectableFlags.None);
-
-                // Handle drag and drop
-                if (ImGui.BeginDragDropSource())
-                {
-                    // Store the index being dragged
-                    unsafe
-                    {
-                        int draggedIndex = i;
-                        byte* data = (byte*)&draggedIndex;
-                        ImGui.SetDragDropPayload("MISSION_TYPE", new ReadOnlySpan<byte>(data, sizeof(int)));
-                    }
-                    ImGui.Text($"正在移动: {GetMissionTypeName(missionType)}");
-                    ImGui.EndDragDropSource();
-                }
-
-                if (ImGui.BeginDragDropTarget())
-                {
-                    unsafe
-                    {
-                        var payload = ImGui.AcceptDragDropPayload("MISSION_TYPE");
-                        if (!payload.IsNull)
-                        {
-                            int draggedIndex = *(int*)payload.Data;
-
-                            // Perform the reorder
-                            if (draggedIndex != i && draggedIndex >= 0 && draggedIndex < currentOrder.Count)
-                            {
-                                var draggedItem = currentOrder[draggedIndex];
-                                currentOrder.RemoveAt(draggedIndex);
-                                currentOrder.Insert(i, draggedItem);
-                                orderChanged = true;
-                            }
-                        }
-                    }
-                    ImGui.EndDragDropTarget();
-                }
-
-                // Show priority number
-                ImGui.SameLine();
-                ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1.0f), $"(优先级: {i + 1})");
-
-                ImGui.PopID();
-            }
-
-            if (orderChanged)
-            {
-                // Priority has been changed. Updating the config now.
-                C.MissionPrio = currentOrder;
+                C.TimeHistoryLimit = TimeHistory;
                 C.Save();
             }
+            ImGui.SameLine();
+            ImGui.TextDisabled("?");
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetTooltip("小于 0: 保留全部日志\n" +
+                                 "大于 0: 按设定数量保留");
+            }
 
             ImGui.Separator();
 
-            // Reset to default button
-            if (ImGui.Button("重置为默认"))
-            {
-                C.MissionPrio = new List<ProvisionalTypes>
-                {
-                    ProvisionalTypes.ProvisionalWeather,
-                    ProvisionalTypes.ProvisionalSequential,
-                    ProvisionalTypes.ProvisionalTimed
-                };
-            }
-
-            ImGui.SameLine();
-
-            // Show current order as text (for debugging/confirmation)
-            if (ImGui.Button("显示当前顺序"))
-            {
-                string orderText = string.Join(" → ", C.MissionPrio.Select(GetMissionTypeName));
-                ImGui.SetClipboardText(orderText);
-            }
-
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.SetTooltip("复制当前优先级顺序到剪贴板");
-            }
-        }
-
-        // Quick way of assigning a name to the missions (useful for enums, saves me a lot of typing
-        private static string GetMissionTypeName(ProvisionalTypes type)
-        {
-            return type switch
-            {
-                ProvisionalTypes.ProvisionalWeather => "天气限定任务",
-                ProvisionalTypes.ProvisionalSequential => "连续任务",
-                ProvisionalTypes.ProvisionalTimed => "时间限定任务",
-                _ => type.ToString()
-            };
-        }
-
-        // Quick way of assigning Icons to the mission types
-        private static string GetMissionTypeIcon(ProvisionalTypes type)
-        {
-            return type switch
-            {
-                ProvisionalTypes.ProvisionalWeather => FontAwesomeIcon.Cloud.ToIconString(),
-                ProvisionalTypes.ProvisionalSequential => FontAwesomeIcon.ListOl.ToIconString(),
-                ProvisionalTypes.ProvisionalTimed => FontAwesomeIcon.Clock.ToIconString(),
-                _ => FontAwesomeIcon.Question.ToIconString()
-            };
+            MountSelection();
         }
 
         private static bool visualizeRadius = false;

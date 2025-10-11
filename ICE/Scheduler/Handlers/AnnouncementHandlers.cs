@@ -81,7 +81,7 @@ namespace ICE.Scheduler.Handlers
                     return default;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return default;
             }
