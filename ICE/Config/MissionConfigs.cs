@@ -106,6 +106,7 @@ namespace ICE.Config
         public int SelectedGatherIndex { get; set; } = 0;
         public bool AutoFisherCast { get; set; } = true; // 新增: 捕鱼人是否在任务开始时自动抛竿
         public bool AutoFisherCastSwitch { get; set; } = true; // 新增: 自动根据钓鱼插件切换自动抛竿
+        public bool MissFisherStartingFix { get; set; } = true; // 新增: MissFisher 抛竿实验性修复
 
         #region Cordial Settings
 

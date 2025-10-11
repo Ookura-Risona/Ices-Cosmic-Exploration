@@ -10,6 +10,7 @@ namespace ICE.Ui.SettingTabs
         private static bool SelfRepairGather = C.SelfRepairGather;
         private static float SelfRepairPercent = C.RepairPercent;
         private static bool SelfSpiritbondGather = C.SelfSpiritbondGather;
+        private static bool MissFisherStartingFix = C.MissFisherStartingFix;
         private static bool AutoFisherCast = C.AutoFisherCast;
         private static bool AutoFisherCastSwitch = C.AutoFisherCastSwitch;
         private static bool AutoCordial = C.AutoCordial;
@@ -180,6 +181,7 @@ namespace ICE.Ui.SettingTabs
             {
                 // Sync
                 AutoFisherCast = C.AutoFisherCast;
+                MissFisherStartingFix = C.MissFisherStartingFix;
 
                 bool enabled = currentEnabled;
                 if (ImGui.Checkbox($"{label}###Enable{uniqueId}", ref enabled))
@@ -271,6 +273,14 @@ namespace ICE.Ui.SettingTabs
                     C.Save();
                 }
             }
+            if (ImGui.Checkbox("[实验性] 修复 MissFisher 抛竿异常", ref MissFisherStartingFix))
+            {
+                C.MissFisherStartingFix = MissFisherStartingFix;
+                C.Save();
+            }
+            ImGuiEx.HelpMarker("使用 MissFisher 作为钓鱼插件时, " +
+                "自动在任务开始/进行时启动 MissFisher 的宇宙探索预设 \n" +
+                "此选项为实验性功能, 如果未来适配修复将计划移除");
             if (ImGui.Checkbox("自动在钓鱼任务进行时抛竿", ref AutoFisherCast)) // 新增: 自动在钓鱼任务进行时抛竿，包括首杆，用于适配 MissFisher 的钓鱼逻辑
             {
                     C.AutoFisherCast = AutoFisherCast;

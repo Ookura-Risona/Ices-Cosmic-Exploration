@@ -1,10 +1,11 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
+using ECommons.Automation;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using ICE.Config;
-using ICE.Ui.DebugWindowTabs;
 using ICE.Sounds;
+using ICE.Ui.DebugWindowTabs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -634,10 +635,16 @@ namespace ICE.Scheduler.Tasks
                 }
                 else if (EzThrottler.Throttle("Starting to fish", 1000))
                 {
+                    PlayerHandlers.UpdateFishingPluginStatus();
                     IceLogging.Debug("Telling it to start fishing", handle);
                     if (C.AutoFisherCast)
                     {
                         ActionManager.Instance()->UseAction(ActionType.Action, 289); // 任务中自动抛竿
+                    }
+                    else if (!C.AutoFisherCast && C.MissFisherStartingFix && PlayerHandlers.IsMissfisherLoaded && !PlayerHandlers.IsAutohookLoaded)
+                    {
+                        Chat.ExecuteCommand("/mf cosmic");
+                        //DuoLog.Debug("[测试] 尝试为MF启动预设");
                     }
                 }
                 return false;
