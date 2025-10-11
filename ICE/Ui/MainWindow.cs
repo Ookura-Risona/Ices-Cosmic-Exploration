@@ -2107,7 +2107,7 @@ namespace ICE.Ui
                     }
 
 
-                    if (config.Times.Count > 0 && ImGui.CollapsingHeader("View All Completed Times"))
+                    if (config.Times.Count > 0 && ImGui.CollapsingHeader("查看所有完成时间"))
                     {
                         for (int i = 0; i < config.Times.Count; i++)
                         {
