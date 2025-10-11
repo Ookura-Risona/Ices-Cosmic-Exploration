@@ -2,7 +2,7 @@
 <Project Sdk="Dalamud.NET.Sdk/13.0">
 
   <PropertyGroup>
-    <Version>0.0.0.627</Version>
+    <Version>0.0.0.628</Version>
     <Description>Who said we couldn't explore the moon!.</Description>
     <PackageProjectUrl>https://github.com/goatcorp/ICE</PackageProjectUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
@@ -14,7 +14,7 @@
 	<NoWarn>CS8618; CS8625; CS8629; </NoWarn>
   </PropertyGroup>
 
-	<ItemGroup>
+  <ItemGroup>
     <Content Include="ICE.json" />
     <EmbeddedResource Include="Sounds\Task_Completed.mp3" />
     <EmbeddedResource Include="Resources\Phaenna.png">
