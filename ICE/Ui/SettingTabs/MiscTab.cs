@@ -80,6 +80,13 @@ namespace ICE.Ui.SettingTabs
                 C.Save();
             }
 
+            bool DisableRedAlertPathing = C.DisablePathfindingToRedAlert;
+            if (ImGui.Checkbox("紧急探索任务中禁用寻路", ref DisableRedAlertPathing))
+            {
+                C.DisablePathfindingToRedAlert = DisableRedAlertPathing;
+                C.Save();
+            }
+
             ImGui.Dummy(new(0, 2));
 
             ImGui.Separator();

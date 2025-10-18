@@ -33,7 +33,7 @@ internal class SettingsWindowV2 : Window
         P.windowSystem.RemoveWindow(this);
     }
 
-    private string SelectedSetting = "安全";
+    public string SelectedSetting = "安全";
     private string[] SettingOptions = ["安全", "采集", "杂项", "宇宙好运道", "任务设置"];
     private string[] DebugOptions = ["Debug", "Path Creation"];
 
