@@ -34,7 +34,7 @@ internal class SettingsWindowV2 : Window
     }
 
     public string SelectedSetting = "安全";
-    private string[] SettingOptions = ["安全", "采集", "杂项", "宇宙好运道", "任务设置"];
+    private string[] SettingOptions = ["安全", "采集", "杂项", "宇宙好运道", "任务设置", "购物清单"];
     private string[] DebugOptions = ["Debug", "Path Creation"];
 
     public override void Draw()
@@ -107,6 +107,8 @@ internal class SettingsWindowV2 : Window
                 GambaWheel.Draw();
             else if (SelectedSetting == SettingOptions[4])
                 MissionSettings.Draw();
+            else if (SelectedSetting == SettingOptions[5])
+                ShoppingTab.Draw();
 #if DEBUG
             else if (SelectedSetting == DebugOptions[0])
                 DebugTab.Draw();

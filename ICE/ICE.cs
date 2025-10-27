@@ -33,7 +33,7 @@ public sealed partial class ICE : IDalamudPlugin
         {
             PluginLog.Warning($"[{typeof(T).Name}] Config was null. Creating new default.");
             config = new T();
-            YamlConfig.Save(config, path);
+            YamlConfig.SaveSync(config, path); // Use synchronous save for initialization
         }
 
         PluginLog.Information($"[{typeof(T).Name}] Loaded from {path}");
@@ -105,6 +105,7 @@ public sealed partial class ICE : IDalamudPlugin
 
         EzCmd.Add("/icecosmic", OnCommand, """
             打开插件窗口
+            /ice debug - 打开调试窗口
             /ice help - 显示所有命令
             /ice clear - 移除所有任务
             /ice stop - 停止 ICE 运行

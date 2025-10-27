@@ -77,6 +77,8 @@ namespace ICE.Scheduler.Tasks
             }
         }
 
+        private static int BaitCounter = 0;
+
         private static unsafe bool? FishingCheck()
         {
             if (_fishingDebug == null)
@@ -85,7 +87,10 @@ namespace ICE.Scheduler.Tasks
             }
 
             string handle = "[Standard Fishing: Fishing Check]";
-            IceLogging.Info("Checking to see where we need to be here", handle);
+            if (EzThrottler.Throttle("Throttling intro message", 1000))
+            {
+                IceLogging.Debug("Checking to see where we need to be here", handle);
+            }
             bool hasBait = false;
 
             if (CosmicHelper.CurrentBait == 0)
@@ -120,7 +125,8 @@ namespace ICE.Scheduler.Tasks
                 {
                     if (PlayerHelper.GetItemCount(baitId, out var count) && count > 0)
                     {
-                        IceLogging.Debug("We have the bait! Continuing onwards");
+                        if (EzThrottler.Throttle("Throttling bait message", 1000))
+                            IceLogging.Debug("We have the bait! Continuing onwards");
                         hasBait = true;
                         break;
                     }
@@ -176,6 +182,29 @@ namespace ICE.Scheduler.Tasks
                         //DuoLog.Debug("[测试] 尝试为MF启动预设");
                     }
                 }
+                else if (EzThrottler.Throttle("Adding counter for bait not equipped"))
+                {
+                    BaitCounter++;
+                    IceLogging.Debug($"Adding 1 to the counter. Counter is at: {BaitCounter}");
+                    if (BaitCounter >= 2)
+                    {
+                        string message = "嘿！你的下坐骑距离设置太低了(可能设置为 0)。改成 5 免得再出现这种情况。";
+                        IceLogging.ChatError(message, "[I.C.E. Fishing]");
+
+                        foreach (var bait in GatheringUtil.MoonBaits)
+                        {
+                            foreach (var baitId in bait.Value)
+                            {
+                                if (PlayerHelper.GetItemCount(baitId, out var count) && count > 0)
+                                {
+                                    P.AutoHook.SwapBaitById(baitId);
+                                    IceLogging.Debug($"Telling it to equip bait ID: {baitId}", handle);
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
                 return false;
             }
             else
@@ -184,6 +213,7 @@ namespace ICE.Scheduler.Tasks
                 P.AutoHook.SetPluginState(true);
                 IceLogging.Info("We're starting to fish. So kicking it over to checking the fish items", handle);
                 P.TaskManager.Insert(() => WaitToStartFishing(), "Waiting till we actually start fishing", Utils.TaskConfig);
+                BaitCounter = 0;
                 return true;
             }
         }

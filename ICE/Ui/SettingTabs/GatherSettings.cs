@@ -260,7 +260,7 @@ namespace ICE.Ui.SettingTabs
                     if (C.RepairPercent != SelfRepairPercent)
                     {
                         C.RepairPercent = (int)SelfRepairPercent;
-                        C.Save();
+                        C.SaveDebounced();
                     }
                 }
                 ImGui.Unindent(15);
@@ -321,7 +321,7 @@ namespace ICE.Ui.SettingTabs
                     if (ImGui.SliderInt("GP 低于设定值时使用强心剂", ref CordialMinGp, 0, maxGp))
                     {
                         C.CordialMinGp = CordialMinGp;
-                        C.Save();
+                        C.SaveDebounced();
                     }
                     ImGui.SameLine();
                     ImGuiEx.HelpMarker("此值为在使用强心剂之前, 最低所需的 GP(采集力)\n" +
@@ -459,38 +459,13 @@ namespace ICE.Ui.SettingTabs
             ImGui.NextColumn();
             ImGui.SetColumnWidth(1, ImGui.GetWindowWidth() - 300);
 
-            /* Don't necessary want to get rid of this, it's good in practicality. Just need to bring to new system eventually...
-             * 
-            // Pathfinding
-            int pathfinding = entry.Pathfinding;
-            string[] modes = ["Simple", "Nearest", "Cyclic"];
-            ImGui.SetNextItemWidth(100);
-            if (ImGui.Combo("Pathfinding mode", ref pathfinding, modes, modes.Length))
-            {
-                entry.Pathfinding = pathfinding;
-                C.Save();
-            }
-            ImGuiEx.HelpMarker("Simple - From 1st node in list until the last.\nNearest - Always go to Nearest node then find a path that minimises distance through all remaining nodes.\nCyclic - Find nodes that are close together and stick to those nodes only.");
-            if (pathfinding == 2)
-            {
-                ImGui.SameLine();
-                ImGui.SetNextItemWidth(100);
-                int cycle = entry.TSPCycleSize;
-                if (ImGui.InputInt("Cycle size", ref cycle, 1))
-                {
-                    entry.TSPCycleSize = cycle >= 2 ? cycle : 2;
-                    C.Save();
-                }
-            }
-            */
-
             // GP Settings
             int minGP = entry.MinimumGp;
             ImGui.SetNextItemWidth(100);
             if (ImGui.SliderInt("开始任务所需最低 GP", ref minGP, -1, maxGp))
             {
                 entry.MinimumGp = minGP;
-                C.Save();
+                C.SaveDebounced();
             }
 
             ImGui.Text("双职业任务制作数量去哪了?"); // Where'd the dual craft amount go?
@@ -513,17 +488,6 @@ namespace ICE.Ui.SettingTabs
                  "现在你们谁都不能再让它去做 27 个物品了。停下！它说的是制作 (╯°Д°)╯︵/(.□ . \\)");
                 ImGui.EndTooltip();
             }
-            // Multiply gathered items on FIRST gather loop only. Should only be used for Dual Class really.
-            /*
-            int gatherMult = entry.DualClassCraftAmount;
-            ImGui.SetNextItemWidth(100);
-            if (ImGui.InputInt("双职业任务制作数量", ref gatherMult, 1))
-            {
-                entry.DualClassCraftAmount = gatherMult >= 1 ? gatherMult : 1;
-                C.Save();
-            }
-            ImGuiEx.HelpMarker("此选项将增加您在切换到制作流程前需要收集的物品数量(即达到\"完成\"状态)。\n根据您需要制作多少物品才能达到目标技巧点来调整此数值。\n只影响双职业任务。");
-            */
 
             // Boon Increase 2 (+30% Increase)
             DrawBuffSetting(
@@ -543,13 +507,13 @@ namespace ICE.Ui.SettingTabs
                 onMinGpChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["BoonIncrease2"].MinGp = newVal;
-                    C.Save();
+                    C.SaveDebounced();
                 },
                 currentMaxUse: entry.GatherBuffs.Buffs["BoonIncrease2"].MaxUse,
                 onMaxUseChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["BoonIncrease2"].MaxUse = newVal;
-                    C.Save();
+                    C.SaveDebounced();
                 }
             );
 
@@ -571,13 +535,13 @@ namespace ICE.Ui.SettingTabs
                 onMinGpChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["BoonIncrease1"].MinGp = newVal;
-                    C.Save();
+                    C.SaveDebounced();
                 },
                 currentMaxUse: entry.GatherBuffs.Buffs["BoonIncrease1"].MaxUse,
                 onMaxUseChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["BoonIncrease1"].MaxUse = newVal;
-                    C.Save();
+                    C.SaveDebounced();
                 }
             );
 
@@ -599,13 +563,13 @@ namespace ICE.Ui.SettingTabs
                 onMinGpChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["Tidings"].MinGp = newVal;
-                    C.Save();
+                    C.SaveDebounced();
                 },
                 currentMaxUse: entry.GatherBuffs.Buffs["Tidings"].MaxUse,
                 onMaxUseChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["Tidings"].MaxUse = newVal;
-                    C.Save();
+                    C.SaveDebounced();
                 }
             );
 
@@ -628,13 +592,13 @@ namespace ICE.Ui.SettingTabs
                 onMinGpChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["YieldII"].MinGp = newVal;
-                    C.Save();
+                    C.SaveDebounced();
                 },
                 currentMaxUse: entry.GatherBuffs.Buffs["YieldII"].MaxUse,
                 onMaxUseChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["YieldII"].MaxUse = newVal;
-                    C.Save();
+                    C.SaveDebounced();
                 }
             );
 
@@ -657,13 +621,13 @@ namespace ICE.Ui.SettingTabs
                 onMinGpChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["YieldI"].MinGp = newVal;
-                    C.Save();
+                    C.SaveDebounced();
                 },
                 currentMaxUse: entry.GatherBuffs.Buffs["YieldI"].MaxUse,
                 onMaxUseChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["YieldI"].MaxUse = newVal;
-                    C.Save();
+                    C.SaveDebounced();
                 }
             );
 
@@ -686,13 +650,13 @@ namespace ICE.Ui.SettingTabs
                 onMinGpChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["BonusIntegrity"].MinGp = newVal;
-                    C.Save();
+                    C.SaveDebounced();
                 },
                 currentMaxUse: entry.GatherBuffs.Buffs["BonusIntegrity"].MaxUse,
                 onMaxUseChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["BonusIntegrity"].MaxUse = newVal;
-                    C.Save();
+                    C.SaveDebounced();
                 }
             );
 
@@ -715,19 +679,19 @@ namespace ICE.Ui.SettingTabs
                 onMinGpChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["BountifulYieldII"].MinGp = newVal;
-                    C.Save();
+                    C.SaveDebounced();
                 },
                 currentMaxUse: entry.GatherBuffs.Buffs["BountifulYieldII"].MaxUse,
                 onMaxUseChange: newVal =>
                 {
                     entry.GatherBuffs.Buffs["BountifulYieldII"].MaxUse = newVal;
-                    C.Save();
+                    C.SaveDebounced();
                 },
                 entry.GatherBuffs.BountifulMinItem,
                 onMinItemMaxUseChange: newVal =>
                 {
                     entry.GatherBuffs.BountifulMinItem = newVal;
-                    C.Save();
+                    C.SaveDebounced();
                 }
             );
 
