@@ -16,7 +16,7 @@ namespace ICE.Scheduler.Tasks
         {
             P.TaskManager.EnqueueMulti
                 (
-                    new(Task_RelicTurnin.RegisterCraftingPosition, "Registering crafting position for later"),
+                    //new(Task_RelicTurnin.RegisterCraftingPosition, "Registering crafting position for later"),
                     new(Task_Repair.HubCheck, "Checking to see if we're in the hub area"),
                     new(PathToCreditVendor, "Pathing to the credit vendor"),
                     new(TalkToCreditNPC, "Talking to the credit NPC to start the buying process"),
