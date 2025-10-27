@@ -80,14 +80,15 @@ namespace ICE.Ui.SettingTabs
 
             ImGui.Text($"订单数量: {C.CosmoShoppingOrder.Count}");
 
-            if (ImGui.BeginTable("Current Shopping List", 9, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.RowBg))
+            if (ImGui.BeginTable("Current Shopping List", 10, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders))
             {
                 ImGui.TableSetupColumn("上移");
                 ImGui.TableSetupColumn("下移");
                 ImGui.TableSetupColumn("名称");
+                ImGui.TableSetupColumn("持有");
                 ImGui.TableSetupColumn("价格");
                 ImGui.TableSetupColumn("类型");
-                ImGui.TableSetupColumn("库存数量");
+                ImGui.TableSetupColumn("目标库存");
                 ImGui.TableSetupColumn("购买数量");
                 ImGui.TableSetupColumn("持续购买");
                 ImGui.TableSetupColumn("移除");
@@ -102,7 +103,8 @@ namespace ICE.Ui.SettingTabs
 
                     ImGui.TableNextRow();
 
-                    // Move to Top Button
+                    ImGui.PushID(itemId);
+
                     ImGui.TableSetColumnIndex(0);
                     using (ImRaii.Disabled(i == 0))
                     {
@@ -113,7 +115,6 @@ namespace ICE.Ui.SettingTabs
                         }
                     }
 
-                    // Drag Handle Column
                     ImGui.TableNextColumn();
                     if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowDown, $"##drag_{itemId}"))
                     {
@@ -129,6 +130,10 @@ namespace ICE.Ui.SettingTabs
                         ImGui.SameLine();
                     }
                     ImGui.Text($"{itemInfo.Name}");
+
+                    ImGui.TableNextColumn();
+                    PlayerHelper.GetItemCount(itemId, out var count);
+                    ImGui.Text($"{count}");
 
                     // Cost
                     ImGui.TableNextColumn();
@@ -182,6 +187,8 @@ namespace ICE.Ui.SettingTabs
                         RemoveItem(itemId);
                         C.Save();
                     }
+
+                    ImGui.PopID();
                 }
 
                 ImGui.EndTable();
