@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ECommons.Automation.NeoTaskManager;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,7 +43,11 @@ namespace ICE.Scheduler
                 P.TaskManager.Enqueue(() => SchedulerMain.State = IceState.Gambling);
                 Task_Gamba.Enqueue();
             }
-            P.TaskManager.Enqueue(Task_RelicTurnin.PathBackToCraftingSpot, "Pathing back to our crafting spot");
+            P.TaskManager.Enqueue(
+                Task_RelicTurnin.PathBackToCraftingSpot,
+                "Pathing back to our crafting spot",
+                Utils.TaskConfig
+                );
             P.TaskManager.Enqueue(() =>
             {
                 RepairNpc = false;
