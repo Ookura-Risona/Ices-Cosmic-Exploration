@@ -14,6 +14,14 @@ namespace ICE.Ui.SettingTabs
         public static unsafe void Draw()
         {
             CheckConfigState();
+            if (Task_BuyCosmoItems.CanPurchaseAnyItem())
+            {
+                ImGui.Text("您现在可以购买列表中的宇宙信用点物品！");
+            }
+            else
+            {
+                ImGui.Text("您当前的宇宙信用点/物品不足以购买任何商品（好吧，这只是测试）");
+            }
 
             if (ImGui.Button("添加物品到清单"))
             {
@@ -158,6 +166,11 @@ namespace ICE.Ui.SettingTabs
                     var keepBuying = setting.KeepBuying;
                     if (ImGui.Checkbox($"##keepbuying_{itemId}", ref keepBuying))
                     {
+                        foreach (var enabled in C.CosmoShopping)
+                        {
+                            enabled.Value.KeepBuying = false;
+                        }
+
                         setting.KeepBuying = keepBuying;
                         C.Save();
                     }

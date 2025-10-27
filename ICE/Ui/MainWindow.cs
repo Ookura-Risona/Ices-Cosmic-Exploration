@@ -149,6 +149,27 @@ namespace ICE.Ui
             }
         }
 
+
+        private int[] allowedValues = { 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000 };
+        private void GambaSlider()
+        {
+            int currentIndex = Array.IndexOf(allowedValues, C.GambaAtAmount);
+            if (currentIndex == -1)
+            {
+                currentIndex = 0;
+                C.GambaAtAmount = allowedValues[0];
+                C.SaveDebounced();
+            }
+
+            ImGui.SetNextItemWidth(200);
+            if (ImGui.SliderInt("开始抽奖阈值", ref currentIndex, 0, allowedValues.Length - 1,
+                allowedValues[currentIndex].ToString()))
+            {
+                C.GambaAtAmount = allowedValues[currentIndex];
+                C.SaveDebounced();
+            }
+        }
+
         public void LeftWindow()
         {
             // - - - - - - - - - - - - - - 
@@ -293,6 +314,7 @@ namespace ICE.Ui
                 if (ImGui.Checkbox($"技巧点达到阈值时", ref stopScore)) // Stop at Cosmic Score
                 {
                     C.StopOnceHitCosmicScore = stopScore;
+                    C.BuyItems = false;
                     C.Save();
                 }
                 if (stopScore)
@@ -444,6 +466,52 @@ namespace ICE.Ui
             }
 
                 WindowSpacer();
+
+            // - - - - - - - - - - - - - - - - - - - -
+            // 3.2 Section, Hud Activities Button
+            // - - - - - - - - - - - - - - - - - - - - 
+
+            bool BuyItems = C.BuyItems;
+
+            if (ImGui.Checkbox("购买物品", ref BuyItems))
+            {
+                C.BuyItems = BuyItems;
+                C.StopOnceHitCosmoCredits = false;
+                C.Save();
+            }
+            ImGui.SameLine();
+            if (ImGuiEx.IconButton(FontAwesomeIcon.Coins, "##Open Settings to buy items menu"))
+            {
+                P.settingsWindowV2.IsOpen = true;
+                P.settingsWindowV2.SelectedSetting = "购物清单";
+            }
+            int buyAmount = C.CosmoBuyAtAmount;
+            if (C.BuyItems)
+            {
+                ImGui.SetNextItemWidth(150);
+                if (ImGui.InputInt("开始购物阈值", ref buyAmount, 1))
+                {
+                    if (buyAmount < 0)
+                        buyAmount = 0;
+                    if (buyAmount > 30000)
+                        buyAmount = 30000;
+                    C.CosmoBuyAtAmount = buyAmount;
+                    C.Save();
+                }
+            }
+
+            bool gambaBetween = C.GambaBetweenRuns;
+            if (ImGui.Checkbox("运行期间玩宇宙好运道", ref gambaBetween))
+            {
+                C.GambaBetweenRuns = gambaBetween;
+                C.Save();
+            }
+            if (gambaBetween)
+            {
+                GambaSlider();
+            }
+
+            WindowSpacer();
 
             // - - - - - - - - - - - - - - - - -
             // 4th Section, Planet Selection
@@ -2374,6 +2442,7 @@ namespace ICE.Ui
                 TurninState.Bronze => new Vector4(0.8f, 0.5f, 0.3f, 1.0f),  // Bronze
                 TurninState.Silver => new Vector4(0.75f, 0.75f, 0.75f, 1.0f), // Silver
                 TurninState.Gold => new Vector4(1.0f, 0.84f, 0.0f, 1.0f),    // Gold
+                TurninState.Critical => new Vector4(1.0f, 0.84f, 0.0f, 1.0f), // Gold
                 _ => new Vector4(0, 0, 0, 0) // Transparent/none
             };
 

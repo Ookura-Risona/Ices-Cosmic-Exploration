@@ -115,6 +115,7 @@ public static unsafe class Utils
             if (gameObject == null || !gameObject.IsTargetable)
                 return;
             var gameObjectPointer = (GameObject*)gameObject.Address;
+            IceLogging.Info($"Attempting to interact with: {gameObject.DataId} | {gameObject.Name}", "[Interact with Game Object]");
             TargetSystem.Instance()->InteractWithObject(gameObjectPointer, false);
         }
         catch (Exception ex)
