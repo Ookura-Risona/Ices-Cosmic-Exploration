@@ -74,6 +74,13 @@ namespace ICE.Ui.SettingTabs
                 C.Save();
             }
 
+            bool DisableLunarAura = C.RemoveStellarStatus;
+            if (ImGui.Checkbox("自动取消贡献之星状态效果", ref DisableLunarAura))
+            {
+                C.RemoveStellarStatus = DisableLunarAura;
+                C.Save();
+            }
+
             if (ImGui.Checkbox("启用 自动离开设置为不切换", ref EnableAutoAntiAFK))
             {
                 C.AutoAntiAFK = EnableAutoAntiAFK;

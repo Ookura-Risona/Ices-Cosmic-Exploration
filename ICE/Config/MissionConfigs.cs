@@ -156,6 +156,7 @@ namespace ICE.Config
         public bool PlaySoundAlert { get; set; } = false;
         public float SoundVolume { get; set; } = 0.5f;
         public int TimeHistoryLimit { get; set; } = 100;
+        public bool RemoveStellarStatus { get; set; } = false;
         public bool AutoAntiAFK { get; set; } = true; // Add: 自动切换离开状态默认
 
         #endregion
@@ -163,6 +164,20 @@ namespace ICE.Config
         #region Relic Settings
         
         public bool TurninRelic { get; set; } = false;
+        public Dictionary<uint, bool> ClassesUnlocked { get; set; } = new()
+        {
+            [8] = true,
+            [9] = true,
+            [10] = true,
+            [11] = true,
+            [12] = true,
+            [13] = true,
+            [14] = true,
+            [15] = true,
+            [16] = true,
+            [17] = true,
+            [18] = true
+        };
 
         #endregion
 

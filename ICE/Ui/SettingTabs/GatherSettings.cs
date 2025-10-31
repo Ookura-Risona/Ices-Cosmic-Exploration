@@ -240,31 +240,6 @@ namespace ICE.Ui.SettingTabs
             }
 
             int maxGp = 1200;
-
-            if (ImGui.Checkbox("采集时自动修理", ref SelfRepairGather))
-            {
-                if (C.SelfRepairGather != SelfRepairGather)
-                {
-                    C.SelfRepairGather = SelfRepairGather;
-                    C.Save();
-                }
-            }
-            if (SelfRepairGather)
-            {
-                ImGui.Indent(15);
-                ImGui.Text("修理阈值");
-                ImGui.SameLine();
-                ImGui.SetNextItemWidth(150);
-                if (ImGui.SliderFloat("###Repair %", ref SelfRepairPercent, 0f, 99f, "%.0f%%"))
-                {
-                    if (C.RepairPercent != SelfRepairPercent)
-                    {
-                        C.RepairPercent = (int)SelfRepairPercent;
-                        C.SaveDebounced();
-                    }
-                }
-                ImGui.Unindent(15);
-            }
             if (ImGui.Checkbox("采集时精制魔晶石", ref SelfSpiritbondGather))
             {
                 if (C.SelfSpiritbondGather != SelfSpiritbondGather)
