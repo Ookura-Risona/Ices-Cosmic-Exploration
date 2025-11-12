@@ -62,6 +62,13 @@ namespace ICE.Ui.SettingTabs
                 C.Save();
             }
 
+            bool showTotalScore = C.ShowTotalScore;
+            if (ImGui.Checkbox("显示 总技巧点", ref showTotalScore))
+            {
+                C.ShowTotalScore = showTotalScore;
+                C.Save();
+            }
+
             ImGui.Dummy(new(0, 2));
 
             ImGui.Separator();
