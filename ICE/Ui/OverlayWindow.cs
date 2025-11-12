@@ -189,7 +189,7 @@ namespace ICE.Ui
 
                 if (CosmicHelper.CrafterJobList.Contains(currentJobId) || CosmicHelper.GatheringJobList.Contains(currentJobId))
                 {
-                    if (ImGui.CollapsingHeader("Relic Tool XP"))
+                    if (ImGui.CollapsingHeader("宇宙工具研究数据"))
                     {
                         Relic_XP.DrawRelicXP((uint)currentJobId);
                     }

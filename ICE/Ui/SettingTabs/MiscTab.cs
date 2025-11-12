@@ -56,7 +56,7 @@ namespace ICE.Ui.SettingTabs
             }
 
             bool showExpOverlay = C.ShowExpBars;
-            if (ImGui.Checkbox("显示 宇宙工具研究经验", ref showExpOverlay))
+            if (ImGui.Checkbox("显示 宇宙工具研究数据", ref showExpOverlay))
             {
                 C.ShowExpBars = showExpOverlay;
                 C.Save();
