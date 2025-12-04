@@ -41,7 +41,7 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
             #region Planet Credits
 
             bool stopLunar = C.StopOnceHitLunarCredits;
-            if (ImGui.Checkbox($"行星信用点信用点达到阈值时", ref stopLunar))
+            if (ImGui.Checkbox($"行星信用点达到阈值时", ref stopLunar))
             {
                 C.StopOnceHitLunarCredits = stopLunar;
                 C.Save();
