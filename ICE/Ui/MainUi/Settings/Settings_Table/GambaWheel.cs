@@ -30,28 +30,33 @@ namespace ICE.Ui.SettingTabs
 
         public static void Draw()
         {
-            if (ImGui.Checkbox("启用 宇宙好运道", ref gambaEnabled))
+            if (ImGui.Checkbox("启用 自动宇宙好运道", ref gambaEnabled))
             {
                 C.GambaEnabled = gambaEnabled;
                 C.Save();
             }
-            ImGuiEx.HelpMarker("运行此功能前，请确保已在 环行威 显示宇宙好运道界面窗口，然后按下开始，之后将会自动运行。");
-            if (gambaEnabled)
+            ImGuiEx.HelpMarker("启用此选项将自动选择转盘进行宇宙好运道。如果您不希望玩宇宙好运道时自动执行, 请禁用此选项。");
+            ImGui.SetNextItemWidth(150);
+            if (ImGui.SliderInt("保留最低信用点数量", ref gambaCreditsMinimum, 0, 10000))
             {
-                ImGui.SetNextItemWidth(150);
-                if (ImGui.SliderInt("宇宙好运道 延迟", ref gambaDelay, 50, 2000))
-                {
-                    C.GambaDelay = gambaDelay;
-                    C.SaveDebounced();
-                }
-                ImGui.SameLine();
-                ImGui.SetNextItemWidth(150);
-                if (ImGui.SliderInt("保留最低信用点数量", ref gambaCreditsMinimum, 0, 10000))
-                {
-                    C.GambaCreditsMinimum = gambaCreditsMinimum;
-                    C.SaveDebounced();
-                }
+                C.GambaCreditsMinimum = gambaCreditsMinimum;
+                C.SaveDebounced();
             }
+            bool gambaBetween = C.GambaBetweenRuns;
+            if (ImGui.Checkbox("运行期间玩宇宙好运道", ref gambaBetween))
+            {
+                C.GambaBetweenRuns = gambaBetween;
+                C.Save();
+            }
+            ImGui.SameLine();
+            GambaSlider();
+            ImGui.SetNextItemWidth(150);
+            if (ImGui.SliderInt("抽奖延迟(ms)", ref gambaDelay, 50, 2000))
+            {
+                C.GambaDelay = gambaDelay;
+                C.SaveDebounced();
+            }
+
             if (ImGui.Checkbox("优先更小的转盘", ref gambaPreferSmallerWheel))
             {
                 C.GambaPreferSmallerWheel = gambaPreferSmallerWheel;
@@ -90,6 +95,26 @@ namespace ICE.Ui.SettingTabs
             if (ImGui.Button("重置权重"))
             {
                 Task_Gamba.EnsureGambaWeightsInitialized(true);
+            }
+        }
+
+        private static int[] allowedValues = { 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000 };
+        private static void GambaSlider()
+        {
+            int currentIndex = Array.IndexOf(allowedValues, C.GambaAtAmount);
+            if (currentIndex == -1)
+            {
+                currentIndex = 0;
+                C.GambaAtAmount = allowedValues[0];
+                C.SaveDebounced();
+            }
+
+            ImGui.SetNextItemWidth(150);
+            if (ImGui.SliderInt("开始抽奖阈值", ref currentIndex, 0, allowedValues.Length - 1,
+                allowedValues[currentIndex].ToString()))
+            {
+                C.GambaAtAmount = allowedValues[currentIndex];
+                C.SaveDebounced();
             }
         }
     }

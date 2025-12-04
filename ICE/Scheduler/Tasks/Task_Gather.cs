@@ -1,11 +1,14 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using ICE.Utilities.Cosmic_Helper;
 using ICE.Utilities.GatheringHelper;
+using Microsoft.VisualBasic.ApplicationServices;
 using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
+using YamlDotNet.Core.Tokens;
 using static ECommons.UIHelpers.AddonMasterImplementations.AddonMaster;
 
 namespace ICE.Scheduler.Tasks
@@ -29,6 +32,7 @@ namespace ICE.Scheduler.Tasks
                 P.TaskManager.Enqueue(() => CheckReduceMission(), "Checking to see if we need to reduce items");
                 P.TaskManager.Enqueue(() => Mission_Settings.ResetCollectableState());
                 Task_CheckScore.Enqueue();
+                P.TaskManager.Enqueue(() => UseFood());
                 P.TaskManager.Enqueue(() => UseCordial(), "Checking to see if we should use cordial or not");
                 P.TaskManager.Enqueue(() => CheckGatherLocation(), "Checking to see if gathering flags needs updated");
                 P.TaskManager.Enqueue(() => PathToNode());
@@ -140,6 +144,14 @@ namespace ICE.Scheduler.Tasks
                 }
 
             }
+            else if (!P.Navmesh.IsRunning() && Player.DistanceTo(location.Position) >= 4)
+            {
+                if (EzThrottler.Throttle("Telling navmesh to move to the node, cause the distance is still to far. . ."))
+                {
+                    IceLogging.Debug($"Telling Navmesh to path to: {location.LandZone}, Cause we still to far", "[Gathering: Navmesh Movement]");
+                    P.Navmesh.PathfindAndMoveTo(location.LandZone, false);
+                }
+            }
             else if (P.Navmesh.IsRunning())
             {
                 if (C.UseMountInMission && (Player.DistanceTo(location.Position) > C.MountRadius))
@@ -218,8 +230,15 @@ namespace ICE.Scheduler.Tasks
             var missionInfo = CosmicHelper.CurrentMissionInfo;
             bool collectableItem = missionInfo.Attributes.HasFlag(MissionAttributes.Collectables);
             bool reduceItems = missionInfo.Attributes.HasFlag(MissionAttributes.ReducedItems);
-            var configId = C.MissionConfig[CosmicHelper.CurrentLunarMission].GatherProfileId;
-            var gatherConfig = C.GatherSettings[configId];
+            var configId = C.MissionConfig[CosmicHelper.CurrentLunarMission].GProfileId;
+            if (C.GatherProfiles.TryGetValue(configId, out var gatherConfig))
+            {
+
+            }
+            else
+            {
+                gatherConfig = C.GatherProfiles[0];
+            }
             var gathActions = GatheringUtil.GathActionDict;
 
             if (EzThrottler.Throttle("Saying what profile you're using", 2000))
@@ -284,29 +303,15 @@ namespace ICE.Scheduler.Tasks
                             }
                             else
                             {
-                                foreach (var action in Mission_Settings.SkillUseAmount)
-                                {
-                                    var key = action.Key;
-                                    var amount = action.Value;
-                                    bool missingDur = gather.CurrentIntegrity != gather.TotalIntegrity;
-                                    int boonChance = gather.GatheredItems.FirstOrDefault().BoonChance;
+                                bool missingDur = gather.CurrentIntegrity != gather.TotalIntegrity;
+                                var testItem = gather.GatheredItems.Where(x => x.ItemID != 0).FirstOrDefault();
+                                int gatherChance = testItem.GatherChance;
+                                int boonChance = testItem.BoonChance;
+                                int playerGp = PlayerHelper.GetGp();
 
-                                    bool useBuff = CanUseGatheringAction(key, configId, missingDur, boonChance);
-                                    if (EzThrottler.Throttle($"Checking buff: {key}"))
-                                    {
-                                        IceLogging.Debug($"Action name: {key} | Using? {useBuff}");
-                                    }
-                                    if (useBuff)
-                                    {
-                                        if (EzThrottler.Throttle($"Using Gathering Action: {key}"))
-                                        {
-                                            IceLogging.Debug($"Using the following action: {key} in full durability section", debugOnly: true);
-                                            var actionId = gathActions[key].ClassAction[jobId].ActionId;
-                                            ActionManager.Instance()->UseAction(ActionType.Action, actionId);
-                                            Mission_Settings.SkillUseAmount[key] += 1;
-                                        }
-                                        return false;
-                                    }
+                                if (UseGatherAction(configId, gatherChance, boonChance, missingDur, playerGp))
+                                {
+                                    return false;
                                 }
 
                                 foreach (var item in CosmicHelper.CurrentMissionInfo.Gathering_Min.OrderByDescending(x => x.Value))
@@ -403,8 +408,144 @@ namespace ICE.Scheduler.Tasks
                 return false;
             }
         }
+        public static unsafe bool UseGatherAction(int profileId, int gatherChance, int? boonChance, bool missingDur, int availableGp)
+        {
+            C.GatherProfiles.TryGetValue(profileId, out var gatherProfile);
+            if (gatherProfile == null)
+            {
+                gatherProfile = C.GatherProfiles[0];
+                if (EzThrottler.Throttle("Null Profile Selected"))
+                {
+                    IceLogging.Error("Hey! We've somehow stumbled into a null profile being selected. Please make sure:\n" +
+                                     "1: The mission you have selected has a gathering profile selected\n" +
+                                     "2: If it does have one, try to click on it again\n" +
+                                     "3: If that still doesn't work, let me know you're getting this error message.\n" +
+                                     $"Expected profileId: {profileId} | Defaulted to the default profile");
+                }
+            }
 
-        public static bool CanUseGatheringAction(string actionName, int profileId, bool missingDur, int? boonChance = null, bool gather1More = true)
+            if (gatherChance != 100)
+            {
+                if (EzThrottler.Throttle("Helper Log"))
+                {
+                    IceLogging.Debug($"Gathering Chance: {gatherChance}", debugOnly: true);
+                }
+                uint MasteryBuff = GatheringUtil.GathActionDict["FieldMasteryI"].StatusId;
+
+                string? SelectBestFieldMastery(int currentChance, int availableGp)
+                {
+                    int playerLevel = Player.Level;
+
+                    bool MasteryIII = gatherProfile.GatherBuffs.Buffs["FieldMasteryIII"].Enabled
+                                   && (gatherProfile.GatherBuffs.Buffs["FieldMasteryIII"].MinGp <= PlayerHelper.GetGp())
+                                   && (PlayerHelper.GetGp() >= GatheringUtil.GathActionDict["FieldMasteryIII"].RequiredGp)
+                                   && (playerLevel >= GatheringUtil.GathActionDict["FieldMasteryIII"].RequiredLv)
+                                   && (gatherProfile.GatherBuffs.Buffs["FieldMasteryIII"].MaxUse == -1 
+                                       || Mission_Settings.SkillUseAmount["FieldMasteryIII"] < gatherProfile.GatherBuffs.Buffs["FieldMasteryIII"].MaxUse);
+                    bool MasteryII = gatherProfile.GatherBuffs.Buffs["FieldMasteryII"].Enabled
+                                  && (gatherProfile.GatherBuffs.Buffs["FieldMasteryII"].MinGp <= PlayerHelper.GetGp())
+                                  && (PlayerHelper.GetGp() >= GatheringUtil.GathActionDict["FieldMasteryII"].RequiredGp)
+                                  && (playerLevel >= GatheringUtil.GathActionDict["FieldMasteryII"].RequiredLv)
+                                  && (gatherProfile.GatherBuffs.Buffs["FieldMasteryII"].MaxUse == -1
+                                      || Mission_Settings.SkillUseAmount["FieldMasteryII"] < gatherProfile.GatherBuffs.Buffs["FieldMasteryII"].MaxUse);
+                    bool MasteryI = gatherProfile.GatherBuffs.Buffs["FieldMasteryI"].Enabled
+                                 && (gatherProfile.GatherBuffs.Buffs["FieldMasteryI"].MinGp <= PlayerHelper.GetGp())
+                                 && (PlayerHelper.GetGp() >= GatheringUtil.GathActionDict["FieldMasteryI"].RequiredGp)
+                                 && (playerLevel >= GatheringUtil.GathActionDict["FieldMasteryI"].RequiredLv)
+                                 && (gatherProfile.GatherBuffs.Buffs["FieldMasteryI"].MaxUse == -1
+                                     || Mission_Settings.SkillUseAmount["FieldMasteryI"] < gatherProfile.GatherBuffs.Buffs["FieldMasteryI"].MaxUse);
+
+                    // Already at 100%? No skill needed, so continuing on
+                    if (currentChance >= 100)
+                        return null;
+
+                    int neededBonus = 100 - currentChance;
+
+                    // Find the cheapest skill that gets us to 100%
+                    if (neededBonus <= 5 && availableGp >= 50 && MasteryI)
+                        return "FieldMasteryI";
+
+                    if (neededBonus <= 15 && availableGp >= 100 && MasteryII)
+                        return "FieldMasteryII";
+
+                    if (neededBonus <= 50 && availableGp >= 250 && MasteryIII)
+                        return "FieldMasteryIII";
+
+                    // If we can't reach 100%, use the best skill we can afford 
+                    if (availableGp >= 250  && MasteryIII)
+                        return "FieldMasteryIII";
+
+                    if (availableGp >= 100 && MasteryII)
+                        return "FieldMasteryII";
+
+                    if (availableGp >= 50  && MasteryI)
+                        return "FieldMasteryI";
+
+                    return null; // Can't afford any skill
+                }
+
+                if (!PlayerHelper.HasStatusId(MasteryBuff) && (SelectBestFieldMastery(gatherChance, availableGp) != null))
+                {
+                    string? ActionName = SelectBestFieldMastery(gatherChance, availableGp);
+                    if (EzThrottler.Throttle($"Using Gathering Action: {ActionName}"))
+                    {
+                        uint jobId = Player.JobId;
+
+                        IceLogging.Debug($"Using the following action: {ActionName} to gain some collectability from the node", debugOnly: true);
+                        var actionId = GatheringUtil.GathActionDict[ActionName].ClassAction[jobId].ActionId;
+                        ActionManager.Instance()->UseAction(ActionType.Action, actionId);
+                        Mission_Settings.SkillUseAmount[ActionName] += 1;
+                    }
+                    return true;
+                }
+
+                int playerLevel = Player.Level;
+                uint TempMasteryBuffId = GatheringUtil.GathActionDict["FieldMasteryTemp"].StatusId;
+                bool TempMasteryBuff = gatherProfile.GatherBuffs.Buffs["FieldMasteryTemp"].Enabled
+                                    && (gatherProfile.GatherBuffs.Buffs["FieldMasteryTemp"].MinGp <= PlayerHelper.GetGp())
+                                    && (PlayerHelper.GetGp() >= GatheringUtil.GathActionDict["FieldMasteryTemp"].RequiredGp)
+                                    && (playerLevel >= GatheringUtil.GathActionDict["FieldMasteryTemp"].RequiredLv)
+                                    && (gatherProfile.GatherBuffs.Buffs["FieldMasteryTemp"].MaxUse == -1);
+
+                if (!PlayerHelper.HasStatusId(TempMasteryBuffId) && TempMasteryBuff)
+                {
+                    if (EzThrottler.Throttle($"Using Gathering Action: {"FieldMasteryTemp"}"))
+                    {
+                        uint jobId = Player.JobId;
+
+                        IceLogging.Debug($"Using the following action: {"FieldMasteryTemp"} to gain some collectability from the node", debugOnly: true);
+                        var actionId = GatheringUtil.GathActionDict["FieldMasteryTemp"].ClassAction[jobId].ActionId;
+                        ActionManager.Instance()->UseAction(ActionType.Action, actionId);
+                        Mission_Settings.SkillUseAmount["FieldMasteryTemp"] += 1;
+                    }
+                    return true;
+                }
+            }
+
+            // general logic for checking for the rest of the buffs now
+            foreach (var buff in Mission_Settings.SkillUseAmount)
+            {
+                string action = buff.Key;
+                if (CanUseGatheringAction(action, profileId, missingDur, boonChance))
+                {
+                    var actionInfo = GatheringUtil.GathActionDict[action];
+                    if (EzThrottler.Throttle($"Using Gathering Action: {action}"))
+                    {
+                        uint jobId = Player.JobId;
+
+                        IceLogging.Debug($"Using the following action: {action} on the node", debugOnly: true);
+                        var actionId = GatheringUtil.GathActionDict[action].ClassAction[jobId].ActionId;
+                        ActionManager.Instance()->UseAction(ActionType.Action, actionId);
+                        Mission_Settings.SkillUseAmount[action] += 1;
+                    }
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        public static bool CanUseGatheringAction(string actionName, int profileId, bool missingDur, int? boonChance = null)
         {
             var actionInfo = GatheringUtil.GathActionDict[actionName];
             bool hasStatus = PlayerHelper.HasStatusId(actionInfo.StatusId);
@@ -417,7 +558,7 @@ namespace ICE.Scheduler.Tasks
                 return hasStatus && missingDur;
             }
 
-            var gatherBuff = C.GatherSettings[profileId].GatherBuffs.Buffs[actionName];
+            var gatherBuff = C.GatherProfiles[profileId].GatherBuffs.Buffs[actionName];
 
             return actionName switch
             {
@@ -469,12 +610,10 @@ namespace ICE.Scheduler.Tasks
                                    && hasGp 
                                    && PlayerHelper.GetGp() >= gatherBuff.MinGp
                                    && (gatherBuff.MaxUse == -1 || gatherBuff.MaxUse > used) 
-                                   && gather1More == true
                                    && properLvl,
                 _ => false,
             };
         }
-
         private static bool CanUseCollectableAction(string action, bool missingDur = false)
         {
             var actionInfo = GatheringUtil.GathCollectableBuffs[action];
@@ -499,7 +638,6 @@ namespace ICE.Scheduler.Tasks
                 _ => false,
             };
         }
-
         public static unsafe bool NormalGpRotation(int collectability, bool missingDur = false)
         {
             if (EzThrottler.Throttle("Executing HighGPRotation", 100))
@@ -623,7 +761,6 @@ namespace ICE.Scheduler.Tasks
 
             return false;
         }
-
         public static unsafe void UseCollectableBuff(string action)
         {
             var collectorBuffs = GatheringUtil.GathCollectableBuffs;
@@ -635,7 +772,6 @@ namespace ICE.Scheduler.Tasks
                 ActionManager.Instance()->UseAction(ActionType.Action, actionId);
             }
         }
-
         public static unsafe void UseCollectableAction(string action)
         {
             var collectorAction = GatheringUtil.GathCollectableActions;
@@ -647,7 +783,6 @@ namespace ICE.Scheduler.Tasks
                 ActionManager.Instance()->UseAction(ActionType.Action, actionId);
             }
         }
-
         public static bool? CheckReduceMission()
         {
             IceLogging.Info($"Current itemId: {Mission_Settings.item_collectableId}", "[Gather: Check Reduce Mission]");
@@ -663,7 +798,6 @@ namespace ICE.Scheduler.Tasks
 
             return true;
         }
-
         public static unsafe bool? CheckReduceItems()
         {
             if (Svc.Condition[ConditionFlag.Occupied39])
@@ -709,7 +843,6 @@ namespace ICE.Scheduler.Tasks
 
             return false;
         }
-
         public static bool? WaitForDesynthCompletion()
         {
             if (!Svc.Condition[ConditionFlag.Occupied39])
@@ -726,7 +859,6 @@ namespace ICE.Scheduler.Tasks
 
             return false;
         }
-
         public static unsafe void UseCordial()
         {
             if (EzThrottler.Throttle("Cordial usage check while moving"))
@@ -778,12 +910,54 @@ namespace ICE.Scheduler.Tasks
                 }
             }
         }
-
         private static bool WillOvercap(int recoveryGP)
         {
             return ((PlayerHelper.GetGp() + recoveryGP) > PlayerHelper.MaxGp());
         }
+        public static unsafe bool? UseFood()
+        {
+            var ItemId = C.GatheringFood;
+            if (C.UseGatheringFood && ItemId != 0)
+            {
+                PlayerHelper.GetItemCount(ItemId, out var HqCount, includeNq: false);
+                PlayerHelper.GetItemCount(ItemId, out var NqCount, includeHq: false);
 
+                if (HqCount > 0 || NqCount > 0)
+                {
+                    // We've gotten this far, which means we have a gathering item to use...
+                    if (!PlayerHelper.HasFoodRunning())
+                    {
+                        // We need to apply the food, since we have some, we're going to use some here
+                        if (EzThrottler.Throttle("Using Food Item", 3000))
+                        {
+                            if (HqCount > 0)
+                                ItemId += 1_000_000;
+
+                            ActionManager.Instance()->UseAction(ActionType.Item, ItemId, extraParam: 65535);
+                            IceLogging.Debug($"Attempting to use food: {ItemId}");
+                        }
+                        return false;
+                    }
+                    else
+                    {
+                        IceLogging.Info("We have food running, and it's the proper one! Continuing");
+                        return true;
+                    }
+                }
+                else
+                {
+                    IceLogging.Info("We are out of the current food, continuing on w/o buff");
+                    return true;
+                }
+            }
+            else
+            {
+                IceLogging.Info("We either don't have use food enabled, or have no food selected. Continuing on\n" +
+                               $"Use Food Enabled: {C.UseGatheringFood}\n" +
+                               $"ItemId of food: {ItemId}");
+                return true;
+            }
+        }
         private static void ThrottleMessage(string s, string handle)
         {
             if (EzThrottler.Throttle($"Throttling the following message: {s}", 1000))

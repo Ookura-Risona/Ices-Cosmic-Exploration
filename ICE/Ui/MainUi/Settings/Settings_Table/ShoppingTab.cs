@@ -5,7 +5,7 @@ using ECommons;
 using ICE.Config;
 using Lumina.Excel.Sheets;
 
-namespace ICE.Ui.SettingTabs
+namespace ICE.Ui.MainUi.Settings.Settings_Table
 {
     internal class ShoppingTab
     {
@@ -13,6 +13,27 @@ namespace ICE.Ui.SettingTabs
 
         public static unsafe void Draw()
         {
+            bool BuyItems = C.BuyItems;
+
+            if (ImGui.Checkbox("购买物品", ref BuyItems))
+            {
+                C.BuyItems = BuyItems;
+                C.StopOnceHitCosmoCredits = false;
+                C.Save();
+            }
+
+            int buyAtAmount = C.CosmoBuyAtAmount;
+            ImGui.SetNextItemWidth(150);
+            if (ImGui.InputInt("开始购物阈值", ref buyAtAmount, 1))
+            {
+                if (buyAtAmount < 0)
+                    buyAtAmount = 0;
+                if (buyAtAmount > 30000)
+                    buyAtAmount = 30000;
+                C.CosmoBuyAtAmount = buyAtAmount;
+                C.Save();
+            }
+
             CheckConfigState();
             if (Task_BuyCosmoItems.CanPurchaseAnyItem())
             {
