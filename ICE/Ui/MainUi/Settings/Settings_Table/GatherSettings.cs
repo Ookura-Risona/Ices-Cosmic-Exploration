@@ -419,6 +419,14 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                 }
                 ImGui.EndChild();
 
+                // 最后选中的采集配置索引不存在时的修复
+                if (!C.GatherProfiles.ContainsKey(C.SelectedGatherIndex))
+                {
+                    Svc.Log.Debug($"Selected gather profile index {C.SelectedGatherIndex} not found, using default(0).");
+                    C.SelectedGatherIndex = 0;
+                    C.Save();
+                }
+
                 GatherProfile entry = C.GatherProfiles[C.SelectedGatherIndex];
 
                 ImGui.Combo("任务类型", ref MissionIndex, MissionTypes, MissionTypes.Length);
