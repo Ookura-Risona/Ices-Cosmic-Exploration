@@ -62,6 +62,13 @@ public static class Settings_TableColumns
         if (ImGui.Checkbox("显示手动模式表格列", ref showManualMode))
         {
             C.ShowManualMode = showManualMode;
+            if (!showManualMode)
+            {
+                foreach (var mission in C.MissionConfig)
+                {
+                    mission.Value.ManualMode = false;
+                }
+            }
             C.Save();
         }
         ImGuiEx.HelpMarker("只在您打算亲自完成任务, 而不是依靠插件自动化完成时, 才需要启用此选项。\n" +
@@ -85,7 +92,7 @@ public static class Settings_TableColumns
 
         ImGui.Checkbox("当前任务结束后停止", ref Mission_Settings.StopAfterCurrent);
         bool relicTurnin = C.TurninRelic;
-        if (ImGui.Checkbox($"宇宙工具可报告时提交", ref relicTurnin))
+        if (ImGui.Checkbox($"宇宙工具可报告时提交##RelicTurnin_GeneralSetting", ref relicTurnin))
         {
             if (relicTurnin)
                 C.GrindProvisionals = false;

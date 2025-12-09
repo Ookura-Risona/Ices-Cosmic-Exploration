@@ -36,6 +36,14 @@ namespace ICE.Ui
         public override void Draw()
         {
             ImGui.Text($"当前状态: " + SchedulerMain.State.ToString());
+            if (CosmicHelper.SheetMissionDict.TryGetValue(CosmicHelper.CurrentLunarMission, out var missionName) && SchedulerMain.State != IceState.AbandonMission)
+            {
+                ImGui.Text($"当前任务: [{CosmicHelper.CurrentLunarMission}] {missionName.Name}");
+            }
+            else
+            {
+                ImGui.Text("当前任务: 无");
+            }
 #if DEBUG
             if (C.ShowDebugGatherInfo)
             {

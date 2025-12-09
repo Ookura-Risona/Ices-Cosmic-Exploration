@@ -380,7 +380,12 @@ namespace ICE.Scheduler.Tasks
         }
         public static bool? InitiateMoving(Vector3 fishingPos)
         {
-            if (P.Navmesh.IsRunning())
+            if (!P.Navmesh.IsReady())
+            {
+                Utils.VnavBuildInfo();
+                return false;
+            }
+            else if (P.Navmesh.IsRunning())
             {
                 P.TaskManager.Enqueue(() => !P.Navmesh.IsRunning());
                 return true;

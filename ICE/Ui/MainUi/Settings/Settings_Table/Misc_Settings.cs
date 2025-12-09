@@ -32,6 +32,11 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
             Separator();
 
             PostMissionCommands();
+            Separator();
+
+            ImGuiEx.IconWithText(FontAwesomeIcon.ExclamationTriangle, "安全设置");
+            ImGui.Dummy(new Vector2(0, 5));
+            SafetySettings.Draw();
         }
 
         private static void OverlaySettings()
