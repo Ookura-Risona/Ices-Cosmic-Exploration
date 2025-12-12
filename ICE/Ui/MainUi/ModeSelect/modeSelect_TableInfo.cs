@@ -1127,10 +1127,10 @@ namespace ICE.Ui.MainUi.ModeSelect
 
                     ImGui.TableNextRow();
                     ImGui.TableSetColumnIndex(0);
-                    ImGui.Text($"研究数据奖励");
+                    ImGui.Text($"研究数据类型");
 
                     ImGui.TableNextColumn();
-                    ImGui.Text(""); // 串行了??
+                    ImGui.Text("数量");
 
                     foreach (var xp in mission.RelicXpInfo.OrderByDescending(x => x.Key))
                     {
