@@ -190,11 +190,18 @@ namespace ICE.Ui.MainUi
                 }
                 if (ImGui_Tools.DrawCategoryHeader_AutoSize("宇宙研究数据", icon: FontAwesomeIcon.ArrowUpRightDots)) // Tool Relic XP
                 {
-                    var jobId = C.SelectedJob;
-                    ImGui.Image(CosmicHelper.JobIconDict[jobId].GetWrapOrEmpty().Handle, new(24, 24));
-                    ImGui.SameLine(0, 2);
-                    ImGui.AlignTextToFramePadding();
-                    Relic_XP.DrawRelicXP(jobId);
+                    if (PlayerHelper.IsInCosmicZone())
+                    {
+                        var jobId = C.SelectedJob;
+                        ImGui.Image(CosmicHelper.JobIconDict[jobId].GetWrapOrEmpty().Handle, new(24, 24));
+                        ImGui.SameLine(0, 2);
+                        ImGui.AlignTextToFramePadding();
+                        Relic_XP.DrawRelicXP(jobId);
+                    }
+                    else
+                    {
+                        ImGui.TextWrapped("You have to be in a cosmic area for us to view this info. Blame square for not making it always accesable");
+                    }
                 }
                 if (ImGui_Tools.DrawCategoryHeader_AutoSize("帮助", icon: FontAwesomeIcon.QuestionCircle)) // Help
                 {

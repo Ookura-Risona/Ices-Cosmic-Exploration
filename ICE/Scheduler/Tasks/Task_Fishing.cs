@@ -148,6 +148,18 @@ namespace ICE.Scheduler.Tasks
                 P.TaskManager.Tasks.Clear();
                 return true;
             }
+            else if (CosmicHelper.CurrentMissionInfo.Attributes.HasFlag(MissionAttributes.Collectables) && !PlayerHelper.HasStatusId(805))
+            {
+                if (EzThrottler.Throttle("Log Throttle for fishing"))
+                    IceLogging.Debug("We need to apply collector's glove", "Task_Start Fishing");
+
+                if (!Player.IsBusy)
+                {
+                    if (EzThrottler.Throttle("Attempting to turn on collectability"))
+                        ActionManager.Instance()->UseAction(ActionType.Action, 4101);
+                }
+                return false;
+            }
             else if (!Svc.Condition[ConditionFlag.Gathering])
             {
                 if (!_fishingDebug.IsFishable())
@@ -182,7 +194,8 @@ namespace ICE.Scheduler.Tasks
                     IceLogging.Debug("Telling it to start fishing", handle);
                     if (C.AutoFisherCast)
                     {
-                        ActionManager.Instance()->UseAction(ActionType.Action, 289); // 任务中自动抛竿
+                        //ActionManager.Instance()->UseAction(ActionType.Action, 289); // 任务中自动抛竿
+                        Svc.Commands.ProcessCommand("/ahstart"); // 同步上游更改
                     }
                     else if (!C.AutoFisherCast && C.MissFisherStartingFix && PlayerHandlers.IsMissfisherLoaded && !PlayerHandlers.IsAutohookLoaded)
                     {
@@ -194,8 +207,6 @@ namespace ICE.Scheduler.Tasks
                 {
                     if (CosmicHelper.CurrentMissionInfo.Attributes.HasFlag(MissionAttributes.Collectables) && !PlayerHelper.HasStatusId(805))
                     {
-
-
                         if (EzThrottler.Throttle("Attempting to turn on collectability"))
                             if (!PlayerHandlers.IsMissfisherLoaded && PlayerHandlers.IsAutohookLoaded)
                             {
@@ -394,6 +405,7 @@ namespace ICE.Scheduler.Tasks
             {
                 if (EzThrottler.Throttle("Navmesh movement"))
                 {
+                    IceLogging.DestinationLogs.Log(fishingPos);
                     P.Navmesh.PathfindAndMoveTo(fishingPos, false);
                 }
                 return false;

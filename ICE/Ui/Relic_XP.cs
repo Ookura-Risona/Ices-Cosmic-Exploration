@@ -53,7 +53,14 @@ namespace ICE.Ui
                 }
             }
 
+            bool MaxStage = XPTable.Where(x => x.Value.NeededXP != 0).Count() == 0;
+
             ImGui.Text($"阶段: {stage}");
+            if (MaxStage)
+            {
+                ImGui.SameLine();
+                ImGui.Text("[最高]");
+            }
             foreach (var type in XPTable)
             {
                 uint current = type.Value.CurrentXP;

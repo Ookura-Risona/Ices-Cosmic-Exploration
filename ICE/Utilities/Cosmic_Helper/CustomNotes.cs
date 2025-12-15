@@ -21,21 +21,20 @@ public static partial class CosmicHelper
     {
         var dict = new Dictionary<uint, CustomNotes>();
 
+        // Dual Class Missions
+        AddMissions(dict, 256f, "我强烈推荐在您冲分刚起步时就做这些任务\n" + // I would HIGHLY recommend doing these as you first start out.\n
+                                "此任务一次能搞定 2 个职业, 一举两得让您更快完成\n" + // Knocks out 2 classes at once, allowing you to double dip and get done quicker.\n
+                                "确保选择银星汇报, 不值得为金星评价多花时间\n" + // Make sure the turnin is on silver, gold isn't worth the extra time
+                                "另外, 这是憧憬湾地图的最佳 A 类任务", // Also, best for A Rank level on Sinus
+                                496, 497, 498, 502, 503, 504);
+
+        AddMissions(dict, 228f, "最好的钓鱼任务... 没有之一。真他妈操蛋。\n" + // Best fishing mission.... period. Which sucks.\n
+                                "为了最好的结果, 选择银星汇报。别去做另一个双职业任务, 不值得。", // Turnin on silver for best results. Don't do the other dual class, it's not worth
+                                509);
+
         // Basic Sinus A Ranks
         AddMissions(dict, 241f, "最佳每分钟技巧点任务(天气限定任务以外)", // Best Score Per Minute outside of weather missions
                     295, 115, 70, 205, 25, 340, 160, 250);
-
-        // Dual Craft MIN/BTN
-        AddMissions(dict, 256f,
-                   "采集职业的冲分最佳 A 类任务, 同时兼顾对应的生产职业, 在两个月球探索地图中都是最佳的\n" + // Best A Rank for gathering, while also double dipping into crafters which is best for both worlds\n
-                   "推荐银星提交, 因为可以节省制作时间", // Silver turnin is recommended for this, due to the time not spent on crafting
-                   496, 497, 498, 502, 503, 504);
-
-        // Dual Craft FSH
-        AddMissions(dict, 228f,
-                   "捕鱼人的冲分最佳 A 类任务, 同时兼顾对应的生产职业, 在两个月球探索地图中都是最佳的\n" + // Best A Rank for FISHING, while also double dipping into crafters which is best for both worlds\n
-                   "强烈推荐银星提交, 因为可以节省制作时间与具有随机性的钓鱼时间, 银星汇报大约 228 技巧点/分钟, 金星汇报大约 152 技巧点/分钟", // Silver turnin is HIGHLY recommended for this, due to the time not spent on crafting and fish RNG. Silver ends up being ~228 SPM, VS. Gold being ~152 SPM
-                   509);
 
         // Sinus Weather Missions
         AddMissions(dict, 490f,
@@ -73,6 +72,19 @@ public static partial class CosmicHelper
                    "紧急探索任务总是值得为了技巧点而去完成", // Criticals are always worth doing for score
                     1007, 1008, 1009, 1010, 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 
                     1019, 1020, 1021, 1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030);
+
+        AddMissions(dict, 211f,
+                    "这是法恩娜行星最好的普通采集任务, 但效率不如双职业任务\n" + // Best general gathering ones to do on Phaenna, not better than dual class.\n
+                    "不过如果您正在等待天气限定任务, 做做这些任务也是很好的", // But if you're sticking around for weather missions, might as well do this.
+                    909, 951);
+
+        AddMissions(dict, 437f,
+                    "冲分效率极佳的天气限定任务, 如果有天气, 通常都应该优先做这些任务", // Really good weather missions for scoring, if these are up, you typically want to aim to do them.
+                    917, 959);
+
+        AddMissions(dict, 392f,
+                    "冲分效率第二好的天气限定任务, 仍然比 A 类普通任务更值得专心去做", // Second best weather missions for scoring, still good to focus over the basic A Ranks
+                    896, 938);
 
 
 

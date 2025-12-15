@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ICE.Config;
+using ICE.Utilities.Cosmic_Helper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +10,7 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table;
 
 public static class Settings_TableColumns
 {
-    private static string[] missionSortOptions = ["ID", "任务名称", "宇宙信用点", "行星信用点", "研究数据 I", "研究数据 II", "研究数据 III", "研究数据 IV", "研究数据 V", "地图位置"];
+    private static string[] missionSortOptions = ["ID", "任务名称", "宇宙信用点", "行星信用点", "研究数据 I", "研究数据 II", "研究数据 III", "研究数据 IV", "研究数据 V", "地图位置", "职业技巧点"];
 
     public static void ColumnSettings()
     {
@@ -74,6 +76,47 @@ public static class Settings_TableColumns
         ImGuiEx.HelpMarker("只在您打算亲自完成任务, 而不是依靠插件自动化完成时, 才需要启用此选项。\n" +
                            "另外, 如果您使用其他插件来处理汇报、制作、采集等自动化操作, 并且不希望 I.C.E. 与这些插件交互, 也可以启用此选项。");
     }
+
+    private static bool ApplyToAllClasses = true;
+    private static bool ApplyToSpecicClass = false;
+    private static int SpecificClass = 8;
+    private static int selectedClassIndex = 0;
+
+    private static readonly string[] classOptions = new[]
+    {
+        "刻木匠",      // 0
+        "锻铁匠",     // 1
+        "铸甲匠",        // 2
+        "雕金匠",      // 3
+        "制革匠",  // 4
+        "裁衣匠",         // 5
+        "炼金术士",      // 6
+        "烹调师",     // 7
+        "采矿工",          // 8
+        "园艺工",       // 9
+        "捕鱼人"          // 10
+    };
+
+    private static readonly int[] classIds = new[]
+    {
+        8,  // Carpenter
+        9,  // Blacksmith
+        10, // Armorer
+        11, // Goldsmith
+        12, // Leatherworker
+        13, // Weaver
+        14, // Alchemist
+        15, // Culinarian
+        16, // Miner
+        17, // Botanist
+        18  // Fisher
+    };
+
+    private static bool AnyTurnin = true;
+    private static bool TurninGold = false;
+    private static bool TurninSilver = false;
+    private static bool TurninBronze = false;
+
     public static void GeneralMissionSettings()
     {
         bool onlyGrabMission = C.OnlyGrabMission;
@@ -111,6 +154,114 @@ public static class Settings_TableColumns
                              "3: 此功能的优先级高于 \"宇宙工具可报告时停止\" 选项，如果两个都启用, 它会选择提交宇宙工具而不是停止, 并继续执行任务。\n" +
                              "4: 如果你当前是能工巧匠职业，报告后会自动返回你之前正在制作的位置。\n" +
                              "\t- 这是可选的，你可以自由关闭。我个人喜欢这样设置，方便我回到自己选定的安静区域。");
+        }
+        if (ImGui.Button("快捷汇报模式应用")) // Quick Apply Turnins
+        {
+            ImGui.OpenPopup("Quick Apply_Mission Turnins");
+        }
+
+        if (ImGui.BeginPopup("Quick Apply_Mission Turnins"))
+        {
+            if (ImGui.RadioButton("应用到全部职业", ApplyToAllClasses)) // Apply to all classes
+            {
+                ApplyToAllClasses = true;
+                ApplyToSpecicClass = false;
+            }
+
+            if (ImGui.RadioButton("应用到指定职业", ApplyToSpecicClass)) // Apply to specific class
+            {
+                ApplyToAllClasses = false;
+                ApplyToSpecicClass = true;
+            }
+            if (ImGui.Combo("##ClassSelector", ref selectedClassIndex, classOptions, classOptions.Length))
+            {
+                // Update SpecificClass when selection changes
+                SpecificClass = classIds[selectedClassIndex];
+                IceLogging.Debug($"Selected class: {classOptions[selectedClassIndex]}, ID: {SpecificClass}");
+            }
+            ImGui.Separator();
+            ImGui.Text("选择汇报选项");
+            ImGui.Dummy(new Vector2(0, 2));
+
+            if (ImGui.Checkbox("自动", ref AnyTurnin))
+            {
+                if (AnyTurnin)
+                {
+                    TurninGold = false;
+                    TurninSilver = false;
+                    TurninBronze = false;
+
+                    AnyTurnin = true;
+                }
+                else
+                {
+                    if (!(TurninBronze && TurninSilver && TurninGold))
+                    {
+                        AnyTurnin = true;
+                    }
+                }
+
+                C.Save();
+            }
+            ImGuiEx.HelpMarker("此选项将尽力获得最佳结果, 但在必要时也会汇报任意结果而避免中止。");
+
+            ImGui.Separator();
+
+            if (ImGui.Checkbox("金星", ref TurninGold))
+            {
+                if (AnyTurnin && TurninGold)
+                    AnyTurnin = false;
+
+            }
+            if (ImGui.Checkbox("银星", ref TurninSilver))
+            {
+                if (AnyTurnin && TurninSilver)
+                    AnyTurnin = false;
+
+            }
+            if (ImGui.Checkbox("铜星", ref TurninBronze))
+            {
+                if (AnyTurnin && TurninBronze)
+                    AnyTurnin = false;
+
+            }
+
+            if (!AnyTurnin && !TurninGold && !TurninSilver && !TurninBronze)
+                AnyTurnin = true;
+
+            ImGui.Separator();
+
+            if (ImGui.Button("应用"))
+            {
+                var amountApplied = 0;
+                foreach (var mission in C.MissionConfig)
+                {
+                    if (CosmicHelper.SheetMissionDict.TryGetValue(mission.Key, out var sheetInfo))
+                    {
+                        if (ApplyToSpecicClass && !sheetInfo.Jobs.Contains((uint)SpecificClass))
+                            continue;
+
+                        if (sheetInfo.Attributes.HasFlag(MissionAttributes.ScoreTimeRemaining))
+                            continue;
+
+                        if (C.MissionConfig.TryGetValue(mission.Key, out var config))
+                        {
+                            config.AutoTurnin = AnyTurnin;
+                            config.TurninGold = TurninGold;
+                            config.TurninSilver = TurninSilver;
+                            config.TurninBronze = TurninBronze;
+                        }
+                        amountApplied += 1;
+                    }
+                }
+                C.SaveDebounced();
+
+                Notify.Success($"已应用设置到 {amountApplied} 个任务\n专门为你做的, 兄弟。");
+                ImGui.CloseCurrentPopup();
+            }
+
+
+            ImGui.EndPopup();
         }
     }
 }

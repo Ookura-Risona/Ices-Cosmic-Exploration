@@ -200,36 +200,6 @@ namespace ICE.Ui.MainUi.ModeSelect
                         }
 
                         ImGui.Separator();
-                        if (ImGui.CollapsingHeader("解锁的职业")) // Unlocked Classes 只有勾选的职业才会尝试提交
-                        {
-                            ImGui.Indent(15);
-                            foreach (var job in C.ClassesUnlocked)
-                            {
-                                string jobName = job.Key switch
-                                {
-                                    8 => "刻木匠",
-                                    9 => "锻铁匠",
-                                    10 => "铸甲匠",
-                                    11 => "雕金匠",
-                                    12 => "制革匠",
-                                    13 => "裁衣匠",
-                                    14 => "炼金术士",
-                                    15 => "烹调师",
-                                    16 => "采矿工",
-                                    17 => "园艺工",
-                                    18 => "捕鱼人",
-                                    _ => "???"
-                                };
-
-                                bool unlocked = job.Value;
-                                if (ImGui.Checkbox($"{jobName}##{jobName}_{job.Key}", ref unlocked))
-                                {
-                                    C.ClassesUnlocked[job.Key] = unlocked;
-                                    C.Save();
-                                }
-                            }
-                            ImGui.Unindent(15);
-                        }
 
                         bool EnableRelicXp = C.XPRelicGrind;
                         if (ImGui.Checkbox("自动根据研究数据挑选任务", ref EnableRelicXp)) // Auto-Pick For Relic XP

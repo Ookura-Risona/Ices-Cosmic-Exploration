@@ -309,7 +309,7 @@ namespace ICE.Scheduler.Tasks
             var zoneId = Player.Territory;
             var missionEntry = CosmicHelper.CurrentMissionInfo;
             var missionFlag = missionEntry.MapPosition;
-            var gatherInfo = GatheringUtil.MoonGatherLocations[zoneId][missionFlag];
+            var gatherInfo = GatheringRouteLoader.GetRoute(zoneId, missionFlag);
             if (Mission_Settings.previousMap != missionFlag)
             {
                 Mission_Settings.previousMap = missionFlag;
@@ -321,7 +321,7 @@ namespace ICE.Scheduler.Tasks
                 var node = Svc.Objects.Where(x => x.BaseId == nodeId).FirstOrDefault();
                 if (node == null || !node.IsTargetable)
                 {
-                    IceLogging.Debug($"Is node null: {node == null} | Is node Targetable: {node.IsTargetable}");
+                    // IceLogging.Debug($"Is node null: {node == null} | Is node Targetable: {node.IsTargetable}");
                     Mission_Settings.nodeCounter += 1;
                     Mission_Settings.nodeTotal += 1;
                 }
@@ -346,7 +346,7 @@ namespace ICE.Scheduler.Tasks
                 var zoneId = Player.Territory;
                 var missionEntry = CosmicHelper.CurrentMissionInfo;
                 var missionFlag = missionEntry.MapPosition;
-                var gatherInfo = GatheringUtil.MoonGatherLocations[zoneId][missionFlag];
+                var gatherInfo = GatheringRouteLoader.GetRoute(zoneId, missionFlag);
 
                 if (gatherInfo.Count-1 < Mission_Settings.nodeCounter)
                 {
@@ -365,6 +365,7 @@ namespace ICE.Scheduler.Tasks
                     if (EzThrottler.Throttle("Enabling pathfinding to navmesh"))
                     {
                         IceLogging.Debug($"Telling Navmesh to path to: {location.LandZone}", "[Gathering: Navmesh moveto]");
+                        IceLogging.DestinationLogs.Log(location.LandZone);
                         P.Navmesh.PathfindAndMoveTo(location.LandZone, false);
                     }
                 }
@@ -377,7 +378,7 @@ namespace ICE.Scheduler.Tasks
             var missionEntry = CosmicHelper.CurrentMissionInfo;
             var zoneId = missionEntry.TerritoryId;
             var missionFlag = missionEntry.MapPosition;
-            var gatherInfo = GatheringUtil.MoonGatherLocations[zoneId][missionFlag];
+            var gatherInfo = GatheringRouteLoader.GetRoute(zoneId, missionFlag);
             var location = gatherInfo[Mission_Settings.nodeCounter];
 
             if (EzThrottler.Throttle("Distance to node debugger"))
@@ -444,7 +445,7 @@ namespace ICE.Scheduler.Tasks
             var zoneId = Player.Territory;
             var missionEntry = CosmicHelper.CurrentMissionInfo;
             var missionFlag = missionEntry.MapPosition;
-            var gatherInfo = GatheringUtil.MoonGatherLocations[zoneId][missionFlag];
+            var gatherInfo = GatheringRouteLoader.GetRoute(zoneId, missionFlag);
             var location = gatherInfo[Mission_Settings.nodeCounter];
 
             if (CosmicHandler.IsMissionTimedOut())
