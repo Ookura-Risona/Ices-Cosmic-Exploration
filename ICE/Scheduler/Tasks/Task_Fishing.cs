@@ -205,32 +205,10 @@ namespace ICE.Scheduler.Tasks
                 }
                 else if (EzThrottler.Throttle("Adding counter for bait not equipped"))
                 {
-                    if (CosmicHelper.CurrentMissionInfo.Attributes.HasFlag(MissionAttributes.Collectables) && !PlayerHelper.HasStatusId(805))
-                    {
-                        if (EzThrottler.Throttle("Attempting to turn on collectability"))
-                            if (!PlayerHandlers.IsMissfisherLoaded && PlayerHandlers.IsAutohookLoaded)
-                            {
-                                Svc.Commands.ProcessCommand("/ahstart");
-                            }
-                            else if (PlayerHandlers.IsMissfisherLoaded && !PlayerHandlers.IsAutohookLoaded)
-                            {
-                                ActionManager.Instance()->UseAction(ActionType.Ability, 4101);
-                            }
-                            else
-                            {
-                                PluginLog.Debug("You haven't installed any fishing plugins!");
-                            }
-                          return false;
-                    }
-
                     BaitCounter++;
                     IceLogging.Debug($"Adding 1 to the counter. Counter is at: {BaitCounter}");
                     if (BaitCounter >= 2)
                     {
-                        /*string message = "嘿！你的下坐骑距离设置太低了(可能设置为 0)。把它改成大约 10？也许吧。反正不要设为 0。这样可以避免这种情况再次发生";
-                        IceLogging.ChatError(message, "[I.C.E. Fishing]");*/
-                        IceLogging.Debug($"Fishing task encountered obstacles, possibly due to dismount setting too low or other conflicts.");
-
                         foreach (var bait in GatheringUtil.MoonBaits)
                         {
                             foreach (var baitId in bait.Value)

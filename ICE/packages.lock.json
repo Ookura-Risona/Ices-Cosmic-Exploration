@@ -1,18 +1,18 @@
 {
   "version": 1,
   "dependencies": {
-    "net9.0-windows7.0": {
+    "net10.0-windows8.0": {
       "DalamudPackager": {
         "type": "Direct",
-        "requested": "[13.1.0, )",
-        "resolved": "13.1.0",
-        "contentHash": "XdoNhJGyFby5M/sdcRhnc5xTop9PHy+H50PTWpzLhJugjB19EDBiHD/AsiDF66RETM+0qKUdJBZrNuebn7qswQ=="
+        "requested": "[14.0.1, )",
+        "resolved": "14.0.1",
+        "contentHash": "y0WWyUE6dhpGdolK3iKgwys05/nZaVf4ZPtIjpLhJBZvHxkkiE23zYRo7K7uqAgoK/QvK5cqF6l3VG5AbgC6KA=="
       },
       "DotNet.ReproducibleBuilds": {
         "type": "Direct",
-        "requested": "[1.2.25, )",
-        "resolved": "1.2.25",
-        "contentHash": "xCXiw7BCxHJ8pF6wPepRUddlh2dlQlbr81gXA72hdk4FLHkKXas7EH/n+fk5UCA/YfMqG1Z6XaPiUjDbUNBUzg=="
+        "requested": "[1.2.39, )",
+        "resolved": "1.2.39",
+        "contentHash": "fcFN01tDTIQqDuTwr1jUQK/geofiwjG5DycJQOnC72i1SsLAk1ELe+apBOuZ11UMQG8YKFZG1FgvjZPbqHyatg=="
       },
       "NAudio": {
         "type": "Direct",
@@ -27,6 +27,12 @@
           "NAudio.WinForms": "2.2.1",
           "NAudio.WinMM": "2.2.1"
         }
+      },
+      "TerraFX.Interop.Windows": {
+        "type": "Direct",
+        "requested": "[10.0.26100.6, )",
+        "resolved": "10.0.26100.6",
+        "contentHash": "QjL9vliSWmscUv6A7bjvsryHjYnY0norqvCNcLXSdEy1VIIzMF6FiS7BuvLTBuGUeN9FY4zJbU65OsHEv7jG9A=="
       },
       "YamlDotNet": {
         "type": "Direct",
@@ -1063,6 +1069,7 @@
       "pictomancy": {
         "type": "Project",
         "dependencies": {
+          "SharpDX": "[4.2.0, )",
           "SharpDX.D3DCompiler": "[4.2.0, )",
           "SharpDX.Direct2D1": "[4.2.0, )",
           "SharpDX.Direct3D11": "[4.2.0, )",

@@ -72,6 +72,17 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                 C.Save();
             }
 
+            bool disableHudClipping = C.DisableHudClipping;
+            if (ImGui.Checkbox("Disable HUD Clipping", ref disableHudClipping))
+            {
+                C.DisableHudClipping = disableHudClipping;
+                C.Save();
+            }
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetTooltip("When enabled, overlays will render over the native UI elements");
+            }
+
         }
 
         private static void AutoUse()
@@ -296,7 +307,7 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
             ImGui.SameLine();
             ImGui.Checkbox("可视化下坐骑半径范围", ref visualizeDismountRadius);
 
-            using (var drawList = PictoService.Draw())
+            using (var drawList = PictoService.Draw(hints: Utils.GetPictoHints()))
             {
                 if (drawList == null)
                     return;

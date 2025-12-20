@@ -1,5 +1,6 @@
 ﻿using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.WKS;
 using System.Collections.Generic;
 using System.Reflection;
 using static ECommons.UIHelpers.AddonMasterImplementations.AddonMaster;
@@ -8,7 +9,7 @@ namespace ICE.Ui.DebugWindowTabs
 {
     internal class Ui_PlayerInfo
     {
-        public static void Draw()
+        public static unsafe void Draw()
         {
             ImGui.Text("Need to actually put the player info here. It got lost");
             ImGui.Spacing();
@@ -25,8 +26,15 @@ namespace ICE.Ui.DebugWindowTabs
                 ImGui.SetClipboardText($"{Player.Position.X:N2}f, {Player.Position.Y:N2}f, {Player.Position.Z:N2}f");
             }
             ImGui.Text($"Job: {Player.Job}");
-            ImGui.Text($"JobId: {Player.JobId}");
+            ImGui.Text($"JobId: {(uint)Player.Job}");
             ImGui.Text($"Current Territory/ZoneId: {Player.Territory}");
+            if (PlayerHelper.IsInCosmicZone())
+            {
+                var manager = (WKSManagerCustom*)WKSManager.Instance();
+                var currentMission = manager->CurrentMissionId;
+
+                ImGui.Text($"Current Mission: {currentMission}");
+            }
             if (Svc.Targets.Target != null)
             {
                 var currentTarget = Svc.Targets.Target;

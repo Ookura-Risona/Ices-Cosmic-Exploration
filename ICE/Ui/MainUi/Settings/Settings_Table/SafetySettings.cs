@@ -70,6 +70,16 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                     }
                 }
             }
+            bool jumpIfStuck = C.JumpIfStuck;
+            if (ImGui.Checkbox("寻路移动卡住时跳跃", ref jumpIfStuck))
+            {
+                C.JumpIfStuck = jumpIfStuck;
+                C.Save();
+            }
+            ImGuiEx.HelpMarker(
+                "如果您在寻路移动过程中卡住了, 此选项将允许您经过特定时间后执行跳跃(当前为 3 秒)。\n" +
+                "注意: 这是实验性功能。虽然有效, 但实际表现仍看起来很可疑。\n如果您发现某个位置会卡住角色, 请通过日志功能报告,\n" +
+                "并提供相关信息以便我们修复这些问题。");
         }
     }
 }

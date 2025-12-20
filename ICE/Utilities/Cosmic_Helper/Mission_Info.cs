@@ -19,11 +19,11 @@ public static partial class CosmicHelper
         {
             try
             {
-                var manager = WKSManager.Instance();
+                var manager = (WKSManagerCustom*)WKSManager.Instance();
                 if (manager == null)
                     return 0; // or some default value
 
-                return manager->CurrentMissionUnitRowId;
+                return manager->CurrentMissionId;
             }
             catch (AccessViolationException)
             {
@@ -106,13 +106,13 @@ public static partial class CosmicHelper
             {
                 if (jobId != 0)
                     classId = jobId;
-                else if (missionInfo.Jobs.Contains(Player.JobId))
-                    classId = Player.JobId;
+                else if (missionInfo.Jobs.Contains((uint)Player.Job))
+                    classId = (uint)Player.Job;
                 else
                     classId = missionInfo.Jobs.First();
             }
-            else if (CosmicHelper.CrafterJobList.Contains(Player.JobId) || CosmicHelper.GatheringJobList.Contains(Player.JobId))
-                classId = Player.JobId;
+            else if (CosmicHelper.CrafterJobList.Contains((uint)Player.Job) || CosmicHelper.GatheringJobList.Contains((uint)Player.Job))
+                classId = (uint)Player.Job;
             else
                 classId = C.SelectedJob;
         }

@@ -16,7 +16,7 @@ namespace ICE.Ui.DebugWindowTabs
         public static void Draw()
         {
             var territoryid = Player.Territory;
-            var moonNpcs = NpcData.MoonNpcs[territoryid];
+            var moonNpcs = NpcData.MoonNpcs[territoryid.RowId];
             ImGui.Text($"Territory Id: {territoryid}");
             ImGui.Text($"Valid Moon NPC Info: {moonNpcs != null}");
             if (moonNpcs != null)
@@ -32,7 +32,7 @@ namespace ICE.Ui.DebugWindowTabs
                             P.Navmesh.PathfindAndMoveTo(randomPoint, false);
                         }
 
-                        using (var drawList = PictoService.Draw())
+                        using (var drawList = PictoService.Draw(hints: Utils.GetPictoHints()))
                         {
                             drawList.AddQuadFilled(npcEntry.Corner1, npcEntry.Corner2, npcEntry.Corner3, npcEntry.Corner4, C.PictoColor_Circle);
                         }
