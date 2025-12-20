@@ -99,6 +99,10 @@ public static partial class CosmicHelper
             // For UI that should respect C.SelectedJob
             classId = C.SelectedJob;
         }
+        else if (jobId != 0) // 防止进行双职业任务时，只传入第一个jobid
+        {
+            classId = jobId;
+        }
         else
         {
             // For overlay that should show current/mission job
