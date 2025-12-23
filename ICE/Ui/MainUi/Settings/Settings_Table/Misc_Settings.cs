@@ -86,7 +86,7 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
             }
             if (ImGui.IsItemHovered())
             {
-                ImGui.SetTooltip("启用后. 绘制叠加层将渲染在原生 UI 元素之上");
+                ImGui.SetTooltip("启用后, 绘制叠加层将渲染在原生 UI 元素上方");
             }
 
         }
