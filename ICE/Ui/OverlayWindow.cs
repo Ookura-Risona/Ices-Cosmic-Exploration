@@ -48,7 +48,8 @@ namespace ICE.Ui
             if (C.ShowDebugGatherInfo)
             {
                 ImGui.Text($"当前收藏品状态: {Mission_Settings.CollectableStep}");
-                ImGui.Text($"当前节点计数: {Mission_Settings.nodeTotal}");
+                ImGui.Text($"全部节点: {Mission_Settings.nodeTotal}");
+                ImGui.Text($"节点计数: {Mission_Settings.nodeCounter}");
             }
 #endif
 

@@ -1,4 +1,7 @@
-﻿using System;
+﻿using ECommons.GameHelpers;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using FFXIVClientStructs.FFXIV.Client.Game.WKS;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -63,6 +66,16 @@ namespace ICE.Ui.SettingTabs
                 C.Save();
             }
             ImGuiEx.HelpMarker("此选项将优先选择物品数量更少的转盘");
+
+            if (PlayerHelper.IsInCosmicZone())
+            {
+                var territory = Player.Territory.RowId;
+                var itemId = CosmicHelper.PlanetCreditInfo[territory];
+                PlayerHelper.GetItemCount(itemId, out var credits);
+
+                ImGui.Text($"当前地图: {territory} | 信用点数量: {credits}");
+            }
+
             ImGui.Separator();
             ImGui.TextUnformatted("配置宇宙好运道每个物品的权重，物品权重越高 = 越优先获取该物品");
             ImGui.Spacing();

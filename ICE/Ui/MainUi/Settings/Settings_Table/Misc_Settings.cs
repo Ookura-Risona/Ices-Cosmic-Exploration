@@ -37,6 +37,12 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
             ImGuiEx.IconWithText(FontAwesomeIcon.ExclamationTriangle, "安全设置");
             ImGui.Dummy(new Vector2(0, 5));
             SafetySettings.Draw();
+
+#if DEBUG
+            ImGui.Separator();
+            ImGui.Dummy(new Vector2(0, 5));
+            DebugTab.Draw();
+#endif
         }
 
         private static void OverlaySettings()
@@ -73,14 +79,14 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
             }
 
             bool disableHudClipping = C.DisableHudClipping;
-            if (ImGui.Checkbox("Disable HUD Clipping", ref disableHudClipping))
+            if (ImGui.Checkbox("禁用 HUD 裁切", ref disableHudClipping))
             {
                 C.DisableHudClipping = disableHudClipping;
                 C.Save();
             }
             if (ImGui.IsItemHovered())
             {
-                ImGui.SetTooltip("When enabled, overlays will render over the native UI elements");
+                ImGui.SetTooltip("启用后. 绘制叠加层将渲染在原生 UI 元素之上");
             }
 
         }

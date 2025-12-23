@@ -10,7 +10,7 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table;
 
 public static class Settings_TableColumns
 {
-    private static string[] missionSortOptions = ["ID", "任务名称", "宇宙信用点", "行星信用点", "研究数据 I", "研究数据 II", "研究数据 III", "研究数据 IV", "研究数据 V", "地图位置", "职业技巧点"];
+    private static string[] missionSortOptions = ["ID", "任务名称", "宇宙信用点", "行星信用点", "研究数据 I", "研究数据 II", "研究数据 III", "研究数据 IV", "研究数据 V", "地图位置", "职业技巧点", "职业经验值"];
 
     public static void ColumnSettings()
     {
