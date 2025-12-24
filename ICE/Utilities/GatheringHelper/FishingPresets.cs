@@ -1148,13 +1148,35 @@ public static partial class GatheringUtil
                 "AH4_H4sIAAAAAAAACs1W227jNhD9lYDPYitRlETpzXGzaQAnDdYu+hAsCloa2URk0UtSm2QD/3tBXWzJl7gbpIu+ycOZM2fGc3tFo8rIMddGj/MFSl7RVcnnBYyKAiVGVeAg+zgRJewes+7pJkMJYbGD7pWQSpgXlHgOutFXz2lRZZDtxFZ/02DdSpkuLVj9QexXjRMyB12vZ0sFeimLDCWe6w6Q34auMeJoYOGeJTNeVquOAfVceoZCZyWLAlLTM/T6auS8W6kywYsTKfVIGA6SSluzT0Ivr15A9xwHe4yDYMA47JLOH2G6FLm55KLmbQW6E0wNTx81SoI2jSE7xO2jxi3qPTcCyhR6fMJ9u3CYQdKZKvEdxtw0pdB53bcme/n3W+vZkheCP+pP/JtUFmAg6MLxnaH8M6TyGyiUeDZJx2o5ZLYEeg67/F2KxTVf1YGOykUBSndO7J+docSPXHrAfgDFNhsHXT0bxdtOs5mfyekTX9+UphJGyPKai7LLB/YcNKkU3ILWfAEoQchBdzUJdCdLQE6D8LIGlNjEHMGbSG3ejXevQMNxhgijE++Nx/p9x2e6htQoXowrpaA0HxTlHuqHxXqU7UHER73XWk2BTI1c234V5WJqYF1Pxh33tohG6mMo9+FqDn+W4msFFhcFUZSxMOM4j4iHaR6lmAEPcU4Z5LHLvDCbo42DJkKbP3LrQ6PkoSlPG8C2uaOQ0dMcx1Kv5JNUK4t1J9WKF79L+WituzHxF/D6t5VrMNsGzHmhoWvI9tFG1bVmK2pCp15kx0+HOTVKlr3FdcT8lj9b6Uysmt7/xT2AdP0e5AQWUGZcvXwA1xr4N1nNi/3oGw0SxluFXSgnVf4NtSPGMyXWpwhEAfG3KqcoDJR+nERrbltilBtQY14tlmYiVnYXec3Dfq/UZ0elmmVnP3pT/cjo9qMgPtzebyxiezJ0Q6sr1M/wtRIKsqnhprL70N4kJ6r3TDX+aIH9xIL5uZXxH5XAe//z3mBMYy/1IAgw8XiMKcznOGaM4piEXuT7NAtchjZfusnY3q0PW0EzHB9e0XBK0iA4PSUvpZIXl8CzwTj33srMTQalESkvbDqsm0ZhtJJVOVBDCQ3i/RvEH96DzHqqVM5TmBZ2arWsgzg4c3oFGwf9b0733SJ99/q0xlYytmlsSvCJr5ulqrvJ0t+xKEG8lOXfD3FE8fjLxW1VGIHXlVpLDRcW6mIG2lz4v/qoD9ZzcKTGe/VIaJ6zkFNMYhpgGucEszgmmNEwDjxOIt/16npscNvgztEhNZ2em5yEc5KyCPtk7mGauSFmUZBifx66jDE355SjzT8n4EKjGQ4AAA==",
                 "AH4_H4sIAAAAAAAACs1WWW/bRhD+K8a+9IVseSyP5ZuiOq4B2TUiFX0wgmBEDqWFKa6yu4ztGvrvxfKQSB1WYrhB36jZmW++Gc31QkaVFmNQWo3zBUleyGUJ8wJHRUESLSu0iHmc8BJ3j1n3dJ2RxIuZRe4kF5LrZ5K4FrlWl09pUWWY7cRGf9Ng3QiRLg1Y/eGZrxonjC1ytZ4tJaqlKDKSuI4zQH4dusZg0cDCOUtmvKxWHQPqOvQMhc5KFAWmumfo9tW8826FzDgUJ1LqemE4SCptzT5ytbx8RtVzHOwxDoIB47BLOjzgdMlz/QF4zdsIVCeYakgfFEmCNo1hfIjbR2Ut6h1ojmWKPT7hvl04zKDXmUr+D45BN6XQed239vby77fWsyUUHB7UR/gmpAEYCLpwfGso/4Sp+IaSJK5J0rFaDmNTAj2HXf4+8MUVrOpAR+WiQKk6J+bPzkjiRw49YD+Aijcbi1w+aQltp5nMz8T0EdbXpa645qK8Al52+bBdi0wqiTeoFCyQJIRY5LYmQW5FicRqEJ7XSBKTmCN4E6H0m/HuJCo8zpDY5MR747F+3/GZrjHVEopxJSWW+p2i3EN9t1iPsj2I+Kj3WqspkKkWa9OvvFxMNa7rybjj3hbRSL4P5T5czeGvkn+t0OASAD+DDDw7YH5gU5a6NoM4tgP0QieNnCzOHbKxyIQr/WdufCiS3DflaQLYNncUxvQ0x7FQK/Eo5Mpg3Qq5guIPIR6MdTcm/kaofxu5Qr1twBwKhV1Dto8mqq41W1ETOnUjM346zKmWouwtrhPmM75CudfxN/C0fSKJS3+NDlw5fs/VBBdYZiCf3yGGGvh3Uc2L/aw0Gl7Itgq7EE+qfA+1I8YzydenCESB529VTlEYKP04idbctMoo1yjHUC2WesJXZke5zcN+D9XnSCWbJWg+etP+yEj3o4AdbvVXFrQ5Jbph1hXwJ/xacYnZVIOuzJ40t8qJqj5TpT9aYD+xYH5uZfxHJfDW/7w3MLM5Yog+2AhRZNPYndvMdzPbgdhxwjwIIz8nm8/dxGzv2futoBma9y9kOD1p8Mr0vFsCliX8oi5GUorHwbB3X8vPdYal5ikUJinGWaMwWomqHKiRhAZs/0Lxh9dibDxVMocUp4WZXUfPUxqw4MydFmws8r+583db98271hgbydhktanLR1g3G1h1uekvZLN3S1F+uWcRtcefL26qQnN7Xcm1UHhhoC5mqPSF95tP+mA9B0cKv1ekc4wYYy7YcUSpTd0gsBmEuc3SEOIMYsrCpkgb3Da4c3Tcmk7PjetGLIqA2pBTx6ZR6tgQ+Lnt+RDOKUMWs5hs/gURRS9ORg4AAA==",
             },
-            AmountRequired = 0,
-            UniqueFish = false,
+            AmountRequired = 2,
+            UniqueFish = true,
             Baits = new Dictionary<string, List<uint>>()
             {
             },
             RequiredFish = new Dictionary<string, List<uint>>()
             {
+                ["Glass Stitcher"] = new List<uint>()
+                {
+                    47425,
+                    47437,
+                    47444,
+                    47452,
+                    47505,
+                },
+                ["boro bead"] = new List<uint>()
+                {
+                    47455,
+                },
+                ["Glass Discus"] = new List<uint>()
+                {
+                    47426,
+                    47453,
+                    47506,
+                },
+                ["Phaenna's arrow"] = new List<uint>()
+                {
+                    47454,
+                },
             },
         },
         // Export for Mission [975] -  Emergency Bulk Provision Procurement
