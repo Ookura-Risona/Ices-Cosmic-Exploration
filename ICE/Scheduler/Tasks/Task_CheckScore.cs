@@ -1,5 +1,6 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using ECommons.GameHelpers;
+using ECommons.UIHelpers.AddonMasterImplementations;
 using ICE.Config;
 using ICE.Utilities.Cosmic_Helper;
 using ICE.Utilities.GatheringHelper;
@@ -61,12 +62,9 @@ namespace ICE.Scheduler.Tasks
                 {
                     if (fishingInfo.AmountRequired == 0 && !missionEntry.Attributes.HasFlag(MissionAttributes.Critical))
                     {
-                        if (missionInfo.CurrentScore == null)
-                            return false;
-
                         IceLogging.Debug("We're in a mission where score is the only importants. Checking to see if we meet the minimum score thresh", tag);
                         var currentScore = missionInfo.CurrentScore;
-                        if (currentScore >= missionEntry.BronzeScore)
+                        if ((currentScore.GetValueOrDefault() >= missionEntry.BronzeScore) & (currentScore != null))
                         {
                             IceLogging.Info($"We've met the bronze scoring threshold. Current Score: {currentScore} | Bronze Score Requirement: {missionEntry.BronzeScore}", tag);
                             return true;
@@ -168,17 +166,6 @@ namespace ICE.Scheduler.Tasks
                 var id = CosmicHelper.CurrentLunarMission;
                 if (CosmicHelper.SheetMissionDict.TryGetValue(id, out var missionEntry))
                 {
-                    if (missionEntry.Attributes.HasFlag(MissionAttributes.Critical))
-                    {
-                        if (missionInfo.CriticalScore == null)
-                            return false;
-                    }
-                    else
-                    {
-                        if (missionInfo.CurrentScore == null)
-                            return false;
-                    }
-
                     if (missionEntry.Attributes.HasFlag(MissionAttributes.ScoreTimeRemaining))
                     {
                         if (MinRequirementsMet(id, missionInfo))
@@ -198,72 +185,73 @@ namespace ICE.Scheduler.Tasks
                     }
                     else
                     {
-                        IceLogging.Debug("We're not in a mission where it's scored based off of time, so going to check to see if we meet the bronze threshold instead");
+                        if (missionInfo.CurrentScore == null)
+                            return false;
+                        IceLogging.Debug("We're not in a mission where it's scored based off of time, so going to check to see if we meet the bronze threshold instead", null, false);
                         if (CosmicHelper.SheetMissionDict.TryGetValue(id, out var mission))
                         {
                             var bronzeTurnin = MinRequirementsMet(id, missionInfo);
                             var shouldTurnin = false;
 
-                            if (bronzeTurnin)
-                            {
-                                if (mission.Attributes.HasFlag(MissionAttributes.Critical))
-                                {
-                                    IceLogging.Debug("We're in a critical mission, and we have met the minimul requirements for it. So going to continue on", handle);
-                                    shouldTurnin = true;
-                                }
-                                else
-                                {
-                                    IceLogging.Debug("We've met the minimum bronze threshold, so checking the rest now", handle);
-                                    var currentScore = missionInfo.CurrentScore;
-                                    var bronzeScore = mission.BronzeScore;
-                                    var silverScore = mission.SilverScore;
-                                    var goldScore = mission.GoldScore;
-
-                                    var config = C.MissionConfig[id];
-                                    bool AnyTurnin = config.AutoTurnin;
-                                    bool GoldGoal = goldScore <= currentScore;
-                                    bool SilverGoal = silverScore <= currentScore;
-                                    bool TurninBronze = config.TurninBronze;
-
-                                    if (config.AutoTurnin)
-                                    {
-                                        // AutoTurnin enabled, going to check for gold only since we have materials/time still
-                                        if (GoldGoal)
-                                        {
-                                            IceLogging.Info("Auto turnin was enabled, and hit the max score.", handle);
-                                            shouldTurnin = true;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (GoldGoal && config.TurninGold)
-                                        {
-                                            IceLogging.Info("Gold Turnin was enabled, and hit the max score.", handle);
-                                            shouldTurnin = true;
-                                        }
-                                        else if (SilverGoal && config.TurninSilver)
-                                        {
-                                            if (!config.TurninGold) // Check is here, just to make sure we shouldn't still be aiming for gold
-                                            {
-                                                IceLogging.Info("Silver Turnin was enabled, and you didn't have gold enabled.", handle);
-                                                shouldTurnin = true;
-                                            }
-                                        }
-                                        else if (config.TurninBronze)
-                                        {
-                                            if (!config.TurninSilver && !config.TurninGold) // Checking to make sure that silver and gold scores both aren't true
-                                            {
-                                                IceLogging.Info("Silver Turnin was enabled, and you didn't have gold or silver enabled.", handle);
-                                                shouldTurnin = true;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            else
+                            if (!bronzeTurnin)
                             {
                                 IceLogging.Info("We have not met the minimum requirements for turning in in general... so we shall continue");
                                 return true;
+                            }
+                            if (mission.Attributes.HasFlag(MissionAttributes.Critical))
+                            {
+                                IceLogging.Debug("We're in a critical mission, and we have met the minimul requirements for it. So going to continue on", handle);
+                                shouldTurnin = true;
+                            }
+                            else
+                            {
+                                IceLogging.Debug("We've met the minimum bronze threshold, so checking the rest now", handle);
+                                var currentScore = missionInfo.CurrentScore;
+                                var bronzeScore = mission.BronzeScore;
+                                var silverScore = mission.SilverScore;
+                                var goldScore = mission.GoldScore;
+
+                                var config = C.MissionConfig[id];
+                                bool AnyTurnin = config.AutoTurnin;
+                                var score = currentScore;
+                                bool GoldGoal = (goldScore <= score.GetValueOrDefault()) & (score != null);
+                                score = currentScore;
+                                bool SilverGoal = (silverScore <= score.GetValueOrDefault()) & (score != null);
+                                bool TurninBronze = config.TurninBronze;
+
+                                if (config.AutoTurnin)
+                                {
+                                    // AutoTurnin enabled, going to check for gold only since we have materials/time still
+                                    if (GoldGoal)
+                                    {
+                                        IceLogging.Info("Auto turnin was enabled, and hit the max score.", handle);
+                                        shouldTurnin = true;
+                                    }
+                                }
+                                else
+                                {
+                                    if (GoldGoal && config.TurninGold)
+                                    {
+                                        IceLogging.Info("Gold Turnin was enabled, and hit the max score.", handle);
+                                        shouldTurnin = true;
+                                    }
+                                    else if (SilverGoal && config.TurninSilver)
+                                    {
+                                        if (!config.TurninGold) // Check is here, just to make sure we shouldn't still be aiming for gold
+                                        {
+                                            IceLogging.Info("Silver Turnin was enabled, and you didn't have gold enabled.", handle);
+                                            shouldTurnin = true;
+                                        }
+                                    }
+                                    else if (config.TurninBronze)
+                                    {
+                                        if (!config.TurninSilver && !config.TurninGold) // Checking to make sure that silver and gold scores both aren't true
+                                        {
+                                            IceLogging.Info("Silver Turnin was enabled, and you didn't have gold or silver enabled.", handle);
+                                            shouldTurnin = true;
+                                        }
+                                    }
+                                }
                             }
                             if (shouldTurnin)
                             {
@@ -280,15 +268,15 @@ namespace ICE.Scheduler.Tasks
                                 return true;
                             }
                         }
+                        else
+                        {
+                            IceLogging.Error("We're homehow here, which means you've found a mission that doesn't exist?? Please let me know.\n" +
+                                            $"MissionID (allegedly) {id}");
+                            SchedulerMain.State = IceState.Idle;
+                            P.TaskManager.Tasks.Clear();
+                            return true;
+                        }
                     }
-                }
-                else
-                {
-                    IceLogging.Error("We're homehow here, which means you've found a mission that doesn't exist?? Please let me know.\n" +
-                                    $"MissionID (allegedly) {id}");
-                    SchedulerMain.State = IceState.Idle;
-                    P.TaskManager.Tasks.Clear();
-                    return true;
                 }
             }
             else
