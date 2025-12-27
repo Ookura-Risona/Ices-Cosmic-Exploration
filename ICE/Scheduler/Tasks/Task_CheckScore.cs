@@ -64,7 +64,7 @@ namespace ICE.Scheduler.Tasks
                     {
                         IceLogging.Debug("We're in a mission where score is the only importants. Checking to see if we meet the minimum score thresh", tag);
                         var currentScore = missionInfo.CurrentScore;
-                        if ((currentScore.GetValueOrDefault() >= missionEntry.BronzeScore) & (currentScore != null))
+                        if ((currentScore != null) && (currentScore.GetValueOrDefault() >= missionEntry.BronzeScore)) // 空值检查顺序调换
                         {
                             IceLogging.Info($"We've met the bronze scoring threshold. Current Score: {currentScore} | Bronze Score Requirement: {missionEntry.BronzeScore}", tag);
                             return true;
@@ -153,6 +153,13 @@ namespace ICE.Scheduler.Tasks
                     IceLogging.Debug("WE'RE NOT IN A CRITICAL MISSION");
 
                     var currentScore = missionInfo.CurrentScore;
+
+                    if (currentScore == null)
+                    {
+                        IceLogging.Error("CurrentScore is null in CheckMedalStatus for non-critical mission");
+                        return;
+                    }
+
                     var silverScore = mission.SilverScore;
                     var goldScore = mission.GoldScore;
 
@@ -166,6 +173,32 @@ namespace ICE.Scheduler.Tasks
                 var id = CosmicHelper.CurrentLunarMission;
                 if (CosmicHelper.SheetMissionDict.TryGetValue(id, out var missionEntry))
                 {
+                    // 补充处理 Critical 任务的逻辑，可能与上游实现不同，留意差异
+                    bool isCritical = missionEntry.Attributes.HasFlag(MissionAttributes.Critical);
+                    if (isCritical)
+                    {
+                        var criticalScore = missionInfo.CriticalScore;
+                        if (criticalScore == null)
+                        {
+                            IceLogging.Info("Critical score is null, waiting...", handle);
+                            return false;
+                        }
+
+                        if (criticalScore.Value == 1)
+                        {
+                            IceLogging.Info("Critical mission completed! Proceeding to turnin", handle);
+                            SchedulerMain.State = IceState.TurninMission;
+                            P.TaskManager.Tasks.Clear();
+                            Mission_Settings.TurninState = TurninState.Critical;
+                            return true;
+                        }
+                        else
+                        {
+                            IceLogging.Info($"Critical mission in progress. CriticalScore: {criticalScore.Value}", handle);
+                            return true; // 继续钓鱼
+                        }
+                    }
+
                     if (missionEntry.Attributes.HasFlag(MissionAttributes.ScoreTimeRemaining))
                     {
                         if (MinRequirementsMet(id, missionInfo))
@@ -185,9 +218,9 @@ namespace ICE.Scheduler.Tasks
                     }
                     else
                     {
-                        if (missionInfo.CurrentScore == null)
+                        if (missionInfo.CurrentScore == null && !missionEntry.Attributes.HasFlag(MissionAttributes.Critical))
                             return false;
-                        IceLogging.Debug("We're not in a mission where it's scored based off of time, so going to check to see if we meet the bronze threshold instead", null, false);
+                        IceLogging.Debug("We're not in a mission where it's scored based off of time, so going to check to see if we meet the bronze threshold instead");
                         if (CosmicHelper.SheetMissionDict.TryGetValue(id, out var mission))
                         {
                             var bronzeTurnin = MinRequirementsMet(id, missionInfo);
@@ -207,6 +240,12 @@ namespace ICE.Scheduler.Tasks
                             {
                                 IceLogging.Debug("We've met the minimum bronze threshold, so checking the rest now", handle);
                                 var currentScore = missionInfo.CurrentScore;
+                                if (currentScore == null) // 空值检查
+                                {
+                                    IceLogging.Error("CurrentScore is null for non-critical mission");
+                                    return false;
+                                }
+
                                 var bronzeScore = mission.BronzeScore;
                                 var silverScore = mission.SilverScore;
                                 var goldScore = mission.GoldScore;
@@ -214,9 +253,8 @@ namespace ICE.Scheduler.Tasks
                                 var config = C.MissionConfig[id];
                                 bool AnyTurnin = config.AutoTurnin;
                                 var score = currentScore;
-                                bool GoldGoal = (goldScore <= score.GetValueOrDefault()) & (score != null);
-                                score = currentScore;
-                                bool SilverGoal = (silverScore <= score.GetValueOrDefault()) & (score != null);
+                                bool GoldGoal = goldScore <= currentScore.Value;
+                                bool SilverGoal = silverScore <= currentScore.Value;
                                 bool TurninBronze = config.TurninBronze;
 
                                 if (config.AutoTurnin)
