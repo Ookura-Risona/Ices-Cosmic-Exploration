@@ -119,6 +119,38 @@ namespace ICE.Ui.MainUi.ModeSelect
                 uint currentJobId = (uint)Player.Job;
                 bool usingSupportedJob = CosmicHelper.CrafterJobList.Contains(currentJobId) || CosmicHelper.GatheringJobList.Contains(currentJobId);
 
+                bool AnyStop = C.StopOnceHitCosmicScore
+                             | C.StopWhenLevel
+                            || C.StopOnceHitCosmoCredits
+                            || C.StopOnceHitLunarCredits
+                            || C.StopOnceRelicFinished;
+                if (AnyStop)
+                {
+                    ImGui.SameLine(0, 10 * scale);
+                    ImGui.SetCursorPosY(ImGui.GetCursorPosY() + yOffset);
+                    ImGuiEx.Icon(FontAwesomeIcon.ExclamationTriangle);
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.BeginTooltip();
+
+                        ImGui.Text("看起来你启用了以下停止条件");
+                        if (C.StopOnceHitCosmicScore)
+                            ImGui.BulletText($"技巧点达到阈值时停止: [{C.CosmicScoreCap:N0}]");
+                        if (C.StopWhenLevel)
+                            ImGui.BulletText($"等级达到阈值时停止: [{C.TargetLevel:N0}]");
+                        if (C.StopOnceHitCosmoCredits)
+                            ImGui.BulletText($"宇宙信用点达到阈值时停止: [{C.CosmoCreditsCap:N0}]");
+                        if (C.StopOnceHitLunarCredits)
+                            ImGui.BulletText($"行星信用点达到阈值时停止: [{C.LunarCreditsCap:N0}]");
+                        if (C.StopOnceRelicFinished)
+                            ImGui.BulletText($"宇宙工具可报告时停止");
+
+                        ImGui.Text("所以如果停了你又不确定原因... 可能就是它们导致的。");
+
+                        ImGui.EndTooltip();
+                    }
+                }
+
                 ImGui.SameLine(0, 10 * scale);
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + yOffset);
 
@@ -132,6 +164,7 @@ namespace ICE.Ui.MainUi.ModeSelect
 
                 ImGui.SameLine(0, 10 * scale);
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + yOffset);
+
                 using (ImRaii.Disabled(SchedulerMain.State == IceState.Idle))
                 {
                     using (ImRaii.PushColor(ImGuiCol.Button, new Vector4(0.8f, 0.2f, 0.2f, 1.0f)))
@@ -385,15 +418,17 @@ namespace ICE.Ui.MainUi.ModeSelect
 
                     if (C.GrindProvisionals)
                     {
-                        ImGui_Tools.DrawCategoryButton($"全部启用 [{allEnabled}]", "main_AllEnabled");
                         ImGui_Tools.DrawCategoryButton($"连续任务 [{sequenceEnabled}]", "main_Sequence");
                         ImGui_Tools.DrawCategoryButton($"天气限定任务 [{weatherEnabled}]", "main_Weather");
                         ImGui_Tools.DrawCategoryButton($"时间限定任务 [{timedEnabled}]", "main_Timed");
+                        if (allEnabled > 0)
+                        {
+                            ImGui_Tools.DrawCategoryButton($"全部启用 [{allEnabled}]", "main_AllEnabled");
+                        }
                         ImGui_Tools.EndCategoryButtonRow();
                     }
                     else
                     {
-                        ImGui_Tools.DrawCategoryButton($"全部启用 [{allEnabled}]", "main_AllEnabled");
                         ImGui_Tools.DrawCategoryButton($"紧急探索任务 [{criticalEnabled}]", "main_Critical");
                         ImGui_Tools.DrawCategoryButton($"连续任务 [{sequenceEnabled}]", "main_Sequence");
                         ImGui_Tools.DrawCategoryButton($"天气限定任务 [{weatherEnabled}]", "main_Weather");
@@ -401,7 +436,15 @@ namespace ICE.Ui.MainUi.ModeSelect
                         ImGui_Tools.DrawCategoryButton($"A 类任务 [{aRankEnabled}]", "main_ARank");
                         ImGui_Tools.DrawCategoryButton($"B 类任务 [{bRankEnabled}]", "main_BRank");
                         ImGui_Tools.DrawCategoryButton($"C 类任务 [{cRankEnabled}]", "main_CRank");
-                        ImGui_Tools.DrawCategoryButton($"D 类任务 [{dRankEnabled}]", "main_DRank", spacingAfter: 0);
+                        ImGui_Tools.DrawCategoryButton($"D 类任务 [{dRankEnabled}]", "main_DRank");
+                        var selectedClass = C.SelectedJob;
+                        var jobIcon = CosmicHelper.JobIconDict[selectedClass];
+                        ImGui_Tools.DrawImageBox(jobIcon, "当前选定", spacingAfter: 5);
+                        if (allEnabled > 0)
+                        {
+                            ImGui_Tools.DrawCategoryButton($"全部启用 [{allEnabled}]", "main_AllEnabled");
+                        }
+
                         ImGui_Tools.EndCategoryButtonRow();
                     }
                 }
@@ -457,7 +500,15 @@ namespace ICE.Ui.MainUi.ModeSelect
                         .ToList();
 
                     if (enabledTabs["main_AllEnabled"])
-                        modeSelect_TableInfo.DrawMissionTablev2("全部启用", "All_Enabled", modeSelect_TableInfo.missionList["All Enabled"]);
+                    {
+                        int allEnabled = modeSelect_TableInfo.missionList.ContainsKey("All Enabled") ? modeSelect_TableInfo.missionList["All Enabled"].Count(mission => mission.enabled) : 0;
+                        if (allEnabled == 0)
+                            enabledTabs["main_AllEnabled"] = false;
+                        else
+                        {
+                            modeSelect_TableInfo.DrawMissionTablev2("全部启用", "All_Enabled", modeSelect_TableInfo.missionList["All Enabled"]);
+                        }
+                    }
                     if (enabledTabs["main_Sequence"])
                         modeSelect_TableInfo.DrawMissionTablev2("连续", "Sequence_Missions", modeSelect_TableInfo.missionList["Sequence"]);
                     if (enabledTabs["main_Weather"])
@@ -469,6 +520,10 @@ namespace ICE.Ui.MainUi.ModeSelect
                 {
                     if (enabledTabs["main_AllEnabled"])
                     {
+                        int allEnabled = modeSelect_TableInfo.missionList.ContainsKey("All Enabled") ? modeSelect_TableInfo.missionList["All Enabled"].Count(mission => mission.enabled) : 0;
+                        if (allEnabled == 0)
+                            enabledTabs["main_AllEnabled"] = false;
+
                         if (modeSelect_TableInfo.missionList["All Enabled"].Count > 0)
                         {
                             modeSelect_TableInfo.DrawMissionTablev2("全部启用", "All_Enabled", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["All Enabled"]));

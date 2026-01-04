@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Dalamud.Interface;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,6 +17,9 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
 
         public static void Draw()
         {
+            ImGuiEx.IconWithText(FontAwesomeIcon.ExclamationTriangle, "安全设置");
+            ImGui.Dummy(new Vector2(0, 5));
+
             if (ImGui.Checkbox("忽略非宇宙探索相关提示", ref rejectUnknownYesNo))
             {
                 C.RejectUnknownYesno = rejectUnknownYesNo;

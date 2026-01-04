@@ -173,6 +173,7 @@ namespace ICE.Config
         public int TimeHistoryLimit { get; set; } = 100;
         public bool RemoveStellarStatus { get; set; } = false;
         public bool ShowSPM { get; set; } = false;
+        public bool StartUponEnterMoon { get; set; } = false;
         public bool AutoAntiAFK { get; set; } = true; // Add: 自动切换离开状态默认
 
         #endregion
@@ -180,7 +181,7 @@ namespace ICE.Config
         #region Relic Settings
         
         public bool TurninRelic { get; set; } = false;
-        public Dictionary<uint, bool> ClassesUnlocked { get; set; } = new()
+        public Dictionary<uint, bool> RelicJobs { get; set; } = new()
         {
             [8] = true,
             [9] = true,
@@ -194,6 +195,8 @@ namespace ICE.Config
             [17] = true,
             [18] = true
         };
+        public bool FarmAllRelics { get; set; } = false;
+        public bool Stop_AllRelicsComplete { get; set; } = false;
 
         #endregion
 
@@ -246,6 +249,8 @@ namespace ICE.Config
         public string AuthorName { get; set; } = "Puni.sh Community";
         public string CustomRoutePath { get; set; } = string.Empty;
         public bool DisableHudClipping { get; set; } = false;
+
+        public bool HighlightVisibleMissions { get; set; } = false;
 
 
         #endregion

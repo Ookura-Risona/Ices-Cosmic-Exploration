@@ -13,36 +13,43 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
     {
         public static void Draw()
         {
-            OverlaySettings();
-            Separator();
+            if (ImGui.BeginTable("Misc Columns Stuff", 3, ImGuiTableFlags.Borders | ImGuiTableFlags.SizingFixedFit))
+            {
+                ImGui.TableNextRow();
 
-            AutoUse();
-            Separator();
+                ImGui.TableSetColumnIndex(0);
+                OverlaySettings();
 
-            RepairSettings();
-            Separator();
+                ImGui.TableNextColumn();
+                AutoUse();
 
-            TimeRecords();
-            Separator();
+                ImGui.TableNextColumn();
+                RepairSettings();
 
-            MountSelection();
-            Separator();
+                ImGui.TableNextRow();
+                ImGui.TableSetColumnIndex(0);
+                SafetySettings.Draw();
 
-            ShowSystemButtons();
-            Separator();
+                ImGui.TableNextColumn();
+                MountSelection();
+
+                ImGui.TableNextColumn();
+                ShowSystemButtons();
+
+                ImGui.Dummy(new Vector2(0, 5));
+
+                TimeRecords();
+
+#if DEBUG
+                ImGui.TableNextRow();
+                ImGui.TableSetColumnIndex(0);
+                DebugTab.Draw();
+#endif
+                ImGui.EndTable();
+            }
 
             PostMissionCommands();
             Separator();
-
-            ImGuiEx.IconWithText(FontAwesomeIcon.ExclamationTriangle, "安全设置");
-            ImGui.Dummy(new Vector2(0, 5));
-            SafetySettings.Draw();
-
-#if DEBUG
-            ImGui.Separator();
-            ImGui.Dummy(new Vector2(0, 5));
-            DebugTab.Draw();
-#endif
         }
 
         private static void OverlaySettings()
@@ -123,6 +130,20 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                 C.DisablePathfindingToRedAlert = DisableRedAlertPathing;
                 C.Save();
             }
+
+            bool autoStartOnMoonEnter = C.StartUponEnterMoon;
+            if (ImGui.Checkbox("进入宇宙探索地图时自动启动 ICE 运行", ref autoStartOnMoonEnter))
+            {
+                C.StartUponEnterMoon = autoStartOnMoonEnter;
+                C.Save();
+            }
+            ImGui.SameLine();
+            ImGuiEx.IconWithTooltip(FontAwesomeIcon.QuestionCircle,
+                                   "首次进入宇宙探索地图时, 若检测到您的职业为能工巧匠或大地使者, \n" +
+                                   "将自动启动 ICE 运行, 等同于您手动按下开始按钮。\n" +
+                                   "适用于使用自动登录工具/只想进入宇宙探索地图后直接开始的情况。\n" +
+                                   "注意: 此功能仅在【首次】进入宇宙探索地图时生效。");
+            ImGui.Dummy(Vector2.Zero);
         }
 
         private static void RepairSettings()
@@ -302,7 +323,6 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                 C.MountRadius = minMountRange;
                 C.Save();
             }
-            ImGui.SameLine();
             ImGui.Checkbox("可视化半径范围", ref visualizeRadius);
             ImGui.SetNextItemWidth(100);
             if (ImGui.DragFloat("下坐骑目标范围", ref dismountRange, 1))
@@ -310,7 +330,6 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                 C.DismountRadius = dismountRange;
                 C.Save();
             }
-            ImGui.SameLine();
             ImGui.Checkbox("可视化下坐骑半径范围", ref visualizeDismountRadius);
 
             using (var drawList = PictoService.Draw(hints: Utils.GetPictoHints()))

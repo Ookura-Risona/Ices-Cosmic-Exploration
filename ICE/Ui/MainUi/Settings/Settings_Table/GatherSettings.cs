@@ -403,31 +403,30 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                     }
                 }
 
-                ImGui.BeginChild("GatherProfileChild", new Vector2(300, ImGui.GetTextLineHeightWithSpacing() * 5 + 10), true);
-                foreach (var profile in C.GatherProfiles)
+                if (ImGui.BeginChild("GatherProfileChild", new Vector2(300, ImGui.GetTextLineHeightWithSpacing() * 5 + 10), true))
                 {
-                    var id = profile.Key;
-                    bool isSelected = C.SelectedGatherIndex == id;
-                    if (ImGui.Selectable($"{profile.Value.Name}##{profile.Value.Name}_{id}", isSelected))
+                    foreach (var profile in C.GatherProfiles)
                     {
-                        C.SelectedGatherIndex = id;
-                        C.Save();
-                    }
+                        var id = profile.Key;
+                        bool isSelected = C.SelectedGatherIndex == id;
+                        if (ImGui.Selectable($"{profile.Value.Name}##{profile.Value.Name}_{id}", isSelected))
+                        {
+                            C.SelectedGatherIndex = id;
+                            C.Save();
+                        }
 
-                    if (isSelected)
-                        ImGui.SetItemDefaultFocus();
+                        if (isSelected)
+                            ImGui.SetItemDefaultFocus();
+                    }
                 }
                 ImGui.EndChild();
 
-                // 最后选中的采集配置索引不存在时的修复
-                if (!C.GatherProfiles.ContainsKey(C.SelectedGatherIndex))
+                if (!C.GatherProfiles.TryGetValue(C.SelectedGatherIndex, out var entry))
                 {
-                    Svc.Log.Debug($"Selected gather profile index {C.SelectedGatherIndex} not found, using default(0).");
+                    // We've somehow gotten a variable that is outside the normal index, so going to just reset it back to 0
                     C.SelectedGatherIndex = 0;
-                    C.Save();
+                    C.SaveDebounced();
                 }
-
-                GatherProfile entry = C.GatherProfiles[C.SelectedGatherIndex];
 
                 ImGui.Combo("任务类型", ref MissionIndex, MissionTypes, MissionTypes.Length);
                 if (ImGui.Button("应用到任务类型"))

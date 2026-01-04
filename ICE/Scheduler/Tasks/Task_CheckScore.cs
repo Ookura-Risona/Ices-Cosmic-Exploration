@@ -173,30 +173,13 @@ namespace ICE.Scheduler.Tasks
                 var id = CosmicHelper.CurrentLunarMission;
                 if (CosmicHelper.SheetMissionDict.TryGetValue(id, out var missionEntry))
                 {
-                    // 补充处理 Critical 任务的逻辑，可能与上游实现不同，留意差异
-                    bool isCritical = missionEntry.Attributes.HasFlag(MissionAttributes.Critical);
-                    if (isCritical)
+                    // 上游仍旧没有添加处理 Critical 任务的逻辑，你觉得还会崩溃吗？先试试看，炸了再回调原来的修复逻辑~
+                    if (CosmicHandler.IsMissionTimedOut())
                     {
-                        var criticalScore = missionInfo.CriticalScore;
-                        if (criticalScore == null)
-                        {
-                            IceLogging.Info("Critical score is null, waiting...", handle);
-                            return false;
-                        }
-
-                        if (criticalScore.Value == 1)
-                        {
-                            IceLogging.Info("Critical mission completed! Proceeding to turnin", handle);
-                            SchedulerMain.State = IceState.TurninMission;
-                            P.TaskManager.Tasks.Clear();
-                            Mission_Settings.TurninState = TurninState.Critical;
-                            return true;
-                        }
-                        else
-                        {
-                            IceLogging.Info($"Critical mission in progress. CriticalScore: {criticalScore.Value}", handle);
-                            return true; // 继续钓鱼
-                        }
+                        IceLogging.Debug("Mission is timed out, attempting to abandon");
+                        SchedulerMain.State = IceState.AbandonMission;
+                        P.TaskManager.Tasks.Clear();
+                        return true;
                     }
 
                     if (missionEntry.Attributes.HasFlag(MissionAttributes.ScoreTimeRemaining))
@@ -218,8 +201,9 @@ namespace ICE.Scheduler.Tasks
                     }
                     else
                     {
-                        if (missionInfo.CurrentScore == null && !missionEntry.Attributes.HasFlag(MissionAttributes.Critical))
+                        if (missionInfo.CurrentScore == null)
                             return false;
+
                         IceLogging.Debug("We're not in a mission where it's scored based off of time, so going to check to see if we meet the bronze threshold instead");
                         if (CosmicHelper.SheetMissionDict.TryGetValue(id, out var mission))
                         {

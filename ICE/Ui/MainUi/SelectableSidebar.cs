@@ -200,7 +200,7 @@ namespace ICE.Ui.MainUi
                     }
                     else
                     {
-                        ImGui.TextWrapped("You have to be in a cosmic area for us to view this info. Blame square for not making it always accesable");
+                        ImGui.TextWrapped("您必须在宇宙探索地图中, 我们才能查看这些信息。\n这得怪 SE 没把它做成随时可访问的。");
                     }
                 }
                 if (ImGui_Tools.DrawCategoryHeader_AutoSize("帮助", icon: FontAwesomeIcon.QuestionCircle)) // Help
