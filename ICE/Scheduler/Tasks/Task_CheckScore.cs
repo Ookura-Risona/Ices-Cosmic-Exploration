@@ -173,7 +173,6 @@ namespace ICE.Scheduler.Tasks
                 var id = CosmicHelper.CurrentLunarMission;
                 if (CosmicHelper.SheetMissionDict.TryGetValue(id, out var missionEntry))
                 {
-                    // 上游仍旧没有添加处理 Critical 任务的逻辑，你觉得还会崩溃吗？先试试看，炸了再回调原来的修复逻辑~
                     if (CosmicHandler.IsMissionTimedOut())
                     {
                         IceLogging.Debug("Mission is timed out, attempting to abandon");
@@ -181,6 +180,34 @@ namespace ICE.Scheduler.Tasks
                         P.TaskManager.Tasks.Clear();
                         return true;
                     }
+
+                    // 补充处理 Critical 任务的逻辑
+                    // Fix crash in critical fishing missions by using CriticalScore instead of CurrentScore
+                    bool isCritical = missionEntry.Attributes.HasFlag(MissionAttributes.Critical);
+                    if (isCritical)
+                    {
+                        var criticalScore = missionInfo.CriticalScore;
+                        if (criticalScore == null)
+                        {
+                            IceLogging.Info("Critical score is null, waiting...", handle);
+                            return false;
+                        }
+
+                        if (criticalScore.Value == 1)
+                        {
+                            IceLogging.Info("Critical mission completed! Proceeding to turnin", handle);
+                            SchedulerMain.State = IceState.TurninMission;
+                            P.TaskManager.Tasks.Clear();
+                            Mission_Settings.TurninState = TurninState.Critical;
+                            return true;
+                        }
+                        else
+                        {
+                            IceLogging.Info($"Critical mission in progress. CriticalScore: {criticalScore.Value}", handle);
+                            return true;
+                        }
+                    }
+
 
                     if (missionEntry.Attributes.HasFlag(MissionAttributes.ScoreTimeRemaining))
                     {
