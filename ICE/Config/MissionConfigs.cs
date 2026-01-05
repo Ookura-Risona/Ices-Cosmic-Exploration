@@ -260,23 +260,13 @@ namespace ICE.Config
         public static string ConfigPath => Path.Combine(Svc.PluginInterface.ConfigDirectory.FullName, "Mission Config.yaml");
         private static CancellationTokenSource? _saveCts;
         private static readonly object _saveLock = new();
+        private static readonly SemaphoreSlim SaveSemaphore = new(1, 1);
 
         // Standard async save (fire-and-forget)
         public void Save()
         {
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    await SaveAsync().ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    PluginLog.Error($"Failed to save MissionConfigs: {ex}");
-                }
-            });
+            _ = SaveAsync();
         }
-
         // Debounced save for rapid operations
         public void SaveDebounced(int delayMs = 500)
         {
@@ -305,11 +295,32 @@ namespace ICE.Config
             }
         }
 
-        // Core async implementation
-        public async Task SaveAsync() => await YamlConfig.SaveAsync(this, ConfigPath);
+        public async Task SaveAsync()
+        {
+            await SaveSemaphore.WaitAsync();
+            try
+            {
+                await YamlConfig.SaveAsync(this, ConfigPath);
+            }
+            finally
+            {
+                SaveSemaphore.Release();
+            }
+        }
 
         // Synchronous for migrations/critical paths
-        public void SaveSync() => YamlConfig.SaveSync(this, ConfigPath);
+        public void SaveSync()
+        {
+            SaveSemaphore.Wait();
+            try
+            {
+                YamlConfig.SaveSync(this, ConfigPath);
+            }
+            finally
+            {
+                SaveSemaphore.Release();
+            }
+        }
 
         #endregion
     }

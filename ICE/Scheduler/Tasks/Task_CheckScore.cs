@@ -208,7 +208,6 @@ namespace ICE.Scheduler.Tasks
                         }
                     }
 
-
                     if (missionEntry.Attributes.HasFlag(MissionAttributes.ScoreTimeRemaining))
                     {
                         if (MinRequirementsMet(id, missionInfo))
