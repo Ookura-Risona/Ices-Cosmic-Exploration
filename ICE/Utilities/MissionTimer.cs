@@ -71,11 +71,6 @@ public class MissionTimer
         // Apply time history limit per state if set
         if (TimeHistoryLimit > 0)
         {
-            if (stats.TurninRecords.Count > TimeHistoryLimit)
-            {
-                stats.TurninRecords.RemoveRange(0, stats.TurninRecords.Count - TimeHistoryLimit);
-            }
-
             // Group records by state
             var groupedByState = stats.TurninRecords
                 .GroupBy(t => t.State)
