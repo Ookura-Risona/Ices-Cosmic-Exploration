@@ -1938,9 +1938,13 @@ namespace ICE.Ui.MainUi.ModeSelect
                             var record = config.TurninRecords[i];
 
                             ImGui.Text($"[{i+1}] \u2192 {TimeSpan.FromSeconds(record.Time):mm\\:ss\\.ff}");
-                            ImGui.SameLine();
-                            DrawColoredStar(record.State);
-
+                            // Only draw the star when it's not None state
+                            // to prevent layout issues with SameLine()
+                            if (record.State != TurninState.None)
+                            {
+                                ImGui.SameLine();
+                                DrawColoredStar(record.State);
+                            }
                         }
                     }
                 }
