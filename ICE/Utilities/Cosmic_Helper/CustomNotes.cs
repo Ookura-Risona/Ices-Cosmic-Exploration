@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -97,5 +98,41 @@ public static partial class CosmicHelper
         {
             dict[id] = new CustomNotes { SPM = spm, NoteInfo = note };
         }
+    }
+
+    public static List<uint> QuickLevelList = new()
+    {
+        // Sinus
+        3, 8, 19,      // CRP
+        48, 53, 64,    // ARM
+        93, 98, 109,   // BSM
+        138, 143, 154, // GSM
+        183, 188, 199, // LTW
+        228, 233, 244, // WVR
+        273, 278, 289, // ALC
+        318, 323, 334, // CUL
+        365, 369, 374, // MIN
+        410, 414, 419, // BTN
+        453, 458, 465, // FHS
+
+
+        // Phaenna // 1 2 2
+        545, 556, 561, // CRP
+        587, 598, 603, // BSM
+        629, 640, 645, // ARM
+        671, 682, 687, // GSM
+        713, 724, 729, // LTW
+        755, 766, 771, // WVR
+        797, 808, 813, // ALC
+        839, 850, 855, // CUL
+        883, 903, 886, // MIN
+        925, 945, 928, // BTN
+        967, 973, 979, // FSH
+    };
+
+    public class LevelInfo
+    {
+        public uint Level { get; set; } = 10;
+        public List<uint> MissionId { get; set; } = new();
     }
 }

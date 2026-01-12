@@ -47,8 +47,9 @@ namespace ICE.Ui.MainUi.ModeSelect
                 FontAwesomeIcon modeIcon = FontAwesomeIcon.List;
 
                 bool relicMode = C.XPRelicGrind;
-                bool provisionalMode = C.GrindProvisionals;
-                bool standard = (!relicMode && !provisionalMode);
+                bool xpLeveling = C.XPLeveling_Mode;
+                bool standard = (!relicMode && !xpLeveling);
+
 
                 if (standard)
                     modeType = "标准模式"; // Standard
@@ -57,10 +58,10 @@ namespace ICE.Ui.MainUi.ModeSelect
                     modeType = "宇宙工具研究数据刷取模式"; // Relic Grind
                     modeIcon = FontAwesomeIcon.ArrowUpRightDots;
                 }
-                else if (provisionalMode)
+                else if (xpLeveling)
                 {
-                    modeType = "临时性任务模式"; // Provisional
-                    modeIcon = FontAwesomeIcon.Cloud;
+                    modeType = "练级模式"; // Leveling Grind
+                    modeIcon = FontAwesomeIcon.Leaf;
                 }
 
                 ImGuiEx.IconWithText(modeIcon, $"{modeType}"); // Mode | 这里去掉直接使用原始文本
@@ -85,7 +86,7 @@ namespace ICE.Ui.MainUi.ModeSelect
                     if (ImGui.RadioButton("标准模式", standard)) // Standard
                     {
                         C.XPRelicGrind = false;
-                        C.GrindProvisionals = false;
+                        C.XPLeveling_Mode = false;
                         C.Save();
                     }
                     ImGuiEx.HelpMarker("标准模式 \n" + // Stand Mode (typo!)
@@ -95,23 +96,26 @@ namespace ICE.Ui.MainUi.ModeSelect
                     if (ImGui.RadioButton("宇宙工具研究数据刷取模式", relicMode)) // Relic Grind
                     {
                         C.XPRelicGrind = true;
-                        C.GrindProvisionals = false;
+                        C.XPLeveling_Mode = false;
                         C.Save();
                     }
                     ImGuiEx.HelpMarker("宇宙工具研究数据刷取模式\n" + // Relic Grind\n
-                                       "-> 自动选择最适合完成宇宙工具的任务\n" + // Automatically select which missions that are best to finish up your relic\n
-                                       "-> 任务选择的权重依据为完成宇宙工具到下一阶段所需的研究数据\n" + // These are weighed based on what is needed to complete the tool to the next step\n
-                                       "-> 如果您只想做特定任务, 可以启用此选项并选择您要做的任务"); // If you want to only do certain missions, enable the option and select which ones you want to do
-                    if (ImGui.RadioButton("临时性任务模式", provisionalMode)) // Provisional Grind
+                                       "-> 自动选择最适合完成宇宙工具的任务\n" +
+                                       "-> 任务选择的权重依据为完成宇宙工具到下一阶段所需的研究数据\n" +
+                                       "-> 如果您只想做特定任务, 可以启用此选项并选择您要做的任务");
+
+                    if (ImGui.RadioButton("练级模式", xpLeveling)) // Leveling Grind
                     {
                         C.XPRelicGrind = false;
-                        C.GrindProvisionals = true;
+                        C.XPLeveling_Mode = true;
                         C.Save();
                     }
-                    ImGuiEx.HelpMarker("临时性任务模式\n" + // Provisional Grind\n
-                                       "-> 刷取您启用的临时性任务 [天气限定任务 | 时间限定任务 | 连续任务]\n" + // Grind provisional missions [Weather | Timed | Sequence] that you have enabled\n
-                                       "-> 可用于所有职业, 您可以设置职业与任务类型的优先级\n" + // Use this to grind all classes. You can set the priority for which classes and types of missions that you want to do\n
-                                       "-> 适用于在所有职业中刷取技巧点/票据, 或在特定时间完成指定任务"); // Useful if you're aiming to grind out score/tokens across all classes, or want to do specific missions at certain times
+                    ImGuiEx.HelpMarker("练级模式\n" +
+                                       "-> 根据您当前职业所处的等级区间, 自动选择最适合升级的任务\n" + // Will automatically select which mission is the best for leveling your current class based on what level bracket you're in
+                                       "-> 这些任务由我手动挑选, 依据完成所需时间决定\n" + // These are hand picked by me, and determined by the time it takes to complete it
+                                       "-> 能工巧匠职业会优先选择制作进展需求最低的任务\n" + // For crafters it's whatever missions take the least amount of progress
+                                       "-> 大地使者职业会优先选择在最低技能需求下最不折磨的任务\n" + // For gathering, it's whatever is the least pain to do w/ the minimum amount of skills
+                                       "**启用这些模式时会自动临时调整相关设置**"); // These will automatically set settings for using these modes temporarily
 
                     ImGui.EndPopup();
                 }
@@ -154,11 +158,27 @@ namespace ICE.Ui.MainUi.ModeSelect
                 ImGui.SameLine(0, 10 * scale);
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + yOffset);
 
-                using (ImRaii.Disabled(SchedulerMain.State != IceState.Idle || !usingSupportedJob))
+                bool unsupportedArtisan = xpLeveling && !P.Artisan.UpdatedArtisan() && CosmicHelper.CrafterJobList.Contains((uint)Player.Job);
+
+                using (ImRaii.Disabled(SchedulerMain.State != IceState.Idle || !usingSupportedJob || unsupportedArtisan))
                 {
                     if (ImGui.Button("开始", new Vector2(150 * scale, 0)))
                     {
                         SchedulerMain.EnablePlugin();
+                    }
+                }
+
+                if (unsupportedArtisan)
+                {
+                    ImGui.SameLine(0, 10 * scale);
+                    ImGui.SetCursorPosY(ImGui.GetCursorPosY() + yOffset);
+                    ImGuiEx.Icon(EColor.Red, FontAwesomeIcon.ExclamationTriangle);
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.BeginTooltip();
+                        ImGui.Text("Hey! You need to update artisan to use this mode, please update to at minimum:");
+                        ImGui.Text("4.0.4.29");
+                        ImGui.EndTooltip();
                     }
                 }
 
@@ -230,9 +250,6 @@ namespace ICE.Ui.MainUi.ModeSelect
                         bool relicTurnin = C.TurninRelic;
                         if (ImGui.Checkbox($"宇宙工具可报告时提交##RelicTurnin_RelicGrind", ref relicTurnin))
                         {
-                            if (relicTurnin)
-                                C.GrindProvisionals = false;
-
                             C.TurninRelic = relicTurnin;
                             C.Save();
                         }
@@ -254,10 +271,6 @@ namespace ICE.Ui.MainUi.ModeSelect
                         bool EnableRelicXp = C.XPRelicGrind;
                         if (ImGui.Checkbox("自动根据研究数据挑选任务", ref EnableRelicXp)) // Auto-Pick For Relic XP
                         {
-                            if (EnableRelicXp)
-                            {
-                                C.GrindProvisionals = false;
-                            }
                             C.XPRelicGrind = EnableRelicXp;
                             C.Save();
                         }
@@ -340,13 +353,6 @@ namespace ICE.Ui.MainUi.ModeSelect
                                 continue;
                         }
                     }
-                    else if (C.GrindProvisionals)
-                    {
-                        // honestly do nothing here, this is just to catch and show all the jobs for this mode here. Kinda lazy I realize but *-shrugs-*
-                    }
-                    else if (!Jobs.Contains(selectedJob))
-                        continue;
-
 
                     if (!sinusEnabled && territoryId == 1237)
                         continue;
@@ -354,11 +360,17 @@ namespace ICE.Ui.MainUi.ModeSelect
                     if (!phaennaEnabled && territoryId == 1291)
                         continue;
 
-                    if (C.GrindProvisionals)
+                    bool provisional = mission.Value.Attributes.HasFlag(MissionAttributes.ProvisionalWeather)
+                                    || mission.Value.Attributes.HasFlag(MissionAttributes.ProvisionalTimed)
+                                    || mission.Value.Attributes.HasFlag(MissionAttributes.ProvisionalSequential);
+
+                    if (provisional)
                     {
-                        bool provisional = mission.Value.Attributes.HasFlag(MissionAttributes.ProvisionalWeather)
-                                        || mission.Value.Attributes.HasFlag(MissionAttributes.ProvisionalTimed)
-                                        || mission.Value.Attributes.HasFlag(MissionAttributes.ProvisionalSequential);
+                        if (!C.GrindAllProvisionals)
+                        {
+                            if (!Jobs.Contains(selectedJob))
+                                continue;
+                        }
 
                         if (mission.Value.Attributes.HasFlag(MissionAttributes.ProvisionalWeather))
                             modeSelect_TableInfo.missionList["Weather"].Add(new modeSelect_TableInfo.Mission { id = mission.Key, enabled = C.MissionConfig[mission.Key].Enabled });
@@ -367,21 +379,18 @@ namespace ICE.Ui.MainUi.ModeSelect
                         else if (mission.Value.Attributes.HasFlag(MissionAttributes.ProvisionalSequential))
                             modeSelect_TableInfo.missionList["Sequence"].Add(new modeSelect_TableInfo.Mission { id = mission.Key, enabled = C.MissionConfig[mission.Key].Enabled });
 
-                        if (C.MissionConfig.ContainsKey(mission.Key) && C.MissionConfig[mission.Key].Enabled && provisional)
+                        if (C.MissionConfig.ContainsKey(mission.Key) && C.MissionConfig[mission.Key].Enabled)
                         {
                             modeSelect_TableInfo.missionList["All Enabled"].Add(new modeSelect_TableInfo.Mission { id = mission.Key, enabled = C.MissionConfig[mission.Key].Enabled });
                         }
                     }
                     else
                     {
+                        if (!Jobs.Contains(selectedJob))
+                            continue;
+
                         if (mission.Value.Attributes.HasFlag(MissionAttributes.Critical))
                             modeSelect_TableInfo.missionList["Critical"].Add(new modeSelect_TableInfo.Mission { id = mission.Key, enabled = C.MissionConfig[mission.Key].Enabled });
-                        else if (mission.Value.Attributes.HasFlag(MissionAttributes.ProvisionalWeather))
-                            modeSelect_TableInfo.missionList["Weather"].Add(new modeSelect_TableInfo.Mission { id = mission.Key, enabled = C.MissionConfig[mission.Key].Enabled });
-                        else if (mission.Value.Attributes.HasFlag(MissionAttributes.ProvisionalTimed))
-                            modeSelect_TableInfo.missionList["Timed"].Add(new modeSelect_TableInfo.Mission { id = mission.Key, enabled = C.MissionConfig[mission.Key].Enabled });
-                        else if (mission.Value.Attributes.HasFlag(MissionAttributes.ProvisionalSequential))
-                            modeSelect_TableInfo.missionList["Sequence"].Add(new modeSelect_TableInfo.Mission { id = mission.Key, enabled = C.MissionConfig[mission.Key].Enabled });
                         else if (mission.Value.Rank > 3)
                             modeSelect_TableInfo.missionList["ARank"].Add(new modeSelect_TableInfo.Mission { id = mission.Key, enabled = C.MissionConfig[mission.Key].Enabled });
                         else if (mission.Value.Rank == 3)
@@ -416,37 +425,23 @@ namespace ICE.Ui.MainUi.ModeSelect
                     if (!missionButtons.Success)
                         return;
 
-                    if (C.GrindProvisionals)
+                    ImGui_Tools.DrawCategoryButton($"紧急探索任务 [{criticalEnabled}]", "main_Critical");
+                    ImGui_Tools.DrawCategoryButton($"连续任务 [{sequenceEnabled}]", "main_Sequence");
+                    ImGui_Tools.DrawCategoryButton($"天气限定任务 [{weatherEnabled}]", "main_Weather");
+                    ImGui_Tools.DrawCategoryButton($"时间限定任务 [{timedEnabled}]", "main_Timed");
+                    ImGui_Tools.DrawCategoryButton($"A 类任务 [{aRankEnabled}]", "main_ARank");
+                    ImGui_Tools.DrawCategoryButton($"B 类任务 [{bRankEnabled}]", "main_BRank");
+                    ImGui_Tools.DrawCategoryButton($"C 类任务 [{cRankEnabled}]", "main_CRank");
+                    ImGui_Tools.DrawCategoryButton($"D 类任务 [{dRankEnabled}]", "main_DRank");
+                    var selectedClass = C.SelectedJob;
+                    var jobIcon = CosmicHelper.JobIconDict[selectedClass];
+                    ImGui_Tools.DrawImageBox(jobIcon, "当前选定", spacingAfter: 5);
+                    if (allEnabled > 0)
                     {
-                        ImGui_Tools.DrawCategoryButton($"连续任务 [{sequenceEnabled}]", "main_Sequence");
-                        ImGui_Tools.DrawCategoryButton($"天气限定任务 [{weatherEnabled}]", "main_Weather");
-                        ImGui_Tools.DrawCategoryButton($"时间限定任务 [{timedEnabled}]", "main_Timed");
-                        if (allEnabled > 0)
-                        {
-                            ImGui_Tools.DrawCategoryButton($"全部启用 [{allEnabled}]", "main_AllEnabled");
-                        }
-                        ImGui_Tools.EndCategoryButtonRow();
+                        ImGui_Tools.DrawCategoryButton($"全部启用 [{allEnabled}]", "main_AllEnabled");
                     }
-                    else
-                    {
-                        ImGui_Tools.DrawCategoryButton($"紧急探索任务 [{criticalEnabled}]", "main_Critical");
-                        ImGui_Tools.DrawCategoryButton($"连续任务 [{sequenceEnabled}]", "main_Sequence");
-                        ImGui_Tools.DrawCategoryButton($"天气限定任务 [{weatherEnabled}]", "main_Weather");
-                        ImGui_Tools.DrawCategoryButton($"时间限定任务 [{timedEnabled}]", "main_Timed");
-                        ImGui_Tools.DrawCategoryButton($"A 类任务 [{aRankEnabled}]", "main_ARank");
-                        ImGui_Tools.DrawCategoryButton($"B 类任务 [{bRankEnabled}]", "main_BRank");
-                        ImGui_Tools.DrawCategoryButton($"C 类任务 [{cRankEnabled}]", "main_CRank");
-                        ImGui_Tools.DrawCategoryButton($"D 类任务 [{dRankEnabled}]", "main_DRank");
-                        var selectedClass = C.SelectedJob;
-                        var jobIcon = CosmicHelper.JobIconDict[selectedClass];
-                        ImGui_Tools.DrawImageBox(jobIcon, "当前选定", spacingAfter: 5);
-                        if (allEnabled > 0)
-                        {
-                            ImGui_Tools.DrawCategoryButton($"全部启用 [{allEnabled}]", "main_AllEnabled");
-                        }
 
-                        ImGui_Tools.EndCategoryButtonRow();
-                    }
+                    ImGui_Tools.EndCategoryButtonRow();
                 }
 
                 if (C.ShowExtraMissionInfo)
@@ -481,75 +476,53 @@ namespace ICE.Ui.MainUi.ModeSelect
             using (var missionTableChild = ImRaii.Child("##modeSelect_MissionTables", new Vector2(0, 0), false))
             {
                 var enabledTabs = ImGui_Tools.CategoryStates;
-                if (C.GrindProvisionals)
+                modeSelect_TableInfo.missionList["All Enabled"] = modeSelect_TableInfo.missionList["All Enabled"]
+                                                                 .OrderBy(x => C.JobPrio.IndexOf(CosmicHelper.SheetMissionDict[x.id].Jobs.First()))
+                                                                 .ToList();
+
+                modeSelect_TableInfo.missionList["Sequence"] = modeSelect_TableInfo.missionList["Sequence"]
+                    .OrderBy(x => C.JobPrio.IndexOf(CosmicHelper.SheetMissionDict[x.id].Jobs.First()))
+                    .ToList();
+
+                modeSelect_TableInfo.missionList["Weather"] = modeSelect_TableInfo.missionList["Weather"]
+                    .OrderBy(x => C.JobPrio.IndexOf(CosmicHelper.SheetMissionDict[x.id].Jobs.First()))
+                    .ToList();
+
+                modeSelect_TableInfo.missionList["Timed"] = modeSelect_TableInfo.missionList["Timed"]
+                    .OrderBy(x => C.JobPrio.IndexOf(CosmicHelper.SheetMissionDict[x.id].Jobs.First()))
+                    .ToList();
+
+                if (enabledTabs["main_AllEnabled"])
                 {
-                    modeSelect_TableInfo.missionList["All Enabled"] = modeSelect_TableInfo.missionList["All Enabled"]
-                        .OrderBy(x => C.JobPrio.IndexOf(CosmicHelper.SheetMissionDict[x.id].Jobs.First()))
-                        .ToList(); // ToList() if you need a List<T>, otherwise the IOrderedEnumerable is fine
+                    int allEnabled = modeSelect_TableInfo.missionList.ContainsKey("All Enabled") ? modeSelect_TableInfo.missionList["All Enabled"].Count(mission => mission.enabled) : 0;
+                    if (allEnabled == 0)
+                        enabledTabs["main_AllEnabled"] = false;
 
-                    modeSelect_TableInfo.missionList["Sequence"] = modeSelect_TableInfo.missionList["Sequence"]
-                        .OrderBy(x => C.JobPrio.IndexOf(CosmicHelper.SheetMissionDict[x.id].Jobs.First()))
-                        .ToList();
-
-                    modeSelect_TableInfo.missionList["Weather"] = modeSelect_TableInfo.missionList["Weather"]
-                        .OrderBy(x => C.JobPrio.IndexOf(CosmicHelper.SheetMissionDict[x.id].Jobs.First()))
-                        .ToList();
-
-                    modeSelect_TableInfo.missionList["Timed"] = modeSelect_TableInfo.missionList["Timed"]
-                        .OrderBy(x => C.JobPrio.IndexOf(CosmicHelper.SheetMissionDict[x.id].Jobs.First()))
-                        .ToList();
-
-                    if (enabledTabs["main_AllEnabled"])
+                    if (modeSelect_TableInfo.missionList["All Enabled"].Count > 0)
                     {
-                        int allEnabled = modeSelect_TableInfo.missionList.ContainsKey("All Enabled") ? modeSelect_TableInfo.missionList["All Enabled"].Count(mission => mission.enabled) : 0;
-                        if (allEnabled == 0)
-                            enabledTabs["main_AllEnabled"] = false;
-                        else
-                        {
-                            modeSelect_TableInfo.DrawMissionTablev2("全部启用", "All_Enabled", modeSelect_TableInfo.missionList["All Enabled"]);
-                        }
+                        modeSelect_TableInfo.DrawMissionTablev2("全部启用", "All_Enabled", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["All Enabled"]));
                     }
-                    if (enabledTabs["main_Sequence"])
-                        modeSelect_TableInfo.DrawMissionTablev2("连续", "Sequence_Missions", modeSelect_TableInfo.missionList["Sequence"]);
-                    if (enabledTabs["main_Weather"])
-                        modeSelect_TableInfo.DrawMissionTablev2("天气限定", "Weather_Missions", modeSelect_TableInfo.missionList["Weather"]);
-                    if (enabledTabs["main_Timed"])
-                        modeSelect_TableInfo.DrawMissionTablev2("时间限定", "Timed_Missions", modeSelect_TableInfo.missionList["Timed"]);
-                }
-                else
-                {
-                    if (enabledTabs["main_AllEnabled"])
+                    else
                     {
-                        int allEnabled = modeSelect_TableInfo.missionList.ContainsKey("All Enabled") ? modeSelect_TableInfo.missionList["All Enabled"].Count(mission => mission.enabled) : 0;
-                        if (allEnabled == 0)
-                            enabledTabs["main_AllEnabled"] = false;
-
-                        if (modeSelect_TableInfo.missionList["All Enabled"].Count > 0)
-                        {
-                            modeSelect_TableInfo.DrawMissionTablev2("全部启用", "All_Enabled", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["All Enabled"]));
-                        }
-                        else
-                        {
-                            ImGui.Text("嘿！启用一些任务, 我们才能在这里显示内容。");
-                        }
+                        ImGui.Text("嘿！启用一些任务, 我们才能在这里显示内容。");
                     }
-                    if (enabledTabs["main_Critical"])
-                        modeSelect_TableInfo.DrawMissionTablev2("紧急探索", "Critical_Missions", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["Critical"]));
-                    if (enabledTabs["main_Sequence"])
-                        modeSelect_TableInfo.DrawMissionTablev2("连续", "Sequence_Missions", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["Sequence"]));
-                    if (enabledTabs["main_Weather"])
-                        modeSelect_TableInfo.DrawMissionTablev2("天气限定", "Weather_Missions", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["Weather"]));
-                    if (enabledTabs["main_Timed"])
-                        modeSelect_TableInfo.DrawMissionTablev2("时间限定", "Timed_Missions", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["Timed"]));
-                    if (enabledTabs["main_ARank"])
-                        modeSelect_TableInfo.DrawMissionTablev2("A 类", "A_RankMissions", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["ARank"]));
-                    if (enabledTabs["main_BRank"])
-                        modeSelect_TableInfo.DrawMissionTablev2("B 类", "B_RankMissions", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["BRank"]));
-                    if (enabledTabs["main_CRank"])
-                        modeSelect_TableInfo.DrawMissionTablev2("C 类", "C_RankMissions", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["CRank"]));
-                    if (enabledTabs["main_DRank"])
-                        modeSelect_TableInfo.DrawMissionTablev2("D 类", "D_RankMissions", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["DRank"]));
                 }
+                if (enabledTabs["main_Critical"])
+                    modeSelect_TableInfo.DrawMissionTablev2("紧急探索", "Critical_Missions", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["Critical"]));
+                if (enabledTabs["main_Sequence"])
+                    modeSelect_TableInfo.DrawMissionTablev2("连续", "Sequence_Missions", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["Sequence"]));
+                if (enabledTabs["main_Weather"])
+                    modeSelect_TableInfo.DrawMissionTablev2("天气限定", "Weather_Missions", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["Weather"]));
+                if (enabledTabs["main_Timed"])
+                    modeSelect_TableInfo.DrawMissionTablev2("时间限定", "Timed_Missions", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["Timed"]));
+                if (enabledTabs["main_ARank"])
+                    modeSelect_TableInfo.DrawMissionTablev2("A 类", "A_RankMissions", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["ARank"]));
+                if (enabledTabs["main_BRank"])
+                    modeSelect_TableInfo.DrawMissionTablev2("B 类", "B_RankMissions", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["BRank"]));
+                if (enabledTabs["main_CRank"])
+                    modeSelect_TableInfo.DrawMissionTablev2("C 类", "C_RankMissions", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["CRank"]));
+                if (enabledTabs["main_DRank"])
+                    modeSelect_TableInfo.DrawMissionTablev2("D 类", "D_RankMissions", modeSelect_TableInfo.SortMissionList(modeSelect_TableInfo.missionList["DRank"]));
             }
         }
     }

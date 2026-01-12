@@ -44,6 +44,17 @@ public static class Settings_TableColumns
             C.Save();
         }
 
+        bool grindAllProvisionals = C.GrindAllProvisionals;
+        if (ImGui.Checkbox("允许执行所有临时性任务", ref grindAllProvisionals))
+        {
+            C.GrindAllProvisionals = grindAllProvisionals;
+            C.Save();
+        }
+        ImGuiEx.HelpMarker("启用后, 将显示所有可刷取的 天气限定/时间限定/连续 任务。\n" + // Enabling this will show you all weather/timed/sequence missions that you can grind, 
+                           "这些任务会在当前选定职业的普通任务之外额外显示。\n" + // ON TOP OF doing the normal missions for whichever class you start on.
+                           "如果您只想专注于一个职业进行任务, 请禁用此选项。\n\n" + // If you just want to focus one specific class, set this to false
+                           "请注意: 此选项实际取代了原先的\"临时性任务模式\", 因为现在已经内置到标准模式中了(终于)。"); // Do note: this replaced provisional grinding, due to just being built into the standard mode now (finally)
+
         bool showExtraInfo = C.ShowExtraMissionInfo;
         if (ImGui.Checkbox("显示额外任务信息侧边窗口", ref showExtraInfo))
         {
@@ -57,8 +68,6 @@ public static class Settings_TableColumns
             C.Auto_ShowTokens = autoShowToken;
             C.Save();
         }
-
-
 
         bool showManualMode = C.ShowManualMode;
         if (ImGui.Checkbox("显示手动模式表格列", ref showManualMode))
@@ -137,9 +146,6 @@ public static class Settings_TableColumns
         bool relicTurnin = C.TurninRelic;
         if (ImGui.Checkbox($"宇宙工具可报告时提交##RelicTurnin_GeneralSetting", ref relicTurnin))
         {
-            if (relicTurnin)
-                C.GrindProvisionals = false;
-
             C.TurninRelic = relicTurnin;
             C.Save();
         }

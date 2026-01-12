@@ -40,6 +40,10 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
 
                 TimeRecords();
 
+                ImGui.TableNextRow();
+                ImGui.TableSetColumnIndex(0);
+                CraftingLocations();
+
 #if DEBUG
                 ImGui.TableNextRow();
                 ImGui.TableSetColumnIndex(0);
@@ -455,6 +459,44 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                 }
 
                 ImGui.EndTable();
+            }
+        }
+
+        private static void CraftingLocations()
+        {
+            ImGuiEx.IconWithText(FontAwesomeIcon.MapPin, "制作返回点");
+            ImGui.Dummy(new Vector2(0, 5));
+
+            bool usePersonalLocations = C.PersonalReturnSpot;
+            if (ImGui.Checkbox("使用个人返回点", ref usePersonalLocations))
+            {
+                C.PersonalReturnSpot = usePersonalLocations;
+                C.Save();
+            }
+
+            if (usePersonalLocations)
+            {
+                var territory = Player.Territory.RowId;
+                var location = Player.Position;
+                if (C.CrafterLocations.TryGetValue(territory, out var moonLoc))
+                {
+                    ImGui.Text($"地图: {territory} \n" +
+                               $"位置: {moonLoc:N2}");
+                    if (ImGui.Button("设置为当前位置"))
+                    {
+                        C.CrafterLocations[territory] = location;
+                        C.Save();
+                    }
+                }
+                else
+                {
+                    ImGui.Text("当前未设置位置");
+                    if (ImGui.Button("添加位置"))
+                    {
+                        C.CrafterLocations[territory] = Player.Position;
+                        C.Save();
+                    }
+                }
             }
         }
 

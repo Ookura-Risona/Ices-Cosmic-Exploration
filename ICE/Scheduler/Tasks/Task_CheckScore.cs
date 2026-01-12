@@ -10,6 +10,7 @@ using TerraFX.Interop.Windows;
 using YamlDotNet.Core.Tokens;
 using static Dalamud.Interface.Utility.Raii.ImRaii;
 using static ECommons.UIHelpers.AddonMasterImplementations.AddonMaster;
+using static ICE.Ui.MainUi.ModeSelect.modeSelect_TableInfo;
 
 namespace ICE.Scheduler.Tasks
 {
@@ -181,34 +182,17 @@ namespace ICE.Scheduler.Tasks
                         return true;
                     }
 
-                    // 补充处理 Critical 任务的逻辑
-                    // Fix crash in critical fishing missions by using CriticalScore instead of CurrentScore
-                    bool isCritical = missionEntry.Attributes.HasFlag(MissionAttributes.Critical);
-                    if (isCritical)
-                    {
-                        var criticalScore = missionInfo.CriticalScore;
-                        if (criticalScore == null)
-                        {
-                            IceLogging.Info("Critical score is null, waiting...", handle);
-                            return false;
-                        }
+                    bool shouldTurnin = false;
 
-                        if (criticalScore.Value == 1)
+                    if (missionEntry.Attributes.HasFlag(MissionAttributes.Critical))
+                    {
+                        if (MinRequirementsMet(id, missionInfo))
                         {
-                            IceLogging.Info("Critical mission completed! Proceeding to turnin", handle);
-                            SchedulerMain.State = IceState.TurninMission;
-                            P.TaskManager.Tasks.Clear();
-                            Mission_Settings.TurninState = TurninState.Critical;
-                            return true;
-                        }
-                        else
-                        {
-                            IceLogging.Info($"Critical mission in progress. CriticalScore: {criticalScore.Value}", handle);
-                            return true;
+                            shouldTurnin = true;
+                            IceLogging.Debug("We've met the minimum requirements to turnin for a critical mission");
                         }
                     }
-
-                    if (missionEntry.Attributes.HasFlag(MissionAttributes.ScoreTimeRemaining))
+                    else if (missionEntry.Attributes.HasFlag(MissionAttributes.ScoreTimeRemaining))
                     {
                         if (MinRequirementsMet(id, missionInfo))
                         {
@@ -231,17 +215,11 @@ namespace ICE.Scheduler.Tasks
                             return false;
 
                         IceLogging.Debug("We're not in a mission where it's scored based off of time, so going to check to see if we meet the bronze threshold instead");
-                        if (CosmicHelper.SheetMissionDict.TryGetValue(id, out var mission))
-                        {
-                            var bronzeTurnin = MinRequirementsMet(id, missionInfo);
-                            var shouldTurnin = false;
+                        var bronzeTurnin = MinRequirementsMet(id, missionInfo);
 
-                            if (!bronzeTurnin)
-                            {
-                                IceLogging.Info("We have not met the minimum requirements for turning in in general... so we shall continue");
-                                return true;
-                            }
-                            if (mission.Attributes.HasFlag(MissionAttributes.Critical))
+                        if (bronzeTurnin)
+                        {
+                            if (missionEntry.Attributes.HasFlag(MissionAttributes.Critical))
                             {
                                 IceLogging.Debug("We're in a critical mission, and we have met the minimul requirements for it. So going to continue on", handle);
                                 shouldTurnin = true;
@@ -250,24 +228,22 @@ namespace ICE.Scheduler.Tasks
                             {
                                 IceLogging.Debug("We've met the minimum bronze threshold, so checking the rest now", handle);
                                 var currentScore = missionInfo.CurrentScore;
-                                if (currentScore == null) // 空值检查
-                                {
-                                    IceLogging.Error("CurrentScore is null for non-critical mission");
-                                    return false;
-                                }
-
-                                var bronzeScore = mission.BronzeScore;
-                                var silverScore = mission.SilverScore;
-                                var goldScore = mission.GoldScore;
+                                var bronzeScore = missionEntry.BronzeScore;
+                                var silverScore = missionEntry.SilverScore;
+                                var goldScore = missionEntry.GoldScore;
 
                                 var config = C.MissionConfig[id];
                                 bool AnyTurnin = config.AutoTurnin;
-                                var score = currentScore;
-                                bool GoldGoal = goldScore <= currentScore.Value;
-                                bool SilverGoal = silverScore <= currentScore.Value;
+                                bool GoldGoal = goldScore <= currentScore;
+                                bool SilverGoal = silverScore <= currentScore;
                                 bool TurninBronze = config.TurninBronze;
 
-                                if (config.AutoTurnin)
+                                if (C.XPLeveling_Mode)
+                                {
+                                    IceLogging.Info("Minimum score has been met for leveling grinding, so turning in", handle);
+                                    shouldTurnin = true;
+                                }
+                                else if (config.AutoTurnin)
                                 {
                                     // AutoTurnin enabled, going to check for gold only since we have materials/time still
                                     if (GoldGoal)
@@ -301,30 +277,36 @@ namespace ICE.Scheduler.Tasks
                                     }
                                 }
                             }
-                            if (shouldTurnin)
-                            {
-                                CheckMedalStatus(id, missionInfo);
-                                IceLogging.Info("The threshold for scoring was met. Time to turnin", handle);
-                                SchedulerMain.State = IceState.TurninMission;
-                                P.TaskManager.Tasks.Clear();
-
-                                return true;
-                            }
-                            else
-                            {
-                                IceLogging.Info("Minimum scoring isn't met for your current preset. Continuing on", handle);
-                                return true;
-                            }
                         }
                         else
                         {
-                            IceLogging.Error("We're homehow here, which means you've found a mission that doesn't exist?? Please let me know.\n" +
-                                            $"MissionID (allegedly) {id}");
-                            SchedulerMain.State = IceState.Idle;
-                            P.TaskManager.Tasks.Clear();
+                            IceLogging.Info("We have not met the minimum requirements for turning in in general... so we shall continue");
                             return true;
                         }
                     }
+
+                    if (shouldTurnin)
+                    {
+                        CheckMedalStatus(id, missionInfo);
+                        IceLogging.Info("The threshold for scoring was met. Time to turnin", handle);
+                        SchedulerMain.State = IceState.TurninMission;
+                        P.TaskManager.Tasks.Clear();
+
+                        return true;
+                    }
+                    else
+                    {
+                        IceLogging.Info("Minimum scoring isn't met for your current preset. Continuing on", handle);
+                        return true;
+                    }
+                }
+                else
+                {
+                    IceLogging.Error("We're homehow here, which means you've found a mission that doesn't exist?? Please let me know.\n" +
+                                    $"MissionID (allegedly) {id}");
+                    SchedulerMain.State = IceState.Idle;
+                    P.TaskManager.Tasks.Clear();
+                    return true;
                 }
             }
             else
@@ -417,7 +399,12 @@ namespace ICE.Scheduler.Tasks
                         bool SilverGoal = silverScore <= currentScore;
                         bool TurninBronze = config.TurninBronze;
 
-                        if (config.AutoTurnin)
+                        if (C.XPLeveling_Mode)
+                        {
+                            IceLogging.Info("Leveling mode is enabled, and you met the brone threshold, turning in", tag);
+                            shouldTurnin = true;
+                        }
+                        else if (config.AutoTurnin)
                         {
                             // AutoTurnin enabled, going to check for gold only since we have materials/time still
                             if (GoldGoal)
@@ -445,7 +432,7 @@ namespace ICE.Scheduler.Tasks
                             {
                                 if (!config.TurninSilver && !config.TurninGold) // Checking to make sure that silver and gold scores both aren't true
                                 {
-                                    IceLogging.Info("Silver Turnin was enabled, and you didn't have gold or silver enabled.", "[Craft Scoring]");
+                                    IceLogging.Info("Bronze Turnin was enabled, and you didn't have gold or silver enabled.", "[Craft Scoring]");
                                     shouldTurnin = true;
                                 }
                             }
@@ -636,7 +623,12 @@ namespace ICE.Scheduler.Tasks
 
                         bool shouldTurnin = false;
 
-                        if (config.AutoTurnin)
+                        if (C.XPLeveling_Mode)
+                        {
+                            IceLogging.Debug("Leveling mode is enabled, and we've hit the bronze threshold. So turning in", "[Gathering Score Check]");
+                            shouldTurnin = true;
+                        }
+                        else if (config.AutoTurnin)
                         {
                             // AutoTurnin enabled, going to check for gold only since we have materials/time still
                             if (GoldGoal)

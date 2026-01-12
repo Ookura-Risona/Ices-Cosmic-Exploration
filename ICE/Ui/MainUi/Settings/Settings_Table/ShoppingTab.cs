@@ -21,6 +21,22 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                 C.StopOnceHitCosmoCredits = false;
                 C.Save();
             }
+            ImGui.SameLine();
+            ImGuiEx.Icon(FontAwesomeIcon.QuestionCircle);
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.BeginTooltip();
+                ImGui.Text("这是您的个性化自定义购物清单, 当您的宇宙信用点达到指定数量时将会进行购物消费。");
+                ImGui.Text("以下是每个选项的功能说明:");
+                ImGui.BulletText("目标库存: 将购买物品直到您的物品栏中拥有设定数量的物品, 这个数量不会在每次运行之间减少。\n" +
+                                 "适用于像 强心剂 这类您希望总是持有一定数量的物品。");
+                ImGui.BulletText("购买数量: 将购买 X 个此物品, 当您从商人处购买时, 这个数量会减少, 直到变成 0。\n" +
+                                 "适用于一次性购买, 或者您只需要特定数量的物品。");
+                ImGui.BulletText("持续购买: 在满足前 2 个条件时, 如果有足够的宇宙信用点, 将持续购买此物品。\n" +
+                                 "只能对 1 个物品进行设置, 并且通常适用于那些您只是想把宇宙信用点花掉的物品。");
+                ImGui.EndTooltip();
+            }
+            ImGui.NewLine();
 
             int buyAtAmount = C.CosmoBuyAtAmount;
             ImGui.SetNextItemWidth(150);
