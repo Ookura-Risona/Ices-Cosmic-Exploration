@@ -38,7 +38,7 @@ namespace ICE.Scheduler.Tasks
                 HubCenter = new Vector2(340.0f, -420.0f);
             }
 
-            Vector2 PlayerPos = new Vector2(Player.Position.Z, Player.Position.Z);
+            Vector2 PlayerPos = new Vector2(Player.Position.X, Player.Position.Z); // typo?
 
             if (Player.DistanceTo(HubCenter) < 45)
             {
@@ -98,7 +98,9 @@ namespace ICE.Scheduler.Tasks
             var currentTarget = Svc.Targets.Target;
             var repairAmount = C.RepairPercent;
 
-            if (!PlayerHelper.NeedsRepair(99.9f))
+            // 安全修理阈值
+            float repairThreshold = C.RepairPercent >= 100 ? 99.99f : C.RepairPercent;
+            if (!PlayerHelper.NeedsRepair(repairThreshold))
             {
                 IceLogging.Debug("Repair Complete! Finishing task and closing window");
                 return true;

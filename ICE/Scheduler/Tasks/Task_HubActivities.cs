@@ -67,14 +67,44 @@ namespace ICE.Scheduler
         {
             if (CosmicHelper.CrafterJobList.Contains((uint)Player.Job))
             {
-                if (!Task_NavmeshMove.Task_NavTo(craftingSpot, true, 1, false).Value)
+                // 临时修复: 使用制作返回点
+                var territory = Player.Territory.RowId;
+                if (C.PersonalReturnSpot)
+                {
+                    if (C.CrafterLocations.TryGetValue(territory, out var location))
+                    {
+                        if (!Task_NavmeshMove.Task_NavTo(location).Value)
+                        {
+                            if (EzThrottler.Throttle("Log message", 1000))
+                                IceLogging.Debug("Moving to crafting spot");
+
+                            return false;
+                        }
+                        else
+                        {
+                            IceLogging.Debug("We're at the spot for crafter location!");
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        IceLogging.Debug("No location is set for this place, so continuing on");
+                        return true;
+                    }
+                }
+                else
+                {
+                    return true;
+                }
+
+                /*if (!Task_NavmeshMove.Task_NavTo(craftingSpot, true, 1, false).Value)
                 {
                     return true;
                 }
                 else
                 {
                     return false;
-                }
+                }*/
             }
             else
             {
