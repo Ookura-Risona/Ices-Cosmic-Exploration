@@ -11,7 +11,7 @@ using static ICE.Utilities.CosmicHelper;
 namespace ICE.Scheduler.Tasks
 {
     internal static class Task_FindMission
-    { 
+    {
         /// <summary>
         /// List of all available critical missions
         /// </summary>
@@ -50,7 +50,7 @@ namespace ICE.Scheduler.Tasks
             IceLogging.Info("Starting the find mission queue", "[Task Find Mission]");
             fishingHoleLoc = Vector3.Zero; // this is here to make sure when we're finding a mission, the queue for the random fishing hole gets reset
             // P.TaskManager.Enqueue(RefreshMissionUi, "Refreshing Mission UI");
-            P.TaskManager.Enqueue(OpenMissionUi, "Opening it on proper class");
+                P.TaskManager.Enqueue(OpenMissionUi, "Opening it on proper class");
             if (C.XPRelicGrind)
             {
                 P.TaskManager.Enqueue(() => OpenTab("ExpCheck"), "Opening Standard tab for relic grind");
@@ -61,8 +61,19 @@ namespace ICE.Scheduler.Tasks
                 P.TaskManager.Enqueue(TabTasksCheck, "Checking which tabs to check for missions");
             }
         }
-        public static bool? OpenMissionUi()
+        public static unsafe bool? OpenMissionUi()
         {
+            // 临时修复: 处理购买物品结束后，重复打开商店界面导致阻塞问题，这只是个临时的方案
+            // Temporary fix: after buying items, the ShopExchangeCurrency window sometimes pops back up
+            // and gets findmission stuck. Just close it here for now.
+            if (GenericHelpers.TryGetAddonMaster<ShopExchangeCurrency>("ShopExchangeCurrency", out var shop) && shop.IsAddonReady)
+            {
+                if (EzThrottler.Throttle("ClosingShopExchangeCurrency"))
+                    shop.Addon->Close(true);
+
+                return false;
+            }
+
             if (GenericHelpers.TryGetAddonMaster<Talk>("Talk", out var talkUi) && talkUi.IsAddonReady)
             {
                 if (EzThrottler.Throttle("Closing the talk"))
@@ -620,7 +631,7 @@ namespace ICE.Scheduler.Tasks
                 {
                     var bar = XPTable[i + 1];
                     urgencies[i + 1] = bar.NeededXP > 0 ? 1f - (float)bar.CurrentXP / bar.NeededXP : 0f;
-                    IceLogging.Debug($"XP Type: {i+1} | Urgency: {urgencies[i + 1]}", tip);
+                    IceLogging.Debug($"XP Type: {i + 1} | Urgency: {urgencies[i + 1]}", tip);
                 }
 
                 Dictionary<uint, Dictionary<int, float>> rewardMissions = new();
@@ -1091,7 +1102,7 @@ namespace ICE.Scheduler.Tasks
                         }
                     }
                 }
-                
+
                 if (!Task_NavmeshMove.Task_NavTo(closestNode).Value)
                 {
                     return false;
