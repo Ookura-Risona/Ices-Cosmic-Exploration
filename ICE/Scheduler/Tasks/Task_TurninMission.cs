@@ -23,7 +23,7 @@ namespace ICE.Scheduler.Tasks
         public static void Enqueue()
         {
             P.TaskManager.Enqueue(() => TurninMission(), "Turning in the mission to the moon gods", Utils.TaskConfig);
-            P.TaskManager.Enqueue(() => JobSwapCheck(), "Checking to see if you need to swap jobs");
+            P.TaskManager.Enqueue(() => JobSwapCheck(), "Checking to see if we need to swap jobs");
             P.TaskManager.Enqueue(() => GoldCheck(), "Checking if Gold Check Task needs to be completed");
             P.TaskManager.Enqueue(() => CommandCheck(), "Checking for post mission commands");
         }
@@ -235,12 +235,6 @@ namespace ICE.Scheduler.Tasks
 
         public static bool? JobSwapCheck()
         {
-            if (!C.GrindAllProvisionals) // 临时修复: 反转条件，允许临时性任务，需要切职业; 如果不允许，则为仅限单一职业，不切职业。
-            {
-                IceLogging.Info("We're currently grinding out provisionals, and that means swapping jobs constantly would be... hella bad LOL. So just continuing on like normal");
-                return true;
-            }
-
             if (Player.Job != Mission_Settings.StartJob && Mission_Settings.StartJob != 0)
             {
                 if (EzThrottler.Throttle("Swapping to crafter job", 1000))

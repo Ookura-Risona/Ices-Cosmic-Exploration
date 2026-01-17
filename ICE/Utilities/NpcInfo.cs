@@ -25,10 +25,6 @@ internal static class NpcData // Renamed the class to avoid conflict
         public string Name { get; set; }
         public Vector3 Location_Npc { get; set; }
         public Vector3 Location_Circle { get; set; }
-        public Vector3 Corner1 { get; set; }
-        public Vector3 Corner2 { get; set; }
-        public Vector3 Corner3 { get; set; }
-        public Vector3 Corner4 { get; set; }
     }
 
     public static Dictionary<uint, List<NPCInfo>> MoonNpcs = new() // Use NPCInfo instead of NpcInfo

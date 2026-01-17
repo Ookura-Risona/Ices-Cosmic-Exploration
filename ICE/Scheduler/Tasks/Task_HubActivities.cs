@@ -67,7 +67,7 @@ namespace ICE.Scheduler
         {
             if (CosmicHelper.CrafterJobList.Contains((uint)Player.Job))
             {
-                // 临时修复: 使用制作返回点
+                // 临时修复: 使用制作返回点，将忽略此任务保存的 craftingSpot 字段作为返回点
                 var territory = Player.Territory.RowId;
                 if (C.PersonalReturnSpot)
                 {
@@ -99,11 +99,12 @@ namespace ICE.Scheduler
 
                 /*if (!Task_NavmeshMove.Task_NavTo(craftingSpot, true, 1, false).Value)
                 {
-                    return true;
+                    return false;
                 }
                 else
                 {
-                    return false;
+                    IceLogging.Debug("We're back at our spot, so continuing on");
+                    return true;
                 }*/
             }
             else

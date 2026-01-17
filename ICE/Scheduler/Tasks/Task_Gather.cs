@@ -3,11 +3,11 @@ using Dalamud.Game.ClientState.Objects.Enums;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using ICE.Config;
 using ICE.Utilities.Cosmic_Helper;
 using ICE.Utilities.GatheringHelper;
 using System.Collections.Generic;
 using static ECommons.UIHelpers.AddonMasterImplementations.AddonMaster;
+using static ICE.ConfigFiles.Config;
 
 namespace ICE.Scheduler.Tasks
 {
@@ -16,7 +16,7 @@ namespace ICE.Scheduler.Tasks
 
         public static void Enqueue()
         {
-            if (GenericHelpers.TryGetAddonMaster<Gathering>("Gathering", out var gather) && gather.IsAddonReady || GenericHelpers.TryGetAddonMaster<GatheringMasterpiece>("GatheringMasterpiece", out var collectable) && collectable.IsAddonReady)
+            if ((GenericHelpers.TryGetAddonMaster<Gathering>("Gathering", out var gather) && gather.IsAddonReady) || (GenericHelpers.TryGetAddonMaster<GatheringMasterpiece>("GatheringMasterpiece", out var collectable) && collectable.IsAddonReady))
             {
                 IceLogging.Debug("Current in a gathering session");
                 Task_CheckScore.Enqueue();
@@ -146,7 +146,7 @@ namespace ICE.Scheduler.Tasks
             var collect_Max = collectable.MaxCollectability;
             var collect_highGrade = collectable.HighCollectability;
             var playerGp = PlayerHelper.GetGp();
-            bool missingDur = integrity != collectable.TotalIntegrity;
+            bool missingDur = integrity < collectable.TotalIntegrity;
 
             if (integrity > 1 && collect_Current < collect_highGrade)
             {
@@ -196,11 +196,13 @@ namespace ICE.Scheduler.Tasks
                 // if we've gotten this far, that means we're in a state that we should just be collecting
                 if (CanUseCollectableAction("BonusIntegrityChance", missingDur))
                 {
-                    UseCollectableAction("BonusIntegrityChance");
+                    if (EzThrottler.Throttle("Integrity bonus"))
+                        UseCollectableAction("BonusIntegrityChance");
                 }
                 else if (CanUseCollectableAction("BonusIntegrity", missingDur))
                 {
-                    UseCollectableAction("BonusIntegrity");
+                    if (EzThrottler.Throttle("Integrity bonus"))
+                        UseCollectableAction("BonusIntegrity");
                 }
                 else
                 {
@@ -310,7 +312,7 @@ namespace ICE.Scheduler.Tasks
                     P.TaskManager.Tasks.Clear();
                     return true;
                 }
-                else if (Svc.Condition[ConditionFlag.Gathering] && GenericHelpers.TryGetAddonMaster<Gathering>("Gathering", out var gather) && gather.IsAddonReady || GenericHelpers.TryGetAddonMaster<GatheringMasterpiece>("GatheringMasterpiece", out var collectable) && collectable.IsAddonReady)
+                else if ((Svc.Condition[ConditionFlag.Gathering] && GenericHelpers.TryGetAddonMaster<Gathering>("Gathering", out var gather) && gather.IsAddonReady) || (GenericHelpers.TryGetAddonMaster<GatheringMasterpiece>("GatheringMasterpiece", out var collectable) && collectable.IsAddonReady))
                 {
                     Mission_Settings.CollectableStep = 0;
 
