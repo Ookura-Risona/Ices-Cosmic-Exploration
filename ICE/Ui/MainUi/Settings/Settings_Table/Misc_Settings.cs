@@ -44,6 +44,9 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                 ImGui.TableSetColumnIndex(0);
                 CraftingLocations();
 
+                ImGui.TableNextColumn();
+                ArtisanSettings();
+
 #if DEBUG
                 ImGui.TableNextRow();
                 ImGui.TableSetColumnIndex(0);
@@ -497,6 +500,41 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                         C.Save();
                     }
                 }
+            }
+        }
+
+        private static void ArtisanSettings()
+        {
+            ImGuiEx.IconWithText(FontAwesomeIcon.Wrench, "Artisan 设置");
+            ImGui.SameLine();
+            ImGuiEx.HelpMarker("对 MeowZWR 的在线仓库版本进行了基于RepoUrl特征的额外兼容\n如果您使用的汉化版本为本地插件, 此功能可能会失效");
+            ImGui.Dummy(new Vector2(0, 5));
+
+            bool force_Raphael = C.Artisan_RaphaelForce;
+            bool force_Expert = C.Artisan_RaphaelExpert;
+
+            if (ImGui.Checkbox("强制使用 Raphael 求解器", ref force_Raphael))
+            {
+                C.Artisan_RaphaelForce = force_Raphael;
+                C.Save();
+            }
+            ImGui.SameLine();
+            ImGuiEx.IconWithTooltip(FontAwesomeIcon.QuestionCircle,
+                                    "在插件运行期间, 强制所有配方使用 Raphael 求解器。\n" +
+                                    "默认情况下不包含高难度配方, 因为它们的特性不太适合。");
+            ImGui.NewLine();
+            if (force_Raphael)
+            {
+                if (ImGui.Checkbox("应用于【高难+】任务的高难度配方", ref force_Expert))
+                {
+                    C.Artisan_RaphaelExpert = force_Expert;
+                    C.Save();
+                }
+                ImGui.SameLine();
+                ImGuiEx.IconWithTooltip(FontAwesomeIcon.QuestionCircle,
+                                        "强制【高难+】任务的高难度配方使用 Raphael 求解器。\n" +
+                                        "我个人不推荐启用, 但有些配方确实可以这样做。\n" +
+                                        "等到我们等级能够碾压宇宙探索玩法时, 这个选项就在这等着。");
             }
         }
 

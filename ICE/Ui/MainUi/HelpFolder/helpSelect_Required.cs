@@ -30,6 +30,11 @@ namespace ICE.Ui.MainUi.HelpFolder
             ImGui.Separator();
             ImGuiEx.IconWithText(FontAwesomeIcon.Running, "自动化基地活动");
             HasPlugin("https://puni.sh/api/repository/veyn", "vnavmesh");
+
+            ImGui.Separator();
+            ImGui.TextWrapped("这不是必需的, 但非常推荐在练级时使用。\n此插件可以从您的兵装库/物品栏范围内进行最强装备并保存套装, 在运行练级模式时自动更新为最强装备。");
+            ImGuiEx.IconWithText(FontAwesomeIcon.Leaf, "Stylist");
+            HasPlugin("https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json", "Stylist");
         }
 
         public static void HasPlugin(string repo, string pluginName)

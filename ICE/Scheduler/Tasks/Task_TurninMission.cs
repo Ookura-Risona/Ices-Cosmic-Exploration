@@ -23,9 +23,9 @@ namespace ICE.Scheduler.Tasks
         public static void Enqueue()
         {
             P.TaskManager.Enqueue(() => TurninMission(), "Turning in the mission to the moon gods", Utils.TaskConfig);
-            P.TaskManager.Enqueue(() => JobSwapCheck(), "Checking to see if we need to swap jobs");
             P.TaskManager.Enqueue(() => GoldCheck(), "Checking if Gold Check Task needs to be completed");
             P.TaskManager.Enqueue(() => CommandCheck(), "Checking for post mission commands");
+            P.TaskManager.Enqueue(() => JobSwapCheck(), "Checking for necessary job swap");
         }
 
         public static unsafe bool? TurninMission()
@@ -293,6 +293,21 @@ namespace ICE.Scheduler.Tasks
 
         public static unsafe bool? CommandCheck()
         {
+            if (C.XPLeveling_Mode && Utils.HasPlugin("Stylist"))
+            {
+                var jobId = (uint)Player.Job;
+
+                if (CosmicHelper.CrafterJobList.Contains(jobId))
+                {
+                    ExecuteCommand("/stylist crafter");
+                }
+                else if (CosmicHelper.GatheringJobList.Contains(jobId))
+                {
+                    ExecuteCommand("/stylist gatherer");
+                }
+                P.TaskManager.EnqueueDelay(500);
+            }
+
             foreach (var task in C.PostMissionCommands)
             {
                 P.TaskManager.Enqueue(() => ExecuteCommand(task.command));
