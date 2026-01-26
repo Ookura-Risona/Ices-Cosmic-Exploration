@@ -339,8 +339,12 @@ namespace ICE.Ui.MainUi.ModeSelect
                     if (standard && showPlaylistExpanded)
                     {
                         // 根据是否显示完成情况窗口决定任务预设列索引，防止展开时错位
-                        int completionColumnIndex = C.ShowCompletionWindow ? 3 : 2;
-                        ImGui.TableSetColumnIndex(completionColumnIndex);
+                        int presetColumnIndex = 2;
+                        if (C.XPRelicGrind || C.ShowCompletionWindow)
+                        {
+                            presetColumnIndex = 3;
+                        }
+                        ImGui.TableSetColumnIndex(presetColumnIndex);
                         if (ImGui.Button("保存当前任务为预设")) // Save Current Mission Preset
                         {
                             ImGui.OpenPopup("Preset Save Editor");
