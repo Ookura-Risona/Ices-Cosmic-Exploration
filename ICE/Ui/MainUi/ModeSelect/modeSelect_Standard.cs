@@ -1,17 +1,21 @@
 ﻿using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Utility;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
 using ICE.Ui.MainUi.Settings.Settings_Table;
 using ICE.Utilities.ImGuiTools;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Windows.Forms;
 
 namespace ICE.Ui.MainUi.ModeSelect
 {
     internal class modeSelect_Standard
     {
+        private static string newListName = "";
+
         public static void Draw()
         {
             using var style = ImRaii.PushStyle(ImGuiStyleVar.ChildRounding, 10).Push(ImGuiStyleVar.ChildBorderSize, 1);
@@ -176,7 +180,7 @@ namespace ICE.Ui.MainUi.ModeSelect
                     if (ImGui.IsItemHovered())
                     {
                         ImGui.BeginTooltip();
-                        ImGui.Text("Hey! You need to update artisan to use this mode, please update to at minimum:");
+                        ImGui.Text("嘿! 你需要更新 Artisan 才能使用这个模式, 请至少更新到以下版本:");
                         ImGui.Text("4.0.4.29");
                         ImGui.EndTooltip();
                     }
@@ -199,7 +203,7 @@ namespace ICE.Ui.MainUi.ModeSelect
                 }
             }
 
-            if (ImGui.BeginTable("modeSelect_TableHeader", 4, ImGuiTableFlags.SizingFixedFit, Vector2.Zero))
+            if (ImGui.BeginTable("modeSelect_TableHeader", 5, ImGuiTableFlags.SizingFixedFit, Vector2.Zero))
             {
                 ImGui.TableSetupColumn("Class Selector");
                 ImGui.TableSetupColumn("Other Settings");
@@ -226,7 +230,15 @@ namespace ICE.Ui.MainUi.ModeSelect
                     completionExpanded = modeSelect_Tools.DrawCompactCategoryHeader("完成情况表格设置", FontAwesomeIcon.Trophy); // Completion Table Settings
                 }
 
-                bool showNextColumn = tableSettingExpanded || missionSettingExpanded || (relicGrindExpanded && C.XPRelicGrind) || (completionExpanded && C.ShowCompletionWindow);
+                bool showPlaylistExpanded = false;
+                bool standard = !(C.XPRelicGrind && C.ShowCompletionWindow);
+                if (standard)
+                {
+                    ImGui.TableNextColumn();
+                    showPlaylistExpanded = modeSelect_Tools.DrawCompactCategoryHeader("任务预设", FontAwesomeIcon.PlayCircle);
+                }
+
+                bool showNextColumn = tableSettingExpanded || missionSettingExpanded || (relicGrindExpanded && C.XPRelicGrind) || (completionExpanded && C.ShowCompletionWindow) || showPlaylistExpanded;
 
                 if (showNextColumn)
                 {
@@ -321,6 +333,125 @@ namespace ICE.Ui.MainUi.ModeSelect
                         {
                             C.ShowCompletion_MissingGold = nonGold;
                             C.Save();
+                        }
+                    }
+
+                    if (standard && showPlaylistExpanded)
+                    {
+                        // 根据是否显示完成情况窗口决定任务预设列索引，防止展开时错位
+                        int completionColumnIndex = C.ShowCompletionWindow ? 3 : 2;
+                        ImGui.TableSetColumnIndex(completionColumnIndex);
+                        if (ImGui.Button("保存当前任务为预设")) // Save Current Mission Preset
+                        {
+                            ImGui.OpenPopup("Preset Save Editor");
+                        }
+
+                        if (ImGui.BeginPopup("Preset Save Editor"))
+                        {
+                            ImGui.InputText($"预设名称", ref newListName);
+                            using (ImRaii.Disabled(string.IsNullOrEmpty(newListName)))
+                            {
+                                if (ImGui.Button("保存")) // Save New List
+                                {
+                                    List<uint> new_Playlist = new();
+                                    foreach (var mission in C.MissionConfig.Where(x=> x.Value.Enabled))
+                                    {
+                                        new_Playlist.Add(mission.Key);
+                                    }
+                                    if (C.Mission_Playlist.ContainsKey(newListName))
+                                    {
+                                        C.Mission_Playlist[newListName] = new_Playlist;
+                                    }
+                                    else
+                                    {
+                                        C.Mission_Playlist.Add(newListName, new_Playlist);
+                                    }
+                                    C.Save();
+                                    ImGui.CloseCurrentPopup();
+                                }
+                            }
+
+                            ImGui.EndPopup();
+                        }
+
+                        if (C.Mission_Playlist.Count > 0)
+                        {
+                            if (ImGui.Button("查看所有预设"))
+                            {
+                                ImGui.OpenPopup("Preset: List Viewer");
+                            }
+
+                            if (ImGui.BeginPopup("Preset: List Viewer"))
+                            {
+                                ImGui.Text($"加载任务预设");
+
+                                if (ImGui.BeginTable($"Preset: TableViewer", 3, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders))
+                                {
+                                    ImGui.TableSetupColumn("名称");
+                                    ImGui.TableSetupColumn("启用任务数量");
+
+                                    ImGui.TableHeadersRow();
+
+                                    ImGui.TableNextRow();
+                                    ImGui.TableSetColumnIndex(0);
+                                    ImGui.AlignTextToFramePadding();
+                                    ImGui.Text($"全部清空");
+                                    ImGui.SameLine();
+                                    if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowUpRightFromSquare, $"FreshPreset_Button"))
+                                    {
+                                        foreach (var mission in C.MissionConfig)
+                                        {
+                                            mission.Value.Enabled = false;
+                                        }
+                                        C.Save();
+                                        ImGui.CloseCurrentPopup();
+                                    }
+
+                                    foreach (var item in C.Mission_Playlist)
+                                    {
+                                        ImGui.TableNextRow();
+                                        ImGui.TableSetColumnIndex(0);
+                                        ImGui.AlignTextToFramePadding();
+                                        ImGui.Text($"{item.Key}");
+                                        ImGui.SameLine();
+                                        if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowUpRightFromSquare, $"{item.Key}_Button"))
+                                        {
+                                            foreach (var mission in C.MissionConfig)
+                                            {
+                                                if (item.Value.Contains(mission.Key))
+                                                    mission.Value.Enabled = true;
+                                                else
+                                                    mission.Value.Enabled = false;
+                                            }
+                                            C.Save();
+                                            ImGui.CloseCurrentPopup();
+                                        }
+                                        if (ImGui.IsItemHovered())
+                                        {
+                                            ImGui.SetTooltip("导入任务"); // Import Missions
+                                        }
+
+                                        ImGui.TableNextColumn();
+                                        ImGui.AlignTextToFramePadding();
+                                        ImGui.Text($"{item.Value.Count}");
+
+                                        ImGui.TableNextColumn();
+                                        if (ImGuiEx.IconButton(FontAwesomeIcon.Trash, $"{item.Key}_Remove"))
+                                        {
+                                            C.Mission_Playlist.Remove(item);
+                                            C.Save();
+                                        }
+                                        if (ImGui.IsItemHovered())
+                                        {
+                                            ImGui.SetTooltip("移除"); // Remove from list
+                                        }
+                                    }
+
+                                    ImGui.EndTable();
+                                }
+
+                                ImGui.EndPopup();
+                            }
                         }
                     }
                 }

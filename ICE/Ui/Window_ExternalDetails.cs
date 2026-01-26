@@ -8,7 +8,7 @@ namespace ICE.Ui
 {
     internal class Window_ExternalDetails : Window
     {
-        public Window_ExternalDetails() : base($"Ice's Cosmic Exploration | Mission Details")
+        public Window_ExternalDetails() : base($"Ice's Cosmic Exploration | 任务详情")
         {
             Flags = ImGuiWindowFlags.None;
             SizeConstraints = new()

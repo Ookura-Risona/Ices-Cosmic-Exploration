@@ -122,12 +122,15 @@ public static class Settings_TableColumns
 
     public static void GeneralMissionSettings()
     {
-        bool onlyGrabMission = C.OnlyGrabMission;
+        // Todo: 上游删除并移动到 Debug 模块, 由于中国服务器可能存在插件联动需求, 暂时保留此选项
+        bool onlyGrabMission = C.OnlyGrabMission_Debug;
         if (ImGui.Checkbox($"只刷取任务", ref onlyGrabMission))
         {
-            C.OnlyGrabMission = onlyGrabMission;
+            C.OnlyGrabMission_Debug = onlyGrabMission;
             C.Save();
         }
+        ImGui.SameLine();
+        ImGuiEx.HelpMarker("启用后, 将在刷取到目标任务后以手动模式运行。\n如果您没有特殊需求, 请不要启用。");
 
         bool removeGold = C.RemoveAfterGold;
         if (ImGui.Checkbox("金星完成时移除任务", ref removeGold))

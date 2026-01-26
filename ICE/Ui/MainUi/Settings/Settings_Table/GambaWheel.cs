@@ -179,9 +179,10 @@ namespace ICE.Ui.SettingTabs
 
                     if (ImGui.BeginTabItem($"{displayName} [{itemsType.Count}]"))
                     {
-                        if (ImGui.BeginTable($"{type.ToString()}_GambaItems", 3, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg))
+                        if (ImGui.BeginTable($"{type.ToString()}_GambaItems", 4, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg))
                         {
                             ImGui.TableSetupColumn("图标");
+                            ImGui.TableSetupColumn("解锁");
                             ImGui.TableSetupColumn("名称");
                             ImGui.TableSetupColumn("权重");
 
@@ -211,6 +212,9 @@ namespace ICE.Ui.SettingTabs
                                         }
                                     }
 
+                                    ImGui.TableNextColumn();
+                                    ImGui.TextUnformatted(UnlockState.IsItemUnlockable(itemInfo) ? UnlockState.IsItemUnlocked(itemInfo) ? "是" : "否" : "-");
+                                    
                                     ImGui.TableNextColumn();
                                     ImGui.Text($"{name}");
 
