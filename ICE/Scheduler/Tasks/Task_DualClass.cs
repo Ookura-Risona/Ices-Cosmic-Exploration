@@ -467,7 +467,7 @@ namespace ICE.Scheduler.Tasks
                     IceLogging.Debug("Telling it to start fishing", handle);
                     if (C.AutoFisherCast)
                     {
-                        ActionManager.Instance()->UseAction(ActionType.Action, 289); // 任务中自动抛竿
+                        Svc.Commands.ProcessCommand("/ahstart"); // 使用与 Task_Fishing 的相同方法
                     }
                     else if (!C.AutoFisherCast && C.MissFisherStartingFix && PlayerHandlers.IsMissfisherLoaded && !PlayerHandlers.IsAutohookLoaded)
                     {
