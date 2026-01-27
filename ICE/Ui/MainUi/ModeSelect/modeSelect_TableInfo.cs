@@ -104,11 +104,15 @@ namespace ICE.Ui.MainUi.ModeSelect
                     return missions.OrderByDescending(m => missionInfo[m.id].RelicXpInfo
                                                      .Where(exp => exp.Key == 5)
                                                      .Sum(exp => exp.Value)).ToList();
-                case 9: // Map Location
+                case 9: // Exp Type 6:
+                    return missions.OrderByDescending(m => missionInfo[m.id].RelicXpInfo
+                                                     .Where(exp => exp.Key == 6)
+                                                     .Sum(exp => exp.Value)).ToList();
+                case 10: // Map Location
                     return missions.OrderBy(m => missionInfo[m.id].MarkerId).ToList();
-                case 10: // Mission Score
+                case 11: // Mission Score
                     return missions.OrderByDescending(m => missionInfo[m.id].ClassScore).ToList();
-                case 11: // Class Exp
+                case 12: // Class Exp
                     return missions.OrderByDescending(m => Math.Max(
                                                            Math.Max(missionInfo[m.id].ExpModifier_1, missionInfo[m.id].ExpModifier_2),
                                                            missionInfo[m.id].ExpModifier_3
@@ -224,7 +228,7 @@ namespace ICE.Ui.MainUi.ModeSelect
                                 ImGuiTableFlags.Reorderable |
                                 ImGuiTableFlags.Hideable |
                                 ImGuiTableFlags.SizingFixedFit;
-            int tableTotalColumns = 18; // How many columns am I using. 
+            int tableTotalColumns = 19; // How many columns am I using. 
 
             // This is here to auto show/hide specific columns that might not be necessary (gathering profiles, and planetary tokens as Ex.)
             bool hasGathering = false;
@@ -246,28 +250,29 @@ namespace ICE.Ui.MainUi.ModeSelect
                 #region Table Column Setup
 
                 ImGui.TableSetupColumn("启用"); // 0
-                ImGui.TableSetupColumn("职业");
-                ImGui.TableSetupColumn("手动");
-                ImGui.TableSetupColumn("ID");
-                ImGui.TableSetupColumn("✓");
-                ImGui.TableSetupColumn("任务名称");
-                ImGui.TableSetupColumn("宇宙信用点");
-                ImGui.TableSetupColumn("行星信用点");
-                ImGui.TableSetupColumn("技巧点");
+                ImGui.TableSetupColumn("职业"); // 1
+                ImGui.TableSetupColumn("手动"); // 2
+                ImGui.TableSetupColumn("ID"); // 3
+                ImGui.TableSetupColumn("✓"); // 4
+                ImGui.TableSetupColumn("任务名称"); // 5
+                ImGui.TableSetupColumn("宇宙信用点"); // 6
+                ImGui.TableSetupColumn("行星信用点"); // 7
+                ImGui.TableSetupColumn("技巧点"); // 8
                 ImGui.TableSetupColumn("物品奖励"); // 9
 
                 // Xp Columns Here
                 float padding = 10f;
                 float xpWidth = ImGui.CalcTextSize("III").X + padding;
                 ImGui.TableSetupColumn("I"); // 10
-                ImGui.TableSetupColumn("II");
-                ImGui.TableSetupColumn("III");
-                ImGui.TableSetupColumn("IV");
+                ImGui.TableSetupColumn("II"); // 11
+                ImGui.TableSetupColumn("III"); // 12
+                ImGui.TableSetupColumn("IV"); // 13
                 ImGui.TableSetupColumn("V"); // 14
+                ImGui.TableSetupColumn("VI"); // 15
 
-                ImGui.TableSetupColumn("汇报模式"); // 15
-                ImGui.TableSetupColumn("采集配置"); // 16
-                ImGui.TableSetupColumn("任务备注"); // 17
+                ImGui.TableSetupColumn("汇报模式"); // 16
+                ImGui.TableSetupColumn("采集配置"); // 17
+                ImGui.TableSetupColumn("任务备注"); // 18
 
                 #endregion
 
@@ -282,7 +287,7 @@ namespace ICE.Ui.MainUi.ModeSelect
                     ImGui.TableSetColumnEnabled(9, hasToken);
                 }
 
-                ImGui.TableSetColumnEnabled(16, hasGathering);
+                ImGui.TableSetColumnEnabled(17, hasGathering);
 
                 #endregion
 
@@ -481,8 +486,8 @@ namespace ICE.Ui.MainUi.ModeSelect
 
                 #region Relic XP
 
-                string[] xpLabels = { "I", "II", "III", "IV", "V" };
-                for (int i = 0; i < 5; i++)
+                string[] xpLabels = { "I", "II", "III", "IV", "V", "VI" };
+                for (int i = 0; i < 6; i++)
                 {
                     ImGui.TableSetColumnIndex(columnIndexCount);
                     ImGui.TableHeader(xpLabels[i]);
@@ -753,7 +758,7 @@ namespace ICE.Ui.MainUi.ModeSelect
 
                     #region Relic Xp Info
 
-                    for (int i = 1; i < 6; i++)
+                    for (int i = 1; i < 7; i++)
                     {
                         ImGui.TableNextColumn();
                         var expReward = missionInfo.RelicXpInfo.Where(exp => exp.Key == i).FirstOrDefault();

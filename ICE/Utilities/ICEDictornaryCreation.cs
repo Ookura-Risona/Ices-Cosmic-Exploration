@@ -90,9 +90,13 @@ public sealed partial class ICE
             {
                 territoryId = 1237;
             }
-            else
+            else if (keyId >= 545 && keyId < 1007)
             {
                 territoryId = 1291;
+            }
+            else if (keyId >= 1007) // moon3
+            {
+                territoryId = 1310;
             }
             // TODO: Make this set the correct territoryId once new planets are added and we figure out where it is.
 

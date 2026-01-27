@@ -26,16 +26,25 @@ namespace ICE.Ui.MainUi.ModeSelect
             bool autoSelectMoon = C.AutoSelectMoon;
             if (autoSelectMoon)
             {
-                if (PlayerHelper.IsInSinusArdorum() && (!C.ShowSinusMissions || C.ShowPhaennaMissions))
+                if (PlayerHelper.IsInSinusArdorum() && (!C.ShowSinusMissions || C.ShowPhaennaMissions || C.ShowOizysMissions))
                 {
                     C.ShowSinusMissions = true;
                     C.ShowPhaennaMissions = false;
+                    C.ShowOizysMissions = false;
                     C.Save();
                 }
-                else if (PlayerHelper.IsInPhaenna() && (C.ShowSinusMissions || !C.ShowPhaennaMissions))
+                else if (PlayerHelper.IsInPhaenna() && (C.ShowSinusMissions || !C.ShowPhaennaMissions || C.ShowOizysMissions))
                 {
                     C.ShowSinusMissions = false;
                     C.ShowPhaennaMissions = true;
+                    C.ShowOizysMissions = false;
+                    C.Save();
+                }
+                else if (PlayerHelper.IsInOizys() && (C.ShowSinusMissions || C.ShowPhaennaMissions) || !C.ShowOizysMissions)
+                {
+                    C.ShowSinusMissions = false;
+                    C.ShowPhaennaMissions = false;
+                    C.ShowOizysMissions = true;
                     C.Save();
                 }
             }
@@ -479,6 +488,7 @@ namespace ICE.Ui.MainUi.ModeSelect
                     uint selectedJob = C.SelectedJob;
                     bool sinusEnabled = C.ShowSinusMissions;
                     bool phaennaEnabled = C.ShowPhaennaMissions;
+                    bool oizysEnabled = C.ShowOizysMissions;
 
                     if (C.ShowCompletionWindow)
                     {
@@ -493,6 +503,9 @@ namespace ICE.Ui.MainUi.ModeSelect
                         continue;
 
                     if (!phaennaEnabled && territoryId == 1291)
+                        continue;
+
+                    if (!oizysEnabled && territoryId == 1310)
                         continue;
 
                     bool provisional = mission.Value.Attributes.HasFlag(MissionAttributes.ProvisionalWeather)
