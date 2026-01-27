@@ -112,7 +112,7 @@ namespace ICE.Ui.MainUi
                         else if (PlayerHelper.IsInOizys() && (C.ShowSinusMissions || C.ShowPhaennaMissions || !C.ShowOizysMissions))
                         {
                             C.ShowSinusMissions = false;
-                            C.ShowPhaennaMissions = true;
+                            C.ShowPhaennaMissions = false;
                             C.ShowOizysMissions = true;
                             C.Save();
                         }
