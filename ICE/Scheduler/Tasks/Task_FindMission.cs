@@ -669,7 +669,7 @@ namespace ICE.Scheduler.Tasks
                 {
                     if (stage != maxStage)
                     {
-                        for (byte type = 1; type < 6; type++)
+                        for (byte type = 1; type < 7; type++)
                         {
                             if (!wksManager->ResearchModule->IsTypeAvailable(toolClassId, type))
                                 break;
@@ -690,7 +690,7 @@ namespace ICE.Scheduler.Tasks
                     }
                     else
                     {
-                        for (byte type = 1; type < 6; type++)
+                        for (byte type = 1; type < 7; type++)
                         {
                             if (!wksManager->ResearchModule->IsTypeAvailable(toolClassId, type))
                                 break;

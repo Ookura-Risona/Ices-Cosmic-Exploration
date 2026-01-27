@@ -15,6 +15,7 @@ public partial class Config
         { 3, new CosmicHelper.XPType { CurrentXP = 100, NeededXP = 300} },
         { 4, new CosmicHelper.XPType { CurrentXP = 150, NeededXP = 400} },
         { 5, new CosmicHelper.XPType { CurrentXP = 200, NeededXP = 500} },
+        { 6, new CosmicHelper.XPType { CurrentXP = 250, NeededXP = 600} }
     };
     public uint PictoColor_Circle { get; set; } = 2616716297;
     public uint PictoColor_Dot { get; set; } = 2616716297;
