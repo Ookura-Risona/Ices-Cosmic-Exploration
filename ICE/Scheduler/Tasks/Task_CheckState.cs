@@ -374,7 +374,7 @@ namespace ICE.Scheduler.Tasks
 
             if (currentStage != maxStage)
             {
-                for (byte type = 1; type < 6; type++)
+                for (byte type = 1; type < 7; type++)
                 {
                     if (!wksManager->ResearchModule->IsTypeAvailable(toolClassId, type))
                     {
@@ -397,7 +397,7 @@ namespace ICE.Scheduler.Tasks
             else
             {
                 // We're checking to make sure the max stage is completed
-                for (byte type = 1; type < 6; type++)
+                for (byte type = 1; type < 7; type++)
                 {
                     if (!wksManager->ResearchModule->IsTypeAvailable(toolClassId, type))
                     {

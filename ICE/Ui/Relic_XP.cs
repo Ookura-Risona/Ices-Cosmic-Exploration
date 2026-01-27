@@ -86,7 +86,7 @@ namespace ICE.Ui
                 else
                     xpType = "???";
 
-                if (stage != 19)
+                if (stage != 17)
                 {
                     DrawXPBar($"类型: {xpType}", current, needed, size, max);
                 }

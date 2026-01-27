@@ -105,23 +105,23 @@ internal static class NpcData // Renamed the class to avoid conflict
             new NPCInfo()
             {
                 type = NpcType.Repair,
-                NpcId = 1052641,
+                NpcId = 1052651,
                 Name = "Godgyth",
                 Location_Npc = new Vector3(-202.44f, 0.65f, 154.31f),
-                Location_Circle = new(-202.44f, 0.65f, 154.31f),
+                Location_Circle = new(-199.23f, 0.52f, 153.76f),
             },
             new NPCInfo // Credit Exchange Vendor
             {
                 type = NpcType.Credit,
-                NpcId = 1052640,
+                NpcId = 1052650,
                 Name = "Mesouaidonque",
                 Location_Npc = new Vector3(-202.20f, 0.65f, 152.54f),
-                Location_Circle = new(-202.20f, 0.65f, 152.54f),
+                Location_Circle = new(-199.23f, 0.52f, 153.76f),
             },
             new NPCInfo // Relic NPC
             {
                 type = NpcType.Relic,
-                NpcId = 1052629,
+                NpcId = 1052647,
                 Name = "Researchingway",
                 Location_Npc = new Vector3(-202.26f, 1.19f, 122.00f),
                 Location_Circle = new(-199.23f, 0.52f, 121.94f),
@@ -129,10 +129,10 @@ internal static class NpcData // Renamed the class to avoid conflict
             new NPCInfo // Cosmic Fortune aka Gamba Wheel
             {
                 type = NpcType.Gamba,
-                NpcId = 1052642,
+                NpcId = 1052652,
                 Name = "Orbitingway",
                 Location_Npc = new Vector3(-157.73f, 1.19f, 153.98f),
-                Location_Circle = new Vector3(-157.73f, 1.19f, 153.98f),
+                Location_Circle = new Vector3(-160.71f, 0.56f, 153.93f),
 
             }
         },
