@@ -85,7 +85,7 @@ namespace ICE.Ui.MainUi
                 {
                     string SinusAsset = "ICE.Resources.Sinus_Ardorum.png";
                     string PhaennaAsset = "ICE.Resources.Phaenna.png";
-                    string OizysAsset = ""; // 占位
+                    string OizysAsset = "ICE.Resources.Oizys_placeholder.png"; // 占位
 
                     bool autoSelectMoon = C.AutoSelectMoon;
                     if (ImGui.Checkbox("自动选择地图", ref autoSelectMoon)) // Auto Select Moon
@@ -154,11 +154,11 @@ namespace ICE.Ui.MainUi
                     }
 
                     ImGui.SameLine(); // 占位
-                    bool OizysEnable = C.ShowOizysMissions;
+                    bool OizysEnabled = C.ShowOizysMissions;
                     var OizysTextures = Svc.Texture.GetFromManifestResource(Assembly.GetExecutingAssembly(), OizysAsset).GetWrapOrEmpty();
-                    if (StyledImageButton.DrawStyledImageButton(PhaennaTextures, new Vector2(iconSize, iconSize), OizysEnable))
+                    if (StyledImageButton.DrawStyledImageButton(OizysTextures, new Vector2(iconSize, iconSize), OizysEnabled))
                     {
-                        C.ShowOizysMissions = !OizysEnable;
+                        C.ShowOizysMissions = !OizysEnabled;
                         C.AutoSelectMoon = false;
                         C.Save();
                     }
