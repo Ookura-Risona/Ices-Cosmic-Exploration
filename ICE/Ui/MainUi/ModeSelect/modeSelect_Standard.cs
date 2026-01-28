@@ -26,16 +26,25 @@ namespace ICE.Ui.MainUi.ModeSelect
             bool autoSelectMoon = C.AutoSelectMoon;
             if (autoSelectMoon)
             {
-                if (PlayerHelper.IsInSinusArdorum() && (!C.ShowSinusMissions || C.ShowPhaennaMissions))
+                if (PlayerHelper.IsInSinusArdorum() && (!C.ShowSinusMissions || C.ShowPhaennaMissions || C.ShowOizysMissions))
                 {
                     C.ShowSinusMissions = true;
                     C.ShowPhaennaMissions = false;
+                    C.ShowOizysMissions = false;
                     C.Save();
                 }
-                else if (PlayerHelper.IsInPhaenna() && (C.ShowSinusMissions || !C.ShowPhaennaMissions))
+                else if (PlayerHelper.IsInPhaenna() && (C.ShowSinusMissions || !C.ShowPhaennaMissions || C.ShowOizysMissions))
                 {
                     C.ShowSinusMissions = false;
                     C.ShowPhaennaMissions = true;
+                    C.ShowOizysMissions = false;
+                    C.Save();
+                }
+                else if (PlayerHelper.IsInOizys() && (C.ShowSinusMissions || C.ShowPhaennaMissions || !C.ShowOizysMissions))
+                {
+                    C.ShowSinusMissions = false;
+                    C.ShowPhaennaMissions = false;
+                    C.ShowOizysMissions = true;
                     C.Save();
                 }
             }
@@ -163,8 +172,9 @@ namespace ICE.Ui.MainUi.ModeSelect
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + yOffset);
 
                 bool unsupportedArtisan = xpLeveling && !P.Artisan.UpdatedArtisan() && CosmicHelper.CrafterJobList.Contains((uint)Player.Job);
+                bool unsupportedMoon = PlayerHelper.IsInOizys() && xpLeveling && !P.Artisan.UpdatedArtisan();
 
-                using (ImRaii.Disabled(SchedulerMain.State != IceState.Idle || !usingSupportedJob || unsupportedArtisan))
+                using (ImRaii.Disabled(SchedulerMain.State != IceState.Idle || !usingSupportedJob || unsupportedArtisan || unsupportedMoon))
                 {
                     if (ImGui.Button("开始", new Vector2(150 * scale, 0)))
                     {
@@ -182,6 +192,19 @@ namespace ICE.Ui.MainUi.ModeSelect
                         ImGui.BeginTooltip();
                         ImGui.Text("嘿! 你需要更新 Artisan 才能使用这个模式, 请至少更新到以下版本:");
                         ImGui.Text("4.0.4.29");
+                        ImGui.EndTooltip();
+                    }
+                }
+                else if (unsupportedMoon)
+                {
+                    ImGui.SameLine(0, 10 * scale);
+                    ImGui.SetCursorPosY(ImGui.GetCursorPosY() + yOffset);
+                    ImGuiEx.Icon(EColor.Red, FontAwesomeIcon.ExclamationTriangle);
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.BeginTooltip();
+                        ImGui.Text("Hey! This moon is currently not supported for leveling yet. (It's also worse than sinus or phaenna)");
+                        ImGui.Text("Please wait till I get the time to focus on this");
                         ImGui.EndTooltip();
                     }
                 }
@@ -479,6 +502,7 @@ namespace ICE.Ui.MainUi.ModeSelect
                     uint selectedJob = C.SelectedJob;
                     bool sinusEnabled = C.ShowSinusMissions;
                     bool phaennaEnabled = C.ShowPhaennaMissions;
+                    bool oizysEnabled = C.ShowOizysMissions;
 
                     if (C.ShowCompletionWindow)
                     {
@@ -493,6 +517,9 @@ namespace ICE.Ui.MainUi.ModeSelect
                         continue;
 
                     if (!phaennaEnabled && territoryId == 1291)
+                        continue;
+
+                    if (!oizysEnabled && territoryId == 1310)
                         continue;
 
                     bool provisional = mission.Value.Attributes.HasFlag(MissionAttributes.ProvisionalWeather)

@@ -669,7 +669,7 @@ namespace ICE.Scheduler.Tasks
                 {
                     if (stage != maxStage)
                     {
-                        for (byte type = 1; type < 6; type++)
+                        for (byte type = 1; type < 7; type++)
                         {
                             if (!wksManager->ResearchModule->IsTypeAvailable(toolClassId, type))
                                 break;
@@ -690,7 +690,7 @@ namespace ICE.Scheduler.Tasks
                     }
                     else
                     {
-                        for (byte type = 1; type < 6; type++)
+                        for (byte type = 1; type < 7; type++)
                         {
                             if (!wksManager->ResearchModule->IsTypeAvailable(toolClassId, type))
                                 break;
@@ -768,12 +768,12 @@ namespace ICE.Scheduler.Tasks
                         bool isManipReq = mission.Attributes.HasFlag(MissionAttributes.ExpertCraft);
 
                         IceLogging.Debug($"[Mission: {id}]" +
-                                         $"Is proper Level: {properLevel} | Mission Level: {minLevel} | Player Level: {Player.Level} \n" +
+                                         $"Is proper Level: {properLevel}\n | Mission Level: {minLevel} | Player Level: {Player.Level} \n" +
                                          $"Ignoring cause of manual? {IgnoreManual}\n" +
                                          $"Ignoring cuase of not enabled: {IgnoreNotEnabled}\n" +
-                                         $"Ignoring because of not supported: {unSupported}" +
-                                         $"Is Manipulation required: {isManipReq}" +
-                                         $"Is Manipluation even unlocked: {manipUnlocked}", tip);
+                                         $"Ignoring because of not supported: {unSupported}\n" +
+                                         $"Is Manipulation required: {isManipReq}\n" +
+                                         $"Is Manipluation even unlocked: {manipUnlocked}\n", tip);
 
                         if (!properLevel) continue;
                         if (IgnoreManual) continue;
