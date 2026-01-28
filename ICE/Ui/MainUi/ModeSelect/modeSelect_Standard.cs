@@ -203,8 +203,8 @@ namespace ICE.Ui.MainUi.ModeSelect
                     if (ImGui.IsItemHovered())
                     {
                         ImGui.BeginTooltip();
-                        ImGui.Text("Hey! This moon is currently not supported for leveling yet. (It's also worse than sinus or phaenna)");
-                        ImGui.Text("Please wait till I get the time to focus on this");
+                        ImGui.Text("嘿! 这个地图目前还不支持练级。(而且比憧憬湾、法恩娜行星更烂)");
+                        ImGui.Text("请等我有时间再来处理这个问题。");
                         ImGui.EndTooltip();
                     }
                 }
