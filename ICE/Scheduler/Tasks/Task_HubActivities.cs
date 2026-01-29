@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static ECommons.UIHelpers.AddonMasterImplementations.AddonMaster;
 
 namespace ICE.Scheduler
 {
@@ -14,6 +15,7 @@ namespace ICE.Scheduler
         public static bool RelicTurnin = false;
         public static bool CosmoBuy = false;
         public static bool CanGamba = false;
+        public static bool DronebitShopping = false;
         private static Vector3 craftingSpot = Vector3.Zero;
 
         public static void Enqueue()
@@ -41,6 +43,11 @@ namespace ICE.Scheduler
                 P.TaskManager.Enqueue(() => IceLogging.Info("Starting Relic Turnin task at the npc", "Task_HubActivities"));;
                 Task_BuyCosmoItems.Enqueue();
             }
+            if (DronebitShopping)
+            {
+                P.TaskManager.Enqueue(() => IceLogging.Info("Starting the Oizys Bags purchasing task at the npc", "Task_HubActivities"));
+                Task_BuyDronebitItems.Enqueue();
+            }
             if (CanGamba)
             {
                 P.TaskManager.Enqueue(() => IceLogging.Info("Starting Gamba task at the npc", "Task_HubActivities"));
@@ -63,8 +70,17 @@ namespace ICE.Scheduler
             return true;
         }
 
-        public static bool? PathBackToCraftingSpot()
+        public static unsafe bool? PathBackToCraftingSpot()
         {
+            // 寻路返回前，关闭货币交易界面，防止卡死
+            if (GenericHelpers.TryGetAddonMaster<ShopExchangeCurrency>("ShopExchangeCurrency", out var shop) && shop.IsAddonReady)
+            {
+                if (EzThrottler.Throttle("ClosingShopExchangeCurrency"))
+                    shop.Addon->Close(true);
+
+                return false;
+            }
+
             if (CosmicHelper.CrafterJobList.Contains((uint)Player.Job))
             {
                 // 临时修复: 使用制作返回点，将忽略此任务保存的 craftingSpot 字段作为返回点
@@ -122,6 +138,7 @@ namespace ICE.Scheduler
             RelicTurnin = false;
             CosmoBuy = false;
             CanGamba = false;
+            DronebitShopping = false;
 
             return true;
         }

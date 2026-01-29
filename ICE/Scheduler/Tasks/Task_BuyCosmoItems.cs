@@ -20,8 +20,17 @@ namespace ICE.Scheduler.Tasks
                 );
         }
 
-        private static bool? Credit_PathToVendor()
+        private static unsafe bool? Credit_PathToVendor()
         {
+            // 关闭 ShopExchangeCurrency 窗口，避免卡死寻路
+            if (GenericHelpers.TryGetAddonMaster<ShopExchangeCurrency>("ShopExchangeCurrency", out var shop) && shop.IsAddonReady)
+            {
+                if (EzThrottler.Throttle("ClosingShopExchangeCurrency"))
+                    shop.Addon->Close(true);
+
+                return false;
+            }
+
             string handle = "[Task_Credits: PathTo]";
             var zoneId = Player.Territory.RowId;
             var npcEntry = NpcData.MoonNpcs[zoneId].Where(x => x.type == NpcData.NpcType.Credit).FirstOrDefault();
