@@ -135,7 +135,7 @@ namespace ICE.Scheduler.Tasks
                 {
                     yesno.Yes();
 
-                    if (_pendingBuyAmount > 0)
+                    if (_pendingBuyAmount > 0 && C.OizysBagBuyAmount > 0)
                     {
                         C.OizysBagBuyAmount -= _pendingBuyAmount;
                         if (C.OizysBagBuyAmount < 0)
@@ -166,20 +166,22 @@ namespace ICE.Scheduler.Tasks
             if (maxAffordable <= 0)
                 return true;
 
-            int targetBuyAmount = C.OizysBagBuyAmount;
-
             PlayerHelper.GetItemCount(OizysBagItemId, out int currentCount);
-            int targetKeepAmount = Math.Max(0, C.OizysBagKeepAmount - currentCount);
-
-            int targetKeepBuying = C.OizysBagKeepBuying ? int.MaxValue : 0;
 
             int target = 0;
-            if (targetBuyAmount > 0)
-                target = targetBuyAmount;
-            else if (targetKeepAmount > 0)
-                target = targetKeepAmount;
-            else if (targetKeepBuying > 0)
-                target = targetKeepBuying;
+
+            if (C.OizysBagKeepBuying)
+            {
+                target = int.MaxValue;
+            }
+            else
+            {
+                if (C.OizysBagBuyAmount > 0)
+                    target = C.OizysBagBuyAmount;
+
+                else if (C.OizysBagKeepAmount > currentCount)
+                    target = C.OizysBagKeepAmount - currentCount;
+            }
 
             if (target <= 0)
                 return true;
@@ -198,10 +200,20 @@ namespace ICE.Scheduler.Tasks
 
         public static bool CanPurchaseAnyItem()
         {
+            PlayerHelper.GetItemCount(49170, out var currencyAmount);
+            if (currencyAmount < 200)
+                return false;
+
+            const int cost = 200;
+            int maxAffordable = (int)(currencyAmount / cost);
+            if (maxAffordable <= 0)
+                return false;
+
+            PlayerHelper.GetItemCount(OizysBagItemId, out int currentCount);
+
             if (C.OizysBagBuyAmount > 0)
                 return true;
 
-            PlayerHelper.GetItemCount(OizysBagItemId, out int currentCount);
             if (C.OizysBagKeepAmount > currentCount)
                 return true;
 
