@@ -4,7 +4,7 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table;
 
 public static class Settings_TableColumns
 {
-    private static string[] missionSortOptions = ["ID", "任务名称", "宇宙信用点", "行星信用点", "研究数据 I", "研究数据 II", "研究数据 III", "研究数据 IV", "研究数据 V", "地图位置", "职业技巧点", "职业经验值"];
+    private static string[] missionSortOptions = ["ID", "任务名称", "宇宙信用点", "行星信用点", "研究数据 I", "研究数据 II", "研究数据 III", "研究数据 IV", "研究数据 V", "研究数据 VI", "地图位置", "职业技巧点", "职业经验值"];
 
     public static void ColumnSettings()
     {
@@ -158,6 +158,23 @@ public static class Settings_TableColumns
                              "4: 如果你当前是能工巧匠职业，报告后会自动返回你之前正在制作的位置。\n" +
                              "\t- 这是可选的，你可以自由关闭。我个人喜欢这样设置，方便我回到自己选定的安静区域。");
         }
+        if (relicTurnin) // 切换其他生产采集职业套装进行提交
+        {
+            bool SwitchToRelicJob = C.SwitchToRelicJob;
+            if (ImGui.Checkbox($"切换其他职业套装进行提交##RelicTurnin_SwitchRelicJob_GeneralSetting", ref SwitchToRelicJob))
+            {
+                C.SwitchToRelicJob = SwitchToRelicJob;
+                C.Save();
+            }
+            ImGui.SameLine();
+            ImGui.TextDisabled("?");
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetTooltip("提交宇宙工具前切换为其他生产采集职业, 避免装备宇宙工具无法提交的问题。\n" +
+                                 "请至少保存 1 个可用的生产采集职业套装, 否则不会生效。");
+            }
+        }
+
         if (ImGui.Button("快捷汇报模式应用")) // Quick Apply Turnins
         {
             ImGui.OpenPopup("Quick Apply_Mission Turnins");

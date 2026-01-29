@@ -23,4 +23,5 @@ public partial class Config
     };
     public bool FarmAllRelics { get; set; } = false;
     public bool Stop_AllRelicsComplete { get; set; } = false;
+    public bool SwitchToRelicJob { get; set; } = true; // 切换其他生产采集职业套装提交, 默认启用
 }

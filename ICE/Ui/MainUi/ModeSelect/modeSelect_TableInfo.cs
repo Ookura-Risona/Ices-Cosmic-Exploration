@@ -104,11 +104,15 @@ namespace ICE.Ui.MainUi.ModeSelect
                     return missions.OrderByDescending(m => missionInfo[m.id].RelicXpInfo
                                                      .Where(exp => exp.Key == 5)
                                                      .Sum(exp => exp.Value)).ToList();
-                case 9: // Map Location
+                case 9: // Exp Type 6:
+                    return missions.OrderByDescending(m => missionInfo[m.id].RelicXpInfo
+                                                     .Where(exp => exp.Key == 6)
+                                                     .Sum(exp => exp.Value)).ToList();
+                case 10: // Map Location
                     return missions.OrderBy(m => missionInfo[m.id].MarkerId).ToList();
-                case 10: // Mission Score
+                case 11: // Mission Score
                     return missions.OrderByDescending(m => missionInfo[m.id].ClassScore).ToList();
-                case 11: // Class Exp
+                case 12: // Class Exp
                     return missions.OrderByDescending(m => Math.Max(
                                                            Math.Max(missionInfo[m.id].ExpModifier_1, missionInfo[m.id].ExpModifier_2),
                                                            missionInfo[m.id].ExpModifier_3
