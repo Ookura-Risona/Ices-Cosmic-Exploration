@@ -1069,7 +1069,6 @@
       "pictomancy": {
         "type": "Project",
         "dependencies": {
-          "SharpDX": "[4.2.0, )",
           "SharpDX.D3DCompiler": "[4.2.0, )",
           "SharpDX.Direct2D1": "[4.2.0, )",
           "SharpDX.Direct3D11": "[4.2.0, )",
