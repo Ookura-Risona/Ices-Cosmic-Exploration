@@ -63,8 +63,8 @@ namespace ICE.Scheduler.Tasks
             }
         }
         public static unsafe bool? OpenMissionUi()
-        {
-            // 临时修复: 处理购买物品结束后，重复打开商店界面导致阻塞问题，这只是个临时的方案
+        {        
+            // 临时修复: 处理购买物品结束后，重复打开商店界面导致阻塞问题，这只是个临时的方案。
             // Temporary fix: after buying items, the ShopExchangeCurrency window sometimes pops back up
             // and gets findmission stuck. Just close it here for now.
             if (GenericHelpers.TryGetAddonMaster<ShopExchangeCurrency>("ShopExchangeCurrency", out var shop) && shop.IsAddonReady)

@@ -16,12 +16,21 @@ namespace ICE.Scheduler.Tasks
                     new(TalkToCreditNPC, "Talking to the credit NPC to start the buying process"),
                     new(SelectShop, "Selecting the shop entry we want to go to"),
                     new(BuyItems, "Buying items from the vendor", Utils.TaskConfig),
-                    new(CloseShop, "Closing the shop menu")
+                    new(CloseShop, "Closing the shop menu", Utils.TaskConfig)
                 );
         }
 
-        private static bool? Credit_PathToVendor()
+        private static unsafe bool? Credit_PathToVendor()
         {
+            // 寻路前，检查商店是否已经打开，若已打开则关闭
+            if (GenericHelpers.TryGetAddonMaster<ShopExchangeCurrency>("ShopExchangeCurrency", out var shop) && shop.IsAddonReady)
+            {
+                if (EzThrottler.Throttle("ClosingShopExchangeCurrency"))
+                    shop.Addon->Close(true);
+
+                return false;
+            }
+
             string handle = "[Task_Credits: PathTo]";
             var zoneId = Player.Territory.RowId;
             var npcEntry = NpcData.MoonNpcs[zoneId].Where(x => x.type == NpcData.NpcType.Credit).FirstOrDefault();
@@ -91,12 +100,12 @@ namespace ICE.Scheduler.Tasks
 
             return false;
         }
-        private static bool? CloseShop()
+        private static unsafe bool? CloseShop()
         {
             if (GenericHelpers.TryGetAddonMaster<ShopExchangeCurrency>("ShopExchangeCurrency", out var shopExchange) && shopExchange.IsAddonReady)
             {
                 if (EzThrottler.Throttle("Close Shop"))
-                    GenericHandlers.FireCallback("ShopExchangeCurrency", true, -1);
+                    shopExchange.Addon->Close(true);
                 return false;
             }
             else

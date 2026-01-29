@@ -279,7 +279,9 @@ namespace ICE.Scheduler.Tasks
                     bool selfRepairGather = C.SelfRepairGather && PlayerHelper.NeedsRepair(C.RepairPercent) && CosmicHelper.GatheringJobList.Contains(currentJob);
                     bool extractSpiritbond = C.SelfSpiritbondGather && Task_Spiritbond.IsSpiritbondReadyAny();
                     PlayerHelper.GetItemCount(45690, out var cosmoCreditAmount);
+                    PlayerHelper.GetItemCount(49170, out var OizysTokens);
                     bool canBuyItems = C.BuyItems && Task_BuyCosmoItems.CanPurchaseAnyItem() && cosmoCreditAmount >= C.CosmoBuyAtAmount;
+                    bool canOizysBagBuy = C.OizysBagBuyEnabled && PlayerHelper.IsInOizys() && Task_BuyOizysBags.CanPurchaseAnyItem() && OizysTokens >=  C.OizysBagBuyAtAmount;
                     bool canGamba = false;
 
                     var territory = Player.Territory.RowId;
@@ -306,18 +308,20 @@ namespace ICE.Scheduler.Tasks
                         IceLogging.Info("We need to repair! So going to go repair", "[Task: Check State]");
                         SchedulerMain.State = IceState.Repair;
                     }
-                    else if (repairVendor || canTurnin || canBuyItems || canGamba)
+                    else if (repairVendor || canTurnin || canBuyItems || canGamba || canOizysBagBuy)
                     {
                         SchedulerMain.State = IceState.HubReturn;
                         Task_HubActivities.RepairNpc = repairVendor;
                         Task_HubActivities.RelicTurnin = canTurnin;
                         Task_HubActivities.CosmoBuy = canBuyItems;
                         Task_HubActivities.CanGamba = canGamba;
+                        Task_HubActivities.OizysBagBuy = canOizysBagBuy;
                         IceLogging.Info("We have some reason to return back to the base so... we're doing so.\n" +
                                         $"Repairing at NPC: {repairVendor}\n" +
                                         $"Relic Turnin: {canTurnin}\n" +
                                         $"Buying Cosmocredit Items: {canBuyItems}\n" +
-                                        $"Can Gamba: {canGamba}");
+                                        $"Can Gamba: {canGamba}\n" +
+                                        $"OizysBuy: {canOizysBagBuy}");
                     }
                     else
                     {

@@ -47,6 +47,8 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                 ImGui.TableNextColumn();
                 ArtisanSettings();
 
+                ImGui.TableNextColumn();
+                OizysBagSettings(); // 临时： 俄匊斯资源包购买设置
 #if DEBUG
                 ImGui.TableNextRow();
                 ImGui.TableSetColumnIndex(0);
@@ -535,6 +537,59 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                                         "强制【高难+】任务的高难度配方使用 Raphael 求解器。\n" +
                                         "我个人不推荐启用, 但有些配方确实可以这样做。\n" +
                                         "等到我们等级能够碾压宇宙探索玩法时, 这个选项就在这等着。");
+            }
+        }
+
+        private static void OizysBagSettings()
+        {
+            ImGuiEx.IconWithText(FontAwesomeIcon.Suitcase, "俄匊斯资源包购买设置");
+            ImGui.Dummy(new Vector2(0, 5));
+
+            bool OizysBagBuyEnabled = C.OizysBagBuyEnabled;
+            int buyAtAmount = C.OizysBagBuyAtAmount;
+            int OizysBagBuyAmount = C.OizysBagBuyAmount;
+            int OizysBagKeepAmount = C.OizysBagKeepAmount;
+            bool OizysBagKeepBuying = C.OizysBagKeepBuying;
+
+            if (ImGui.Checkbox("启用 购买俄匊斯资源包", ref OizysBagBuyEnabled))
+            {
+                C.OizysBagBuyEnabled = OizysBagBuyEnabled;
+                C.Save();
+            }
+
+            ImGui.SetNextItemWidth(150);
+            if (ImGui.InputInt("开始购买阈值", ref buyAtAmount, 1))
+            {
+                if (buyAtAmount < 0)
+                    buyAtAmount = 0;
+                if (buyAtAmount > 5000)
+                    buyAtAmount = 5000;
+                C.OizysBagBuyAtAmount = buyAtAmount;
+                C.Save();
+            }
+
+            ImGui.Text("购买数量");
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(80);
+            if (ImGui.InputInt($"##buy_OizysBag", ref OizysBagBuyAmount))
+            {
+                C.OizysBagBuyAmount = OizysBagBuyAmount;
+                C.Save();
+            }
+
+            ImGui.Text("目标库存");
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(80);
+            if (ImGui.InputInt($"##keep_OizysBag", ref OizysBagKeepAmount))
+            {
+                C.OizysBagKeepAmount = OizysBagKeepAmount;
+                C.Save();
+            }
+
+            if (ImGui.Checkbox("持续购买", ref OizysBagKeepBuying))
+            {
+                C.OizysBagKeepBuying = OizysBagKeepBuying;
+                C.Save();
             }
         }
 

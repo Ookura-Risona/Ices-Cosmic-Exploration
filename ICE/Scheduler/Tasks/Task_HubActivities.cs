@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static ECommons.UIHelpers.AddonMasterImplementations.AddonMaster;
 
 namespace ICE.Scheduler
 {
@@ -14,6 +15,7 @@ namespace ICE.Scheduler
         public static bool RelicTurnin = false;
         public static bool CosmoBuy = false;
         public static bool CanGamba = false;
+        public static bool OizysBagBuy = false;
         private static Vector3 craftingSpot = Vector3.Zero;
 
         public static void Enqueue()
@@ -41,6 +43,11 @@ namespace ICE.Scheduler
                 P.TaskManager.Enqueue(() => IceLogging.Info("Starting Relic Turnin task at the npc", "Task_HubActivities"));;
                 Task_BuyCosmoItems.Enqueue();
             }
+            if (OizysBagBuy)
+            {
+                P.TaskManager.Enqueue(() => IceLogging.Info("Starting the Oizys Bags purchasing task at the npc", "Task_HubActivities"));
+                Task_BuyOizysBags.Enqueue();
+            }
             if (CanGamba)
             {
                 P.TaskManager.Enqueue(() => IceLogging.Info("Starting Gamba task at the npc", "Task_HubActivities"));
@@ -63,8 +70,18 @@ namespace ICE.Scheduler
             return true;
         }
 
-        public static bool? PathBackToCraftingSpot()
+        public static unsafe bool? PathBackToCraftingSpot()
         {
+            // 脱离 ShopExchangeCurrency 窗口卡死，因为执行间隔问题窗口有很大可能再次打开导致卡死，这是必要的。
+            // 并且这个问题会发生在所有需要打开交易窗口的基地任务中，阻塞角色移动寻路
+            if (GenericHelpers.TryGetAddonMaster<ShopExchangeCurrency>("ShopExchangeCurrency", out var shop) && shop.IsAddonReady)
+            {
+                if (EzThrottler.Throttle("ClosingShopExchangeCurrency"))
+                    shop.Addon->Close(true);
+
+                return false;
+            }
+
             if (CosmicHelper.CrafterJobList.Contains((uint)Player.Job))
             {
                 // 临时修复: 使用制作返回点，将忽略此任务保存的 craftingSpot 字段作为返回点
@@ -122,6 +139,7 @@ namespace ICE.Scheduler
             RelicTurnin = false;
             CosmoBuy = false;
             CanGamba = false;
+            OizysBagBuy = false;
 
             return true;
         }
