@@ -712,6 +712,12 @@ namespace ICE.Ui.MainUi.ModeSelect
                             selectedMission = Id;
                             Utils.SetGatheringRing(missionInfo.TerritoryId, (int)missionInfo.MapPosition.X, (int)missionInfo.MapPosition.Y, missionInfo.Radius, missionInfo.Name);
                         }
+#if DEBUG
+                        if (ImGui.IsItemHovered())
+                        {
+                            ImGui.SetTooltip($"X: {missionInfo.MapPosition.X} Y: {missionInfo.MapPosition.Y}");
+                        }
+#endif
                     }
                     if (GatheringUtil.CriticalLocations.TryGetValue(Id, out var criticalLoc))
                     {
@@ -1284,6 +1290,11 @@ namespace ICE.Ui.MainUi.ModeSelect
                         if (notesCount > 0)
                             ImGui.SameLine(0, 2);
 
+                        var weather = missionInfo.Weather;
+                        string weatherCN = CosmicWeatherCN.TryGetValue(weather, out var name) 
+                            ? name 
+                            : weather.ToString();
+
                         if (CosmicHelper.WeatherIds.ContainsKey(missionInfo.Weather))
                         {
                             ISharedImmediateTexture? weatherIcon = CosmicHelper.WeatherIconDict[missionInfo.Weather];
@@ -1298,7 +1309,7 @@ namespace ICE.Ui.MainUi.ModeSelect
                         if (ImGui.IsItemHovered())
                         {
                             ImGui.BeginTooltip();
-                            ImGui.Text($"天气: {missionInfo.Weather}");
+                            ImGui.Text($"天气: {weatherCN}");
                             ImGui.EndTooltip();
                         }
                         notesCount++;

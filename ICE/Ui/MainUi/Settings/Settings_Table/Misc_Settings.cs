@@ -512,6 +512,8 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
 
             bool force_Raphael = C.Artisan_RaphaelForce;
             bool force_Expert = C.Artisan_RaphaelExpert;
+            bool force_MasterA = C.Artisan_Raphael_ARank;
+            bool force_MasterEx = C.Artisan_Raphael_ExRank;
 
             if (ImGui.Checkbox("强制使用 Raphael 求解器", ref force_Raphael))
             {
@@ -525,6 +527,28 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
             ImGui.NewLine();
             if (force_Raphael)
             {
+                if (ImGui.Checkbox("应用于 A 类任务的高难度配方", ref force_MasterA))
+                {
+                    C.Artisan_Raphael_ARank = force_MasterA;
+                    C.Save();
+                }
+                ImGui.SameLine();
+                ImGuiEx.IconWithTooltip(FontAwesomeIcon.QuestionCircle,
+                    "强制那些被视为高难度配方的 A 类任务配方使用 Raphael 求解器。\n" +
+                    "对大多数 A 类任务配方来说通常更高效, 因为在我看来它们并非真正的高难度配方。(节省更多时间)");
+                ImGui.Dummy(Vector2.Zero);
+
+                if (ImGui.Checkbox("应用于【高难】任务的高难度配方", ref force_MasterEx))
+                {
+                    C.Artisan_Raphael_ExRank = force_MasterEx;
+                    C.Save();
+                }
+                ImGui.SameLine();
+                ImGuiEx.IconWithTooltip(FontAwesomeIcon.QuestionCircle,
+                    "强制那些被视为高难度配方的【高难】任务使用 Raphael 求解器。" +
+                    "对大多数【高难】任务配方来说通常更高效, 因为在我看来它们并非真正的高难度配方。(节省更多时间)");
+                ImGui.Dummy(Vector2.Zero);
+
                 if (ImGui.Checkbox("应用于【高难+】任务的高难度配方", ref force_Expert))
                 {
                     C.Artisan_RaphaelExpert = force_Expert;
@@ -535,6 +559,7 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                                         "强制【高难+】任务的高难度配方使用 Raphael 求解器。\n" +
                                         "我个人不推荐启用, 但有些配方确实可以这样做。\n" +
                                         "等到我们等级能够碾压宇宙探索玩法时, 这个选项就在这等着。");
+                ImGui.Dummy(Vector2.Zero);
             }
         }
 
