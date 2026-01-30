@@ -70,13 +70,7 @@ namespace ICE.Scheduler.Tasks
             var recipeId = item.Value.RecipeId;
             var itemId = item.Value.ItemId;
             var expert = item.Value.ExpertCraft;
-            bool useRaphael = rank switch
-            {
-                6 => C.Artisan_RaphaelExpert,
-                5 => C.Artisan_Raphael_ExRank,
-                4 => C.Artisan_Raphael_ARank,
-                _ => false
-            };
+            var expertRaph = C.Artisan_RaphaelMaster;
 
 
             // 对 MeowZWR 的汉化分支进行兼容
@@ -111,7 +105,7 @@ namespace ICE.Scheduler.Tasks
                     }
                     else if (expert)
                     {
-                        if (useRaphael)
+                        if (expertRaph)
                         {
                             string solver = Solver("Raphael Recipe Solver", "Raphael 配方求解器");
                             IceLogging.Debug($"[Artisan Solver] Using: {solver}");

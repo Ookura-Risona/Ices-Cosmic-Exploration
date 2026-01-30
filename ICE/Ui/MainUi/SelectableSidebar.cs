@@ -118,7 +118,7 @@ namespace ICE.Ui.MainUi
                             C.Save();
                         }
                     }
-                    ImGui.Dummy(new (0, 3));
+                    ImGui.Dummy(new(0, 3));
 
                     float iconSize = 23 * scale;
                     float iconSpacing = 4;
@@ -164,6 +164,10 @@ namespace ICE.Ui.MainUi
                         C.AutoSelectMoon = false;
                         C.Save();
                     }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip("俄匊斯行星");
+                    }
                 }
                 if (C.AutoPickCurrentJob && (CosmicHelper.CrafterJobList.Contains((uint)Player.Job) || CosmicHelper.GatheringJobList.Contains((uint)Player.Job)) && C.SelectedJob != (uint)Player.Job)
                 {
@@ -176,7 +180,7 @@ namespace ICE.Ui.MainUi
                     float iconSpacing = 4;
                     float availWidth = ImGui.GetContentRegionAvail().X;
                     float startX = (availWidth - (iconSize + iconSpacing) * 4 + iconSpacing) * 0.5f;
-                    
+
                     ImGui.SetCursorPosX(startX);
                     bool autoSelectJob = C.AutoPickCurrentJob;
                     if (ImGui.Checkbox("自动选择##AutoSelectJob", ref autoSelectJob)) // Auto Select

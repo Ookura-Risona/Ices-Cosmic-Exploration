@@ -511,9 +511,7 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
             ImGui.Dummy(new Vector2(0, 5));
 
             bool force_Raphael = C.Artisan_RaphaelForce;
-            bool force_Expert = C.Artisan_RaphaelExpert;
-            bool force_MasterA = C.Artisan_Raphael_ARank;
-            bool force_MasterEx = C.Artisan_Raphael_ExRank;
+            bool expertRaphael = C.Artisan_RaphaelMaster;
 
             if (ImGui.Checkbox("强制使用 Raphael 求解器", ref force_Raphael))
             {
@@ -521,45 +519,34 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                 C.Save();
             }
             ImGui.SameLine();
-            ImGuiEx.IconWithTooltip(FontAwesomeIcon.QuestionCircle,
-                                    "在插件运行期间, 强制所有配方使用 Raphael 求解器。\n" +
-                                    "默认情况下不包含高难度配方, 因为它们的特性不太适合。");
-            ImGui.NewLine();
+            ImGuiEx.Icon(FontAwesomeIcon.QuestionCircle);
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.BeginTooltip();
+                ImGui.Text($"在插件运行期间, 强制所有配方使用 Raphael 求解器。");
+                ImGui.Text($"不包含高难度配方, 因为它们的机制不太适合。");
+                ImGui.EndTooltip();
+            }
+            ImGui.Dummy(Vector2.Zero);
             if (force_Raphael)
             {
-                if (ImGui.Checkbox("应用于 A 类任务的高难度配方", ref force_MasterA))
+                if (ImGui.Checkbox("应用于高难度配方", ref expertRaphael))
                 {
-                    C.Artisan_Raphael_ARank = force_MasterA;
+                    C.Artisan_RaphaelMaster = expertRaphael;
                     C.Save();
                 }
                 ImGui.SameLine();
-                ImGuiEx.IconWithTooltip(FontAwesomeIcon.QuestionCircle,
-                    "强制那些被视为高难度配方的 A 类任务配方使用 Raphael 求解器。\n" +
-                    "对大多数 A 类任务配方来说通常更高效, 因为在我看来它们并非真正的高难度配方。(节省更多时间)");
-                ImGui.Dummy(Vector2.Zero);
-
-                if (ImGui.Checkbox("应用于【高难】任务的高难度配方", ref force_MasterEx))
+                ImGuiEx.Icon(FontAwesomeIcon.QuestionCircle);
+                if (ImGui.IsItemHovered())
                 {
-                    C.Artisan_Raphael_ExRank = force_MasterEx;
-                    C.Save();
+                    ImGui.BeginTooltip();
+                    ImGui.Text($"强制那些原本应使用 专家配方求解器 的高难度配方改为使用 Raphael 求解器。"); // 如果按国服本地化来翻译, Artisan 的 Expert Recipe Solver 应该叫 高难度配方求解器
+                    ImGuiEx.Icon(new Vector4(1.0f, 0.4f, 0.0f, 1.0f), FontAwesomeIcon.Diamond);
+                    ImGui.SameLine();
+                    ImGui.Text($"对应配方详细信息里的那个图标, 顺带一提。");
+                    ImGui.Text($"不建议在俄匊斯行星上使用, 它并不完美, 而且已经给不少人带来了问题。");
+                    ImGui.EndTooltip();
                 }
-                ImGui.SameLine();
-                ImGuiEx.IconWithTooltip(FontAwesomeIcon.QuestionCircle,
-                    "强制那些被视为高难度配方的【高难】任务使用 Raphael 求解器。" +
-                    "对大多数【高难】任务配方来说通常更高效, 因为在我看来它们并非真正的高难度配方。(节省更多时间)");
-                ImGui.Dummy(Vector2.Zero);
-
-                if (ImGui.Checkbox("应用于【高难+】任务的高难度配方", ref force_Expert))
-                {
-                    C.Artisan_RaphaelExpert = force_Expert;
-                    C.Save();
-                }
-                ImGui.SameLine();
-                ImGuiEx.IconWithTooltip(FontAwesomeIcon.QuestionCircle,
-                                        "强制【高难+】任务的高难度配方使用 Raphael 求解器。\n" +
-                                        "我个人不推荐启用, 但有些配方确实可以这样做。\n" +
-                                        "等到我们等级能够碾压宇宙探索玩法时, 这个选项就在这等着。");
-                ImGui.Dummy(Vector2.Zero);
             }
         }
 

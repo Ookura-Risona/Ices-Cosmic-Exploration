@@ -653,6 +653,7 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
 
                     bool currentlyEnabled = entry.GatherBuffs.Buffs[buffName].Enabled;
                     int minUseGp = entry.GatherBuffs.Buffs[buffName].MinGp;
+                    int minUsableDurability = entry.GatherBuffs.Buffs[buffName].MinUsableDurability;
                     int minActionGp = GatheringUtil.GathActionDict[buffName].RequiredGp;
                     int maxActionUsage = entry.GatherBuffs.Buffs[buffName].MaxUse;
                     string ActionInfo = "令获得数增加2个\n" +
@@ -671,6 +672,13 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                     if (ImGui.SliderInt("使用所需最低 GP", ref minUseGp, minActionGp, maxGp))
                     {
                         entry.GatherBuffs.Buffs[buffName].MinGp = minUseGp;
+                        C.SaveDebounced();
+                    }
+
+                    ImGui.SetNextItemWidth(200);
+                    if (ImGui.SliderInt("使用所需最少采集点采集次数", ref minUsableDurability, 0, 8))
+                    {
+                        entry.GatherBuffs.Buffs[buffName].MinUsableDurability = minUsableDurability;
                         C.SaveDebounced();
                     }
 
@@ -698,6 +706,7 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
 
                     bool currentlyEnabled = entry.GatherBuffs.Buffs[buffName].Enabled;
                     int minUseGp = entry.GatherBuffs.Buffs[buffName].MinGp;
+                    int minUsableDurability = entry.GatherBuffs.Buffs[buffName].MinUsableDurability;
                     int minActionGp = GatheringUtil.GathActionDict[buffName].RequiredGp;
                     int maxActionUsage = entry.GatherBuffs.Buffs[buffName].MaxUse;
                     string ActionInfo = "令获得数增加1个\n" +
@@ -716,6 +725,13 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                     if (ImGui.SliderInt("使用所需最低 GP", ref minUseGp, minActionGp, maxGp))
                     {
                         entry.GatherBuffs.Buffs[buffName].MinGp = minUseGp;
+                        C.SaveDebounced();
+                    }
+
+                    ImGui.SetNextItemWidth(200);
+                    if (ImGui.SliderInt("使用所需最少采集点采集次数", ref minUsableDurability, 0, 8))
+                    {
+                        entry.GatherBuffs.Buffs[buffName].MinUsableDurability = minUsableDurability;
                         C.SaveDebounced();
                     }
 
@@ -743,6 +759,7 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
 
                     bool currentlyEnabled = entry.GatherBuffs.Buffs[buffName].Enabled;
                     int minUseGp = entry.GatherBuffs.Buffs[buffName].MinGp;
+                    int minUsableDurability = entry.GatherBuffs.Buffs[buffName].MinUsableDurability;
                     int minActionGp = GatheringUtil.GathActionDict[buffName].RequiredGp;
                     int maxActionUsage = entry.GatherBuffs.Buffs[buffName].MaxUse;
                     string ActionInfo = "恢复1次采集次数\n" +
@@ -761,6 +778,13 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                     if (ImGui.SliderInt("使用所需最低 GP", ref minUseGp, minActionGp, maxGp))
                     {
                         entry.GatherBuffs.Buffs[buffName].MinGp = minUseGp;
+                        C.SaveDebounced();
+                    }
+
+                    ImGui.SetNextItemWidth(200);
+                    if (ImGui.SliderInt("使用所需最少采集点采集次数", ref minUsableDurability, 0, 8))
+                    {
+                        entry.GatherBuffs.Buffs[buffName].MinUsableDurability = minUsableDurability;
                         C.SaveDebounced();
                     }
 
