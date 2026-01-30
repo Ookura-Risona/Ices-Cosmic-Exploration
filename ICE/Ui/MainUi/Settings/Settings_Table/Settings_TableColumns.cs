@@ -170,7 +170,7 @@ public static class Settings_TableColumns
             ImGui.TextDisabled("?");
             if (ImGui.IsItemHovered())
             {
-                ImGui.SetTooltip("提交宇宙工具前切换为其他生产采集职业, 避免装备宇宙工具无法提交的问题。\n" +
+                ImGui.SetTooltip("提交宇宙工具前切换为其他生产采集职业, 避免装备宇宙工具无法提交的问题发生。\n" +
                                  "请至少保存 1 个可用的生产采集职业套装, 否则不会生效。");
             }
         }
