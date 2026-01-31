@@ -84,6 +84,15 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                 "如果您在寻路移动过程中卡住了, 此选项将允许您经过特定时间后执行跳跃(当前为 3 秒)。\n" +
                 "注意: 这是实验性功能。虽然有效, 但实际表现仍看起来很可疑。\n如果您发现某个位置会卡住角色, 请通过日志功能报告,\n" +
                 "并提供相关信息以便我们修复这些问题。");
+            ImGui.Dummy(Vector2.Zero);
+
+            int delayRelic = C.DelayPostRelic;
+            ImGui.SetNextItemWidth(150);
+            if (ImGui.SliderInt("宇宙工具提交后延迟", ref delayRelic, 0, 5000)) // Delay Post Relic Turnin
+            {
+                C.DelayPostRelic = delayRelic;
+                C.SaveDebounced();
+            }
         }
     }
 }

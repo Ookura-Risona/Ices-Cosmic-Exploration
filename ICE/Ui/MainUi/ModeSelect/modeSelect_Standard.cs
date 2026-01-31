@@ -14,6 +14,39 @@ namespace ICE.Ui.MainUi.ModeSelect
 {
     internal class modeSelect_Standard
     {
+        private static readonly Dictionary<string, uint> BattleJobs = new()
+        {
+            // Tanks
+            { "骑士", 19 },          // Paladin
+            { "战士", 21 },          // Warrior
+            { "暗黑骑士", 32 },      // Dark Knight
+            { "绝枪战士", 37 },      // Gunbreaker
+
+            // Healers
+            { "白魔法师", 24 },      // White Mage
+            { "学者", 28 },          // Scholar
+            { "占星术士", 33 },      // Astrologian
+            { "贤者", 40 },          // Sage
+
+            // Melee DPS
+            { "武僧", 20 },          // Monk
+            { "龙骑士", 22 },        // Dragoon
+            { "忍者", 30 },          // Ninja
+            { "武士", 34 },          // Samurai
+            { "钐镰客", 39 },        // Reaper
+            { "蝰蛇剑士", 41 },      // Viper
+
+            // Physical Ranged DPS
+            { "吟游诗人", 23 },      // Bard
+            { "机工士", 31 },        // Machinist
+            { "舞者", 38 },          // Dancer
+
+            // Magical Ranged DPS
+            { "黑魔法师", 25 },      // Black Mage
+            { "召唤师", 27 },        // Summoner
+            { "赤魔法师", 35 },      // Red Mage
+            { "绘灵法师", 42 }       // Pictomancer
+        };
         private static string newListName = "";
 
         public static void Draw()
@@ -172,7 +205,7 @@ namespace ICE.Ui.MainUi.ModeSelect
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + yOffset);
 
                 bool unsupportedArtisan = xpLeveling && !P.Artisan.UpdatedArtisan() && CosmicHelper.CrafterJobList.Contains((uint)Player.Job);
-                bool unsupportedMoon = PlayerHelper.IsInOizys() && xpLeveling && !P.Artisan.UpdatedArtisan();
+                bool unsupportedMoon = PlayerHelper.IsInOizys() && xpLeveling;
 
                 using (ImRaii.Disabled(SchedulerMain.State != IceState.Idle || !usingSupportedJob || unsupportedArtisan || unsupportedMoon))
                 {
@@ -254,14 +287,23 @@ namespace ICE.Ui.MainUi.ModeSelect
                 }
 
                 bool showPlaylistExpanded = false;
-                bool standard = !(C.XPRelicGrind && C.ShowCompletionWindow);
+                bool standard = !(C.XPRelicGrind || C.XPLeveling_Mode || C.ShowCompletionWindow);
                 if (standard)
                 {
                     ImGui.TableNextColumn();
                     showPlaylistExpanded = modeSelect_Tools.DrawCompactCategoryHeader("任务预设", FontAwesomeIcon.PlayCircle);
                 }
 
-                bool showNextColumn = tableSettingExpanded || missionSettingExpanded || (relicGrindExpanded && C.XPRelicGrind) || (completionExpanded && C.ShowCompletionWindow) || showPlaylistExpanded;
+                bool showJobSwapExpanded = false;
+                bool relicJobSwap = C.TurninRelic;
+
+                if (relicJobSwap)
+                {
+                    ImGui.TableNextColumn();
+                    showJobSwapExpanded = modeSelect_Tools.DrawCompactCategoryHeader("宇宙工具职业切换", FontAwesomeIcon.Hammer);
+                }
+
+                bool showNextColumn = tableSettingExpanded || missionSettingExpanded || (relicGrindExpanded && C.XPRelicGrind) || (completionExpanded && C.ShowCompletionWindow) || showPlaylistExpanded || showJobSwapExpanded;
 
                 if (showNextColumn)
                 {
@@ -278,223 +320,246 @@ namespace ICE.Ui.MainUi.ModeSelect
                         Settings_TableColumns.GeneralMissionSettings();
                     }
 
-                    if (C.XPRelicGrind && relicGrindExpanded)
+                    if (C.XPRelicGrind)
                     {
                         ImGui.TableNextColumn();
-
-                        bool relicTurnin = C.TurninRelic;
-                        if (ImGui.Checkbox($"宇宙工具可报告时提交##RelicTurnin_RelicGrind", ref relicTurnin))
+                        if (relicGrindExpanded)
                         {
-                            C.TurninRelic = relicTurnin;
-                            C.Save();
-                        }
-                        ImGui.SameLine();
-                        ImGui.TextDisabled("?");
-                        if (ImGui.IsItemHovered())
-                        {
-                            ImGui.SetTooltip("这是此功能的工作方式说明。如果我未来修改了这个功能，这个提示也会随之改变。\n" +
-                                             "1: 此功能将检查你的当前职业 [不是菜单中选择的职业, 是实际当前职业] 提交宇宙工具。\n" +
-                                             "2: 你必须不装备宇宙工具，才能让此功能完全地自动运行。\n" +
-                                             "\t- 原因是我现在懒得写这部分逻辑。（将来可能会改主意 *耸肩*）\n" +
-                                             "3: 此功能的优先级高于 \"宇宙工具可报告时停止\" 选项，如果两个都启用, 它会选择提交宇宙工具而不是停止, 并继续执行任务。\n" +
-                                             "4: 如果你当前是能工巧匠职业，报告后会自动返回你之前正在制作的位置。\n" +
-                                             "\t- 这是可选的，你可以自由关闭。我个人喜欢这样设置，方便我回到自己选定的安静区域。");
-                        }
-                        if (relicTurnin) // 切换其他生产采集职业套装进行提交
-                        {
-                            bool SwitchToRelicJob = C.SwitchToRelicJob;
-                            if (ImGui.Checkbox($"切换其他职业套装进行提交##RelicTurnin_SwitchRelicJob_RelicGrind", ref SwitchToRelicJob))
+                            bool relicTurnin = C.TurninRelic;
+                            if (ImGui.Checkbox($"宇宙工具可报告时提交##RelicTurnin_RelicGrind", ref relicTurnin))
                             {
-                                C.SwitchToRelicJob = SwitchToRelicJob;
+                                C.TurninRelic = relicTurnin;
                                 C.Save();
                             }
                             ImGui.SameLine();
                             ImGui.TextDisabled("?");
                             if (ImGui.IsItemHovered())
                             {
-                                ImGui.SetTooltip("提交宇宙工具前切换为其他生产采集职业, 避免装备宇宙工具无法提交的问题发生。\n" +
-                                                 "请至少保存 1 个可用的生产采集职业套装, 否则不会生效。");
+                                ImGui.SetTooltip("这是此功能的工作方式说明。如果我未来修改了这个功能, 这个提示也会随之改变。\n" +
+                                                 "1: 此功能将检查你的当前职业 [不是菜单中选择的职业, 是实际当前职业] 提交宇宙工具。\n" +
+                                                 "2: 此功能的优先级高于 \"宇宙工具可报告时停止\" 选项，如果两个都启用, 它会选择提交宇宙工具而不是停止, 并继续执行任务。\n" +
+                                                 "3: 如果你当前是能工巧匠职业，报告后会自动返回你之前正在制作的位置。\n" +
+                                                 "\t- 这是可选的, 你可以自由关闭。我个人喜欢开着, 方便我回到自己选定的安静区域。");
                             }
-                        }
 
+                            ImGui.Separator();
 
-                        ImGui.Separator();
-
-                        bool EnableRelicXp = C.XPRelicGrind;
-                        if (ImGui.Checkbox("自动根据研究数据挑选任务", ref EnableRelicXp)) // Auto-Pick For Relic XP
-                        {
-                            C.XPRelicGrind = EnableRelicXp;
-                            C.Save();
-                        }
-                        ImGui.SameLine();
-                        ImGui.TextDisabled("?");
-                        if (ImGui.IsItemHovered())
-                        {
-                            ImGui.SetTooltip("请注意: 此功能仅会执行基础任务标签下的任务刷取研究数据。\n" + // Please note. This will ONLY grind for relic Exp under the basic mission tab. \n
-                                               "即使您选择启用了连续/时间限定/天气限定/紧急探索任务, 也不会执行这些任务。"); // This will NOT work (even with missions selected) on the Sequence/Timed/Weather/Critical Missions
-                        }
-                        if (EnableRelicXp)
-                        {
-                            bool OnlySelected = C.XPRelicOnlyEnabled;
-                            if (ImGui.Checkbox("仅限启用的任务", ref OnlySelected))
+                            bool EnableRelicXp = C.XPRelicGrind;
+                            if (ImGui.Checkbox("自动根据研究数据挑选任务", ref EnableRelicXp))
                             {
-                                C.XPRelicOnlyEnabled = OnlySelected;
+                                C.XPRelicGrind = EnableRelicXp;
                                 C.Save();
                             }
-                            if (C.ShowManualMode)
+                            ImGui.SameLine();
+                            ImGui.TextDisabled("?");
+                            if (ImGui.IsItemHovered())
                             {
-                                bool IgnoreManual = C.XPRelicIgnoreManual;
-                                if (ImGui.Checkbox("忽略手动模式任务", ref IgnoreManual))
+                                ImGui.SetTooltip("请注意: 此功能仅会执行基础任务标签下的任务刷取研究数据。\n" +
+                                                   "即使您选择启用了连续/时间限定/天气限定/紧急探索任务, 也不会执行这些任务。");
+                            }
+                            if (EnableRelicXp)
+                            {
+                                bool OnlySelected = C.XPRelicOnlyEnabled;
+                                if (ImGui.Checkbox("仅限启用的任务", ref OnlySelected))
                                 {
-                                    C.XPRelicIgnoreManual = IgnoreManual;
+                                    C.XPRelicOnlyEnabled = OnlySelected;
                                     C.Save();
+                                }
+                                if (C.ShowManualMode)
+                                {
+                                    bool IgnoreManual = C.XPRelicIgnoreManual;
+                                    if (ImGui.Checkbox("忽略手动模式任务", ref IgnoreManual))
+                                    {
+                                        C.XPRelicIgnoreManual = IgnoreManual;
+                                        C.Save();
+                                    }
                                 }
                             }
                         }
                     }
 
-                    if (C.ShowCompletionWindow && completionExpanded)
+                    if (C.ShowCompletionWindow)
                     {
-                        // 根据是否选择宇宙工具研究数据刷取模式决定完成情况表格设置的列索引，防止展开时错位
-                        int completionColumnIndex = C.XPRelicGrind ? 3 : 2;
-                        ImGui.TableSetColumnIndex(completionColumnIndex);
-
-                        bool showSelectedJobOnly = C.ShowSelectedJobOnly;
-                        if (ImGui.Checkbox("只显示选择的职业", ref showSelectedJobOnly)) // Show only selected job
+                        ImGui.TableNextColumn();
+                        if (completionExpanded)
                         {
-                            C.ShowSelectedJobOnly = showSelectedJobOnly;
-                            if (showSelectedJobOnly)
-                                C.ShowCompletionOnlyJob = false;
-                            C.Save();
-                        }
+                            bool showSelectedJobOnly = C.ShowSelectedJobOnly;
+                            if (ImGui.Checkbox("只显示选择的职业", ref showSelectedJobOnly))
+                            {
+                                C.ShowSelectedJobOnly = showSelectedJobOnly;
+                                if (showSelectedJobOnly)
+                                    C.ShowCompletionOnlyJob = false;
+                                C.Save();
+                            }
 
-                        bool nonGold = C.ShowCompletion_MissingGold;
-                        if (ImGui.Checkbox("只显示非金星评价任务", ref nonGold)) // Show Only Non-Gold Missions
-                        {
-                            C.ShowCompletion_MissingGold = nonGold;
-                            C.Save();
+                            bool nonGold = C.ShowCompletion_MissingGold;
+                            if (ImGui.Checkbox("只显示非金星评价任务", ref nonGold))
+                            {
+                                C.ShowCompletion_MissingGold = nonGold;
+                                C.Save();
+                            }
                         }
                     }
 
-                    if (standard && showPlaylistExpanded)
+                    if (standard)
                     {
-                        // 根据是否显示完成情况窗口决定任务预设列索引，防止展开时错位
-                        int presetColumnIndex = 2;
-                        if (C.XPRelicGrind || C.ShowCompletionWindow)
-                        {
-                            presetColumnIndex = 3;
-                        }
-                        ImGui.TableSetColumnIndex(presetColumnIndex);
-                        if (ImGui.Button("保存当前任务为预设")) // Save Current Mission Preset
-                        {
-                            ImGui.OpenPopup("Preset Save Editor");
-                        }
+                        ImGui.TableNextColumn();
 
-                        if (ImGui.BeginPopup("Preset Save Editor"))
+                        if (showPlaylistExpanded)
                         {
-                            ImGui.InputText($"预设名称", ref newListName);
-                            using (ImRaii.Disabled(string.IsNullOrEmpty(newListName)))
+                            if (ImGui.Button("保存当前任务为预设"))
                             {
-                                if (ImGui.Button("保存")) // Save New List
-                                {
-                                    List<uint> new_Playlist = new();
-                                    foreach (var mission in C.MissionConfig.Where(x=> x.Value.Enabled))
-                                    {
-                                        new_Playlist.Add(mission.Key);
-                                    }
-                                    if (C.Mission_Playlist.ContainsKey(newListName))
-                                    {
-                                        C.Mission_Playlist[newListName] = new_Playlist;
-                                    }
-                                    else
-                                    {
-                                        C.Mission_Playlist.Add(newListName, new_Playlist);
-                                    }
-                                    C.Save();
-                                    ImGui.CloseCurrentPopup();
-                                }
+                                ImGui.OpenPopup("Preset Save Editor");
                             }
 
-                            ImGui.EndPopup();
-                        }
-
-                        if (C.Mission_Playlist.Count > 0)
-                        {
-                            if (ImGui.Button("查看所有预设"))
+                            if (ImGui.BeginPopup("Preset Save Editor"))
                             {
-                                ImGui.OpenPopup("Preset: List Viewer");
-                            }
-
-                            if (ImGui.BeginPopup("Preset: List Viewer"))
-                            {
-                                ImGui.Text($"加载任务预设");
-
-                                if (ImGui.BeginTable($"Preset: TableViewer", 3, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders))
+                                ImGui.InputText($"预设名称", ref newListName);
+                                using (ImRaii.Disabled(string.IsNullOrEmpty(newListName)))
                                 {
-                                    ImGui.TableSetupColumn("名称");
-                                    ImGui.TableSetupColumn("启用任务数量");
-
-                                    ImGui.TableHeadersRow();
-
-                                    ImGui.TableNextRow();
-                                    ImGui.TableSetColumnIndex(0);
-                                    ImGui.AlignTextToFramePadding();
-                                    ImGui.Text($"全部清空");
-                                    ImGui.SameLine();
-                                    if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowUpRightFromSquare, $"FreshPreset_Button"))
+                                    if (ImGui.Button("保存"))
                                     {
-                                        foreach (var mission in C.MissionConfig)
+                                        List<uint> new_Playlist = new();
+                                        foreach (var mission in C.MissionConfig.Where(x => x.Value.Enabled))
                                         {
-                                            mission.Value.Enabled = false;
+                                            new_Playlist.Add(mission.Key);
+                                        }
+                                        if (C.Mission_Playlist.ContainsKey(newListName))
+                                        {
+                                            C.Mission_Playlist[newListName] = new_Playlist;
+                                        }
+                                        else
+                                        {
+                                            C.Mission_Playlist.Add(newListName, new_Playlist);
                                         }
                                         C.Save();
                                         ImGui.CloseCurrentPopup();
                                     }
+                                }
 
-                                    foreach (var item in C.Mission_Playlist)
+                                ImGui.EndPopup();
+                            }
+
+                            if (C.Mission_Playlist.Count > 0)
+                            {
+                                if (ImGui.Button("查看所有预设"))
+                                {
+                                    ImGui.OpenPopup("Preset: List Viewer");
+                                }
+
+                                if (ImGui.BeginPopup("Preset: List Viewer"))
+                                {
+                                    ImGui.Text($"加载任务预设");
+
+                                    if (ImGui.BeginTable($"Preset: TableViewer", 3, ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.RowBg | ImGuiTableFlags.Borders))
                                     {
+                                        ImGui.TableSetupColumn("名称");
+                                        ImGui.TableSetupColumn("启用任务数量");
+
+                                        ImGui.TableHeadersRow();
+
                                         ImGui.TableNextRow();
                                         ImGui.TableSetColumnIndex(0);
                                         ImGui.AlignTextToFramePadding();
-                                        ImGui.Text($"{item.Key}");
+                                        ImGui.Text($"全部清空");
                                         ImGui.SameLine();
-                                        if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowUpRightFromSquare, $"{item.Key}_Button"))
+                                        if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowUpRightFromSquare, $"FreshPreset_Button"))
                                         {
                                             foreach (var mission in C.MissionConfig)
                                             {
-                                                if (item.Value.Contains(mission.Key))
-                                                    mission.Value.Enabled = true;
-                                                else
-                                                    mission.Value.Enabled = false;
+                                                mission.Value.Enabled = false;
                                             }
                                             C.Save();
                                             ImGui.CloseCurrentPopup();
                                         }
-                                        if (ImGui.IsItemHovered())
+
+                                        foreach (var item in C.Mission_Playlist)
                                         {
-                                            ImGui.SetTooltip("导入任务"); // Import Missions
+                                            ImGui.TableNextRow();
+                                            ImGui.TableSetColumnIndex(0);
+                                            ImGui.AlignTextToFramePadding();
+                                            ImGui.Text($"{item.Key}");
+                                            ImGui.SameLine();
+                                            if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowUpRightFromSquare, $"{item.Key}_Button"))
+                                            {
+                                                foreach (var mission in C.MissionConfig)
+                                                {
+                                                    if (item.Value.Contains(mission.Key))
+                                                        mission.Value.Enabled = true;
+                                                    else
+                                                        mission.Value.Enabled = false;
+                                                }
+                                                C.Save();
+                                                ImGui.CloseCurrentPopup();
+                                            }
+                                            if (ImGui.IsItemHovered())
+                                            {
+                                                ImGui.SetTooltip("导入任务");
+                                            }
+
+                                            ImGui.TableNextColumn();
+                                            ImGui.AlignTextToFramePadding();
+                                            ImGui.Text($"{item.Value.Count}");
+
+                                            ImGui.TableNextColumn();
+                                            if (ImGuiEx.IconButton(FontAwesomeIcon.Trash, $"{item.Key}_Remove"))
+                                            {
+                                                C.Mission_Playlist.Remove(item);
+                                                C.Save();
+                                            }
+                                            if (ImGui.IsItemHovered())
+                                            {
+                                                ImGui.SetTooltip("移除");
+                                            }
                                         }
 
-                                        ImGui.TableNextColumn();
-                                        ImGui.AlignTextToFramePadding();
-                                        ImGui.Text($"{item.Value.Count}");
-
-                                        ImGui.TableNextColumn();
-                                        if (ImGuiEx.IconButton(FontAwesomeIcon.Trash, $"{item.Key}_Remove"))
-                                        {
-                                            C.Mission_Playlist.Remove(item);
-                                            C.Save();
-                                        }
-                                        if (ImGui.IsItemHovered())
-                                        {
-                                            ImGui.SetTooltip("移除"); // Remove from list
-                                        }
+                                        ImGui.EndTable();
                                     }
 
-                                    ImGui.EndTable();
+                                    ImGui.EndPopup();
                                 }
+                            }
+                        }
+                    }
 
-                                ImGui.EndPopup();
+                    if (C.TurninRelic)
+                    {
+                        ImGui.TableNextColumn();
+                        if (showJobSwapExpanded)
+                        {
+                            bool swapJobs = C.Relic_SwapJob;
+                            if (ImGui.Checkbox("提交宇宙工具时切换职业", ref swapJobs)) // Swap jobs when turning in relic
+                            {
+                                C.Relic_SwapJob = swapJobs;
+                                C.Save();
+                            }
+                            ImGuiEx.HelpMarker("如果您使用宇宙工具作为主手, 请务必启用此选项, 并设置好战斗职业以保证提交宇宙工具正常运行。\n" +
+                                               "因为宇宙工具作为主手装备时无法提交的, 必须通过切换职业来绕过。");
+
+
+                            string currentJobName = BattleJobs.FirstOrDefault(x => x.Value == C.Relic_BattleJob).Key ?? "无";
+
+                            if (ImGui.BeginCombo("战斗职业", currentJobName))
+                            {
+                                foreach (var job in BattleJobs)
+                                {
+                                    bool isSelected = C.Relic_BattleJob == job.Value;
+                                    if (ImGui.Selectable(job.Key, isSelected))
+                                    {
+                                        C.Relic_BattleJob = job.Value;
+                                        C.Save();
+                                    }
+                                    if (isSelected)
+                                        ImGui.SetItemDefaultFocus();
+                                }
+                                ImGui.EndCombo();
+                            }
+
+                            bool useStylist = C.Relic_Stylist;
+                            if (ImGui.Checkbox($"使用 Stylist 插件重新装备工具", ref useStylist)) // Use Stylist to re-equip tools
+                            {
+                                C.Relic_Stylist = useStylist;
+                                C.Save();
                             }
                         }
                     }

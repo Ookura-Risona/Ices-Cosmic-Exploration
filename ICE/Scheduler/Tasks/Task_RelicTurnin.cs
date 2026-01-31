@@ -1,9 +1,9 @@
 ﻿using ECommons.GameHelpers;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using ICE.Utilities.Cosmic_Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using static ECommons.UIHelpers.AddonMasterImplementations.AddonMaster;
 
@@ -11,51 +11,81 @@ namespace ICE.Scheduler.Tasks
 {
     internal class Task_RelicTurnin
     {
-        public static Job NonRelicJob = 0;
-        public static Job RelicJob = 0;
+        public static uint TurninJob = 0;
+
         public static void Enqueue()
         {
-            RelicJob = Mission_Settings.StartJob;
-
-            NonRelicJob = 0;
-
             P.TaskManager.EnqueueMulti
             (
-                new(SwitchToNonRelicJob, "Switch to non-relic job"),
-                new(Relic_PathTo, "Heading to relic NPC"),
+                new(RegisterJob, "Register Job Swap Class"),
+                new(CheckJobSwap, "Checking to see if we need to swap jobs", Utils.TaskConfig),
+                new(Relic_PathTo, "Heading to the relic NPC for turnin"),
                 new(TalkToResearchWay, "Talk to researchway"),
-                new(SelectReport, "Selecting report"),
-                new(SelectRelicClass, "Selecting relic class", Utils.TaskConfig),
-                new(SwitchToStartJob, "Switch back to StartJob")
+                new(SelectReport, "Selecting Report", Utils.TaskConfig),
+                new(SelectRelicClass, "Selecting the class to turnin on", Utils.TaskConfig)
             );
+        }
+        public static bool? RegisterJob()
+        {
+            IceLogging.Verbose("Registering what job to turn in on");
+            TurninJob = (uint)Player.Job;
+
+            return true;
+        }
+
+        public static bool? CheckJobSwap()
+        {
+            if (C.Relic_SwapJob && C.Relic_BattleJob != 0)
+            {
+                if (Player.Job != (Job)C.Relic_BattleJob)
+                {
+                    if (EzThrottler.Throttle("Swapping jobs", 1000))
+                    {
+                        IceLogging.Verbose($"Telling the game to swap you to jobID: {C.Relic_BattleJob}");
+                        GearsetHandler.TaskClassChange((Job)C.Relic_BattleJob);
+                    }
+
+                    return false;
+                }
+                else
+                {
+                    IceLogging.Verbose("Job swap is complete! Turning in the relic now");
+
+                    return true;
+                }
+            }
+            else
+            {
+                IceLogging.Debug("No swap is necessary/not configured properly. Continuing on");
+                return true;
+            }
         }
 
         public static bool? Relic_PathTo()
         {
             string handle = "[Task_Relic: PathTo]";
             var zoneId = Player.Territory;
-            var npcEntry = NpcData.MoonNpcs[zoneId.RowId]
-                .FirstOrDefault(x => x.type == NpcData.NpcType.Relic);
+            var npcEntry = NpcData.MoonNpcs[zoneId.RowId].Where(x => x.type == NpcData.NpcType.Relic).FirstOrDefault();
 
             if (npcEntry != null)
             {
                 Vector3 randomPos = NpcData.GetRandomPointInCircle(npcEntry.Location_Circle, 0.5f);
-
                 if (!Task_NavmeshMove.Task_NavTo(randomPos, distance: 5, npcLoc: npcEntry.Location_Npc).Value)
                 {
-                    if (EzThrottler.Throttle("Relic move message", 1000))
-                        IceLogging.Verbose($"Pathing to relic NPC. Distance: {Player.DistanceTo(npcEntry.Location_Npc)}", handle);
+                    if (EzThrottler.Throttle("Repair move message", 1000))
+                        IceLogging.Verbose($"Pathing to repair NPC. Current distance: {Player.DistanceTo(npcEntry.Location_Npc)}", handle);
                 }
                 else
                 {
-                    IceLogging.Debug("Reached relic NPC.", handle);
+                    IceLogging.Debug("We're close enough to the repair npc! Continuing on", handle);
                     return true;
                 }
             }
             else
             {
                 if (EzThrottler.Throttle("Error message: NPC", 5000))
-                    IceLogging.Error($"Relic NPC not coded. Territory: {Player.Territory.RowId}", handle);
+                    IceLogging.Error("Hey! We don't have this npc coded yet, which means I forgot bout it, could you let me know\n" +
+                                     $"Planet Territory ID: {Player.Territory.RowId}", handle);
             }
 
             return false;
@@ -65,21 +95,21 @@ namespace ICE.Scheduler.Tasks
         {
             if (GenericHelpers.TryGetAddonMaster<SelectString>("SelectString", out var selectString) && selectString.IsAddonReady)
             {
-                IceLogging.Info("Talk complete.");
+                IceLogging.Info("Talk to researchway complete");
                 return true;
             }
             else if (GenericHelpers.TryGetAddonMaster<Talk>("Talk", out var talk) && talk.IsAddonReady)
             {
-                if (EzThrottler.Throttle("Click talk", 100))
+                if (EzThrottler.Throttle("Clicking the talk dialog", 100))
+                {
                     talk.Click();
+                }
             }
 
-            var researchId = NpcData.MoonNpcs[Player.Territory.RowId]
-                .FirstOrDefault(x => x.type == NpcData.NpcType.Relic).NpcId;
+            var researchId = NpcData.MoonNpcs[Player.Territory.RowId].Where(x => x.type == NpcData.NpcType.Relic).FirstOrDefault().NpcId;
 
             Utils.TryGetObjectByDataId(researchId, out var researchNpc);
-
-            if (EzThrottler.Throttle("Interact researchway"))
+            if (EzThrottler.Throttle("Interacting with researchingway"))
             {
                 Utils.TargetgameObject(researchNpc);
                 Utils.InteractWithObject(researchNpc);
@@ -92,12 +122,12 @@ namespace ICE.Scheduler.Tasks
         {
             if (GenericHelpers.TryGetAddonMaster<SelectIconString>("SelectIconString", out var selectIconString) && selectIconString.IsAddonReady)
             {
-                IceLogging.Info("Proceed to relic class selection.");
+                IceLogging.Info("We're onto selecting the class to turnin, woo!");
                 return true;
             }
             else if (GenericHelpers.TryGetAddonMaster<SelectString>("SelectString", out var selectString) && selectString.IsAddonReady)
             {
-                if (EzThrottler.Throttle("Select report"))
+                if (EzThrottler.Throttle("Selecting the research one"))
                     selectString.Entries[0].Select();
             }
 
@@ -106,128 +136,135 @@ namespace ICE.Scheduler.Tasks
 
         public static bool? SelectRelicClass()
         {
-            uint[] dohDolJobs = { 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 };
-
-            uint selectedEntry = 0;
-
-            foreach (var id in dohDolJobs)
+            Dictionary<uint, bool> jobUnlocked = new()
             {
-                if (Player.GetLevel((Job)id) == 0)
-                    continue;
-
-                if (id == (uint)RelicJob)
-                    break;
-
-                selectedEntry++;
+                [8] = true,
+                [9] = true,
+                [10] = true,
+                [11] = true,
+                [12] = true,
+                [13] = true,
+                [14] = true,
+                [15] = true,
+                [16] = true,
+                [17] = true,
+                [18] = true,
+            };
+            foreach (var jobId in jobUnlocked)
+            {
+                if (Player.GetLevel((Job)jobId.Key) == 0)
+                    jobUnlocked[jobId.Key] = false;
             }
+
+            if (EzThrottler.Throttle("Throttle job unlock message", 1000))
+                IceLogging.Debug($"Amount of jobs unlocked: {jobUnlocked.Where(x => x.Value).Count()}");
+            uint selectedEntry = 0;
+            foreach (var jobId in jobUnlocked)
+            {
+                if (TurninJob == jobId.Key)
+                    break;
+                else
+                {
+                    if (jobId.Value)
+                        selectedEntry += 1;
+                }
+            }
+
 
             if (GenericHelpers.TryGetAddonMaster<SelectIconString>("SelectIconString", out var selectIconString) && selectIconString.IsAddonReady)
             {
-                if (EzThrottler.Throttle("Select relic class"))
+                if (EzThrottler.Throttle($"Selecting jobId: {TurninJob}"))
                 {
-                    IceLogging.Debug($"Selecting entry {selectedEntry} for relic job {RelicJob}");
+                    IceLogging.Debug($"Selecting Entry: {selectedEntry} for job: {TurninJob} to turnin relic");
                     selectIconString.Entries[selectedEntry].Select();
                 }
             }
-            else if (GenericHelpers.TryGetAddonMaster<SelectYesno>("SelectYesno", out var yesno) && yesno.IsAddonReady)
+            else if (GenericHelpers.TryGetAddonMaster<SelectYesno>("SelectYesno", out var selectYesno) && selectYesno.IsAddonReady)
             {
-                if (EzThrottler.Throttle("Select yes"))
-                    yesno.Yes();
+                if (EzThrottler.Throttle("Selecting yes for turnin"))
+                {
+                    IceLogging.Verbose("Selecting yes for the turnin");
+                    selectYesno.Yes();
+                }
             }
             else if (GenericHelpers.TryGetAddonMaster<Talk>("Talk", out var talk) && talk.IsAddonReady)
             {
-                if (EzThrottler.Throttle("Click talk", 50))
+                if (EzThrottler.Throttle("Clicking the talk dialog", 50))
+                {
+                    IceLogging.Verbose("Clicking the talk dialog");
                     talk.Click();
+                }
             }
             else if (!Player.IsBusy)
             {
-                IceLogging.Info("Relic turnin complete.");
+                IceLogging.Info("No longer busy talking to researchingway, to we're done");
+                if (C.Relic_SwapJob)
+                {
+                    if (C.Relic_Stylist)
+                    {
+                        P.TaskManager.Enqueue(() => StylistCheck(), "Doing a stylist check", Utils.TaskConfig);
+                    }
+                    else
+                    {
+                        P.TaskManager.Enqueue(() => ReturnBackToJob(), "Returning back to the original job", Utils.TaskConfig);
+                    }
+                }
                 return true;
             }
 
             return false;
+
         }
-
-        private static bool IsDoHDoL(byte jobId) => jobId >= 8 && jobId <= 18;
-
-        internal unsafe static bool HasGearsetForJob(Job job)
+        public static bool StylistCheck()
         {
-            var gearsets = RaptureGearsetModule.Instance();
+            var jobId = TurninJob;
 
-            foreach (ref var gs in gearsets->Entries)
+            if (CosmicHelper.CrafterJobList.Contains(jobId))
             {
-                if (!gearsets->IsValidGearset(gs.Id))
-                    continue;
-
-                if ((Job)gs.ClassJob == job)
-                    return true;
+                Task_TurninMission.ExecuteCommand("/stylist crafter");
             }
-
-            return false;
-        }
-
-        public static bool? SwitchToNonRelicJob()
-        {
-            if (!C.SwitchToRelicJob)
-                return true;
-
-            // 如果当前不是 relic 职业 → 不切换
-            if (Player.Job != RelicJob)
-                return true;
-
-            // 当前是 relic 职业 → 必须切换到其他 DoH/DoL
-            if (NonRelicJob == 0)
+            else if (CosmicHelper.GatheringJobList.Contains(jobId))
             {
-                for (Job job = Job.CRP; job <= Job.FSH; job++)
-                {
-                    if (job == RelicJob)
-                        continue;
-
-                    if (Player.GetLevel(job) == 0)
-                        continue;
-
-                    if (!HasGearsetForJob(job))
-                        continue;
-
-                    NonRelicJob = job;
-                    IceLogging.Debug($"Found non-relic job: {NonRelicJob}");
-                    break;
-                }
-
-                if (NonRelicJob == 0)
-                {
-                    IceLogging.Error("[Relic Turnin] No other DoH/DoL gearset found!");
-                    DuoLog.Warning($"未找到有效的生产采集职业套装! 请保证至少有 1 个可用的套装, 或者禁用\"切换其他职业套装进行提交\"选项关闭此功能。");
-                    return true;
-                }
+                Task_TurninMission.ExecuteCommand("/stylist gatherer");
             }
-
-            if (Player.Job != NonRelicJob)
-            {
-                if (EzThrottler.Throttle("SwitchToNonRelicJob", 1000))
-                {
-                    IceLogging.Info($"Switching to non-relic job: {NonRelicJob}");
-                    GearsetHandler.TaskClassChange(NonRelicJob);
-                }
-                return false;
-            }
+            P.TaskManager.EnqueueDelay(1000);
+            P.TaskManager.Enqueue(() => ReturnBackToJob(), "Returning back to original job", Utils.TaskConfig);
 
             return true;
         }
 
-        public static bool? SwitchToStartJob()
+        private static int postRelicCounter = 0;
+
+        public static bool? ReturnBackToJob()
         {
-            if (Player.Job != RelicJob && RelicJob != 0)
+            if ((uint)Player.Job == TurninJob)
             {
-                if (EzThrottler.Throttle("SwitchToStartJob", 1000))
+                IceLogging.Debug("We're back on the proper job, continuing on");
+
+                var delayAmount = C.DelayPostRelic == 0 ? 25 : C.DelayPostRelic;
+
+                if (EzThrottler.Throttle("Add to counter", delayAmount))
                 {
-                    IceLogging.Info($"Switching back to relic job: {RelicJob}");
-                    GearsetHandler.TaskClassChange(RelicJob);
+                    postRelicCounter += 1;
+                }
+
+                if (postRelicCounter >= 2)
+                {
+                    postRelicCounter = 0;
+                    return true;
+                }
+                else
+                    return false;
+            }
+            else
+            {
+                if (EzThrottler.Throttle("Swapping jobs", 1000))
+                {
+                    IceLogging.Verbose($"Telling the game to swap you to jobID: {TurninJob}");
+                    GearsetHandler.TaskClassChange((Job)TurninJob);
                 }
                 return false;
             }
-
-            return true;
         }
     }
 }
