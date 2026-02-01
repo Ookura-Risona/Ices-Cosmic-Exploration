@@ -17,6 +17,7 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
         private static bool MissFisherStartingFix = C.MissFisherStartingFix;
         private static bool AutoFisherCast = C.AutoFisherCast;
         private static bool AutoFisherCastSwitch = C.AutoFisherCastSwitch;
+        private static int AutoFisherCastDelay = C.MissFisherStartingDelay;
 
         private static readonly string PROFILE_PREFIX = "IceGatherProfile_";
 
@@ -184,6 +185,7 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
         {
             AutoFisherCast = C.AutoFisherCast;
             MissFisherStartingFix = C.MissFisherStartingFix;
+            AutoFisherCastDelay = C.MissFisherStartingDelay;
             int maxGp = 1200;
 
             bool SelfSpiritbondGather = C.SelfSpiritbondGather;
@@ -196,21 +198,23 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                 }
             }
 
-            if (ImGui.Checkbox("[实验性] 修复 MissFisher 抛竿异常", ref MissFisherStartingFix))
+            if (ImGui.Checkbox("[实验性] 兼容 MissFisher 宇宙模式", ref MissFisherStartingFix))
             {
                 C.MissFisherStartingFix = MissFisherStartingFix;
                 C.Save();
             }
-            ImGuiEx.HelpMarker("使用 MissFisher 作为钓鱼插件时, " +
-                "自动在任务开始/进行时启动 MissFisher 的宇宙探索预设 \n" +
-                "此选项为实验性功能, 如果未来适配修复将计划移除");
-            if (ImGui.Checkbox("自动在钓鱼任务进行时抛竿", ref AutoFisherCast)) // 新增: 自动在钓鱼任务进行时抛竿，包括首杆，用于适配 MissFisher 的钓鱼逻辑
+            ImGuiEx.HelpMarker("如果您要使用 MissFisher 请务必勾选。\n" +
+                "允许使用 MissFisher 作为钓鱼插件替代默认的 AutoHook,\n" +
+                "自动在任务开始/进行时启动 MissFisher 的宇宙探索预设。\n");
+
+            /*if (ImGui.Checkbox("自动在钓鱼任务进行时抛竿", ref AutoFisherCast)) // 新增: 自动在钓鱼任务进行时抛竿，包括首杆，用于适配 MissFisher 的钓鱼逻辑
             {
                 C.AutoFisherCast = AutoFisherCast;
                 C.Save();
             }
-            ImGuiEx.HelpMarker("自动在捕鱼人任务(包括双职业任务)进行时自动尝试执行\"抛竿\"技能, 取消勾选则不会在任务进行时自动抛竿。");
-            if (ImGui.Checkbox("自动根据钓鱼插件切换自动抛竿设置", ref AutoFisherCastSwitch))
+            ImGuiEx.HelpMarker("自动在捕鱼人任务(包括双职业任务)进行时自动尝试执行\"抛竿\"技能, 取消勾选则不会在任务进行时自动抛竿。");*/
+
+            /*if (ImGui.Checkbox("自动根据钓鱼插件切换自动抛竿设置", ref AutoFisherCastSwitch))
             {
                 if (C.AutoFisherCastSwitch != AutoFisherCastSwitch)
                 {
@@ -219,6 +223,16 @@ namespace ICE.Ui.MainUi.Settings.Settings_Table
                 }
             }
             ImGuiEx.HelpMarker("控制\"自动在钓鱼任务进行时抛竿\"选项根据钓鱼插件启用情况自动切换\nAutoHook = 启用\nMissFisher = 禁用\n两个钓鱼插件同时启用 = 无动作");
+            */
+
+            /*ImGui.SetNextItemWidth(100);
+            if (ImGui.SliderInt("MissFisher 宇宙模式启动延迟(ms)", ref AutoFisherCastDelay, 0, 10000))
+            {
+                C.MissFisherStartingDelay = AutoFisherCastDelay;
+                C.Save();
+            }
+            ImGuiEx.HelpMarker("默认 1000ms, 补偿 MissFisher 宇宙模式的启动容错\n按住 Ctrl 点击可自由修改\n如果您没有特殊需求, 请保持默认");*/
+            
 
             bool AutoCordial = C.AutoCordial;
             if (ImGui.Checkbox("自动强心剂", ref AutoCordial))

@@ -363,7 +363,7 @@ internal static unsafe class PlayerHandlers
             //DuoLog.Warning("请安装并启用 AutoHook 或 MissFisher 其中一个插件作为钓鱼插件，否则钓鱼将无法自动运行。");
             //DuoLog.Warning("此报错也可能发生在 UpdateFishingPluginStatus() 没有被正确执行时");
         }
-        else if (C.AutoFisherCastSwitch)
+        /*else if (C.AutoFisherCastSwitch)
         {
             if (IsAutohookLoaded && !IsMissfisherLoaded && !C.AutoFisherCast)
             {
@@ -392,7 +392,7 @@ internal static unsafe class PlayerHandlers
                 Svc.Toasts.ShowQuest($"检测到您正在使用 MissFisher 作为钓鱼插件，请在设置中取消勾选\"自动在钓鱼任务开始时抛竿\"选项", new QuestToastOptions() { PlaySound = true, DisplayCheckmark = true });
                 DuoLog.Warning("检测到您正在使用 MissFisher 作为钓鱼插件，请在设置中取消勾选\"自动在钓鱼任务开始时抛竿\"选项");
             }
-        }
+        }*/
     }
 
     internal static void DisablePlugin()

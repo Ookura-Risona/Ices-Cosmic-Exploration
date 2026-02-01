@@ -16,7 +16,7 @@ internal static class NpcData // Renamed the class to avoid conflict
         Credit,
         Relic,
         Gamba,
-        Dronebit
+        Drone,
     }
 
     public class NPCInfo // Keep this class for the dictionary
@@ -135,13 +135,13 @@ internal static class NpcData // Renamed the class to avoid conflict
                 Location_Npc = new Vector3(-157.73f, 1.19f, 153.98f),
                 Location_Circle = new Vector3(-161.04f, 0.50f, 153.84f),
             },
-            new NPCInfo // 遗物探索 NPC
+            new NPCInfo
             {
-                type = NpcType.Dronebit,
+                type = NpcType.Drone,
                 NpcId = 1052654,
-                Name = "枫",
-                Location_Npc = new Vector3(-206.38f, 0.50f, 131.09f),
-                Location_Circle = new Vector3(-203.40f, 0.78f, 132.28f),
+                Name = "Kaede",
+                Location_Npc = new Vector3(),
+                Location_Circle = new(-205.85f, 0.65f, 134.19f),
             }
         },
     };

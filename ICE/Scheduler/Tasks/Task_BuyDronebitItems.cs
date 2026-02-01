@@ -36,7 +36,7 @@ namespace ICE.Scheduler.Tasks
 
             string handle = "[Task_OizysBags: PathTo]";
             var zoneId = Player.Territory.RowId;
-            var npcEntry = NpcData.MoonNpcs[zoneId].Where(x => x.type == NpcData.NpcType.Dronebit).FirstOrDefault();
+            var npcEntry = NpcData.MoonNpcs[zoneId].Where(x => x.type == NpcData.NpcType.Drone).FirstOrDefault();
 
             if (npcEntry != null)
             {
@@ -71,7 +71,7 @@ namespace ICE.Scheduler.Tasks
             }
             else
             {
-                var researchId = NpcData.MoonNpcs[Player.Territory.RowId].Where(x => x.type == NpcData.NpcType.Dronebit).FirstOrDefault().NpcId;
+                var researchId = NpcData.MoonNpcs[Player.Territory.RowId].Where(x => x.type == NpcData.NpcType.Drone).FirstOrDefault().NpcId;
 
                 Utils.TryGetObjectByDataId(researchId, out var researchNpc);
                 if (EzThrottler.Throttle("Interacting with researchingway"))

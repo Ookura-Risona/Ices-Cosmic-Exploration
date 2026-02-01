@@ -19,6 +19,7 @@ public partial class Config
     public bool AutoFisherCast { get; set; } = true; // 新增: 捕鱼人是否在任务开始时自动抛竿(MissFisher插件适配)
     public bool AutoFisherCastSwitch { get; set; } = true; // 新增: 自动根据钓鱼插件切换自动抛竿(MissFisher插件适配)
     public bool MissFisherStartingFix { get; set; } = true; // 新增: MissFisher 抛竿实验性修复(MissFisher插件适配)
+    public int MissFisherStartingDelay { get; set; } = 1000; // 新增: MissFisher 启动前延时(MissFisher插件适配)
 
     public List<GatherProfile> GatherSettings { get; set; } = new()
     {

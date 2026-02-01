@@ -192,14 +192,17 @@ namespace ICE.Scheduler.Tasks
                 {
                     PlayerHandlers.UpdateFishingPluginStatus();
                     IceLogging.Debug("Telling it to start fishing", handle);
-                    if (C.AutoFisherCast)
+                    if (!PlayerHandlers.IsMissfisherLoaded && PlayerHandlers.IsAutohookLoaded)
                     {
                         //ActionManager.Instance()->UseAction(ActionType.Action, 289); // 任务中自动抛竿
                         Svc.Commands.ProcessCommand("/ahstart"); // 同步上游更改
                     }
-                    else if (!C.AutoFisherCast && C.MissFisherStartingFix && PlayerHandlers.IsMissfisherLoaded && !PlayerHandlers.IsAutohookLoaded)
+                    else if (C.MissFisherStartingFix && PlayerHandlers.IsMissfisherLoaded && !PlayerHandlers.IsAutohookLoaded)
                     {
-                        Chat.ExecuteCommand("/mf cosmic");
+                        if (EzThrottler.Throttle("MissFisherStarting", 6000)) // 节流, 防止重复启动
+                        {
+                            Chat.ExecuteCommand("/mf cosmic");
+                        }
                         //DuoLog.Debug("[测试] 尝试为MF启动预设");
                     }
                 }
