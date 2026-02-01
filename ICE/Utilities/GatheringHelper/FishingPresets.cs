@@ -2198,7 +2198,7 @@ public static partial class GatheringUtil
             {
                 "AH4_H4sIAAAAAAAACs1XS2/jOAz+K4FOu4AN+P3Izc22nQKZtqhTzKGYg2LTsRDFSmWpnWyR/76QbSV2kr4GBXZuBkV+/EhRJP2CEinYBNeinhQLNH5B5xWeU0goRWPBJRhIHU5JBfvDXB9d5WjsRLGBbjlhnIgNGtsGuqrPf2VU5pDvxUp/22J9ZywrFVjz4aivBieIDHS5npUc6pLRHI1tyxogvw3dYMThwMJ6l8yklKtXAvNsy3uHkQZhlEImdCSebdl9Ned9FoznBFMNENjeAMDr1C5IXZ5voO458g8Y+v6AYaBzjpeQlqQQZ5g0PJWg1oJU4GxZo7HfZTGIjnH7qHGHeosFgSqDHp/g0C4YZszRppz8CxMs2krQXg+tnYN8u531rMSU4GV9gZ8YVwADgQ7HNYbyO8jYE3A0tlWStE9v4EEn7IwsLvGqiSypFhR4rVHVbeZo7IaWd0R3ABVttwY6/yU47l6WSvWMpc94fVUJSQRh1SUmlU6AaRtoKjl8h7rGC0BjhAx03ZBA16wCZLQImzWgscrECbwpq8Vv491yqOE0Q2SiV85bj835nk+6hkxwTCeSc6jEF0V5gPplsZ5kexTxSe+NVlsgqWBr9UBJtUgFrJtOuOfeFVHCv4ZyH+6Y6TNZzTERF4TS+o3zO1nVN1Ij3FfkUYJihizHKTwIQ9OZ+7bpFV5oxr6Xm1YYF5blYteKY7Q10JTU4qZQLGs0fmgLXKVAh+hbjhu+HmWKqXjGAvgo4aLkjEoOCvaa8RWm3xhbKiDdZH4AXu47tTqtQahwdM/uRG3CPDtUXUobp4KzavEZc8vtmU9hAVWO+ebTCP8wOac77gMNJ4h3Cnt+r6oMOJzQuq9hxsm6ZaYptZID97tZV2BaH/J2Qt9RxFvLI16fsB0Qvqno5kcJVZIJ8gRXOVSCZGrinUidhlEvKikE8AmWi1JMyUrNLrs9OHxqzZYieTsc1UdvCrT92o+Px/kbk1mtFLrJ6Vq8g0dJOOSpwEKqgal2lsMC/Vgdfrjc/t+qOllAH6qUd0viz7xz3RwnTFaib2c0NXxfgyrja9Ysr8kTJlQ9CF3HvSaK51bgetgxXbBC04v9wMRWZJsxOL6dOyGOwhxtf+ou2m3FDztB20gfXtCwozar4Wsd9Y5ly80olVWhbPoDxH4rt7vnqBKqXLUKyUrlYK92akf248MlyB1uoJFyLHmBM0ip6pXdqujH/jvLnr810B/zr5CuMYdC0m+4yjULtQL6p3gMaqjLn2s0F3mVz9ikhGy5u8vef4I1WHd+e1FIn/FaSRr3zc31p3837tVnK96rnXpj/YoOwZ9H88iMAuyZno9zM87d0LT9PPI8K4hwEDYV3eJ2FB9s13V+jpKKrTDdjJIcrwVWTXWUPEqcSSokh1Eq+RNsRn+d/X2witiWH80hMIN5Nje9zA/NOIojM3BdcDLfCV0rRtv/AAvjYOjGDgAA",
             },
-            AmountRequired = 0,
+            AmountRequired = 12,
             UniqueFish = false,
             Baits = new Dictionary<string, List<uint>>()
             {
@@ -2219,13 +2219,17 @@ public static partial class GatheringUtil
             {
                 "AH4_H4sIAAAAAAAACs1XS2/jOAz+K4FOu4C9sGP5lVsm23YKpA/UKeZQzEGx6USII2UkuZ1Mkf++kG0lduI2g6KL3ZtMUR8/UhRJv6JxqfiESCUn+QKNXpFeTykDvb5gZF5AhkZKlGCh6wyNhlFsoXtBuaBqi0auha7lxc+0KDPIDmKtv7MqrBvO06UGqxZDvapwgshCV5vZUoBc8iJDI9dxOsjvQ1cYcdg54ZwlM1mWa8MAuw4+Q8Gc4kUBqWoddNtqw/NmucgoKQxA4OIOAG7ULqlcXmxBtgz5Rwx9v8MwMEEmK0iWNFdfCK14aoE0gkSRdCXRyG/CFkSnuG3UuEG9J4oCS6HFJzg+F3QjNjRHBf0FE6LqqzdWj08Pj+LtNadnS1JQspKX5JkLDdARGHc8qyt/gJQ/g0AjVwfJ2MQdCyZgX+jiiqwrz8ZsUYCQBlXfZoZGXujgE7odqGi3s9DFTyVI83J0qGc8eSGba6ZKqihnV4QyEwDbtdC0FHADUpIFoBFCFrqtSKBbzgBZNcJ2A2ikI9GDN+VSfRjvXoCEfobIRm/s1xar/QOfZAOpEqSYlEIAU5/k5RHqp/nay/bE417rlVadIIniG/1AKVskCjZV6Ttwb5JoLD6HchvulOkLXc8JVZe0KOQ7+w8lk3elQXhk9EcJmhkKIi9wUpzZqRPFNnYxtqPUB3uOfS/CwziGcI52FppSqe5yzVKi0VOd4DoExkXfGWLnbS8TBUVBxCAhxZqzwQMHDXrLxZoUXzlfaRhTYr4Bqb61XILaN56cFBKsphE1m9pH05IaUR1F7Ia6dBnMRAnOFp+A6ngt1CksgGVEbA8N8g2EGV2DOGqhN5Ttt3TB+8vpt/Y3L+fFcVRqjWEQ7xVOXDxV6fDt0XqUMBN0U3thaNaSM5fSBQv9oSZenzwb+nfOdgjfsWL7bQlsnCr6DNcZMEVT3Ul7LsrA6Jc6zhWICSkXSzWla90T3Xrj+AlX404p6qarF63u0jP+eKEfn04N7wwAelQxtdQk/QP8KKmALFFElbov61nojZfwe5l9PlP/2yTrzaffSpyzGfLvpsBH79zU4AkvmWqfs6qUfpSgs/qWV0Px+JnQQqeaybR2rQ6wFw+jwA7cOLBx5Od2lIFnO3N/njtRCNiN0O67KdbNtP20F9T1+ukVdQu3i8O3C7eed8lGQjZIynQFotOq3PfCu3+gOqb134RWGK91GA5qPQ8L+/HxuOV1Z91IGy5FTlJICl1pm6HUj/0zY6W/s9D/5jck2RABeVl8JSwzLPSw6ffx6KRREz/Pqu7yOpvxyRLS1f46W38kTmew+vBIkryQjZZU5quba88ZzWChl7X4oNb3zFpJDSHETuSHduw5uY3TIbZj7Ed24ARkngVhTABXSV3jNhSfXM/zvh+Sc1YyBsVAD250DWyQlOIZtoM/xn92x50ozefpHDzbxU5o49QPbeJHYPsxZNjHme+SHO3+AT8HEa8KDwAA",
             },
-            AmountRequired = 0,
+            AmountRequired = 5,
             UniqueFish = false,
             Baits = new Dictionary<string, List<uint>>()
             {
             },
             RequiredFish = new Dictionary<string, List<uint>>()
             {
+                ["崩溃平鲶"] = new List<uint>()
+                {
+                    50147,
+                },
             },
         },
         // Export for Mission [1334] - Red Cosmomaggot Testing
